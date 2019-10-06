@@ -16,7 +16,7 @@ suite "parser tests":
     check program.statements[0].expression.nodeType == NodeType.NTIntegerLiteral
     check program.statements[0].toCode() == "1"
 
-  test "test prefix parsing":
+  test "prefix parsing":
     var
       source: string = "-1"
       lexer: Lexer = newLexer(source)
@@ -25,3 +25,14 @@ suite "parser tests":
 
     check len(program.statements) == 1
     check program.statements[0].toCode() == "(-1)"
+
+  test "illegal prefix operators returns error":
+    var
+      source: string = "$1"
+      lexer: Lexer = newLexer(source)
+      parser: Parser = newParser(lexer = lexer)
+      program: Program = parser.parseProgram()
+
+    discard program
+
+    check len(parser.errors) == 1

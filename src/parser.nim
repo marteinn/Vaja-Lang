@@ -14,7 +14,7 @@ from ast import
 type
   Parser* = object
     lexer*: Lexer
-    errors: seq[string]
+    errors*: seq[string]
     curToken: Token
     peekToken: Token
   Precedence* = enum
