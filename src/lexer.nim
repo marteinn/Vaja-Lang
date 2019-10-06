@@ -58,6 +58,10 @@ method nextToken*(lexer: var Lexer): Token {.base.} =
       tok = newToken(tokenType=TokenType.ASSIGN, literal=($ch))
     of ';':
       tok = newToken(tokenType=TokenType.SEMICOLON, literal=($ch))
+    of '*':
+      tok = newToken(tokenType=TokenType.ASTERISK, literal=($ch))
+    of '/':
+      tok = newToken(tokenType=TokenType.SLASH, literal=($ch))
     elif isLetter(lexer.ch):
       var identifier = lexer.readIdentifier()
       case identifier:

@@ -9,7 +9,9 @@ type
     LET,
     ASSIGN,
     IDENT,
-    SEMICOLON
+    SEMICOLON,
+    SLASH,
+    ASTERISK
 
 type 
   Token* = object

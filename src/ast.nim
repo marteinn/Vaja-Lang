@@ -31,7 +31,8 @@ method toCode*(node: Node): string {.base.} =
       else:
         "(" & node.prefixOperator & " " & node.prefixRight.toCode() & ")"
     of NTInfixExpression:
-      "(" & node.infixLeft.toCode() & " " & node.infixOperator & " " & node.infixRight.toCode() & ")"
+      "(" & node.infixLeft.toCode() & " " & node.infixOperator & " " &
+      node.infixRight.toCode() & ")"
 
 proc newIntegerLiteral*(token: Token, intValue: int): Node =
   return Node(nodeType: NodeType.NTIntegerLiteral, intValue: intValue)

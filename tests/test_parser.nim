@@ -53,7 +53,10 @@ suite "parser tests":
       tests: ExpectedTokens = @[
         ("1 + 1", "(1 + 1)"),
         ("1 + 1 + 1", "((1 + 1) + 1)"),
-        #("1 - 1", "(1 - 1)"),
+        ("1 - 1", "(1 - 1)"),
+        ("-1 + 1", "((-1) + 1)"),
+        ("1 * 1", "(1 * 1)"),
+        ("1 / 1", "(1 / 1)"),
       ]
     for testPair in tests:
       var program: Program = parseSource(testPair[0])

@@ -10,11 +10,13 @@ suite "lexer tests":
 let a = 1
 ;
 -1
+2*3
+2/3
 """
       lexer: Lexer = newLexer(source)
     type
       ExpectedTokenPair = (TokenType, string)
-      ExpectedTokens = array[19, ExpectedTokenPair]
+      ExpectedTokens = array[27, ExpectedTokenPair]
     let
       tokens: ExpectedTokens = [
         (TokenType.INT, "1"),
@@ -34,6 +36,14 @@ let a = 1
         (TokenType.NEWLINE, "\n"),
         (TokenType.MINUS, "-"),
         (TokenType.INT, "1"),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.INT, "2"),
+        (TokenType.ASTERISK, "*"),
+        (TokenType.INT, "3"),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.INT, "2"),
+        (TokenType.SLASH, "/"),
+        (TokenType.INT, "3"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.EOF, "")
       ]

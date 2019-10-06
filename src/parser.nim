@@ -21,12 +21,15 @@ type
     peekToken: Token
   Precedence* = enum
     LOWEST = 0
-    PREFIX = 1
     SUM = 4
+    PRODUCT = 5
+    PREFIX = 6
 var
   precedences: Table[TokenType, Precedence] = {
     TokenType.PLUS: Precedence.SUM,
-    TokenType.MINUS: Precedence.SUM
+    TokenType.MINUS: Precedence.SUM,
+    TokenType.SLASH: Precedence.PRODUCT,
+    TokenType.ASTERISK: Precedence.PRODUCT,
   }.toTable
 
 method nextParserToken(parser: var Parser): Token {.base.} =
@@ -40,7 +43,6 @@ proc parseIntegerLiteral(parser: var Parser): Node =
     literal: string = parser.curToken.literal
     intValue: int = parseInt(literal)
   return newIntegerLiteral(token=parser.curToken, intValue=intValue)
-
 
 method parseExpression(parser: var Parser, precedence: Precedence): Node {.base.} # forward declaration
 
@@ -90,6 +92,9 @@ type InfixFunction = proc (parser: var Parser, left: Node): Node
 proc getInfixFn(tokenType: TokenType): InfixFunction =
   return case tokenType:
     of PLUS: parseInfixExpression
+    of MINUS: parseInfixExpression
+    of SLASH: parseInfixExpression
+    of ASTERISK: parseInfixExpression
     else: nil
 
 method parseExpression(parser: var Parser, precedence: Precedence): Node =
@@ -105,7 +110,10 @@ method parseExpression(parser: var Parser, precedence: Precedence): Node =
   var
     leftExpression: Node = prefixFn(parser)
 
-  while parser.peekToken.tokenType != TokenType.SEMICOLON and precedence < parser.peekPrecedence():
+  while (
+    parser.peekToken.tokenType != TokenType.SEMICOLON and
+    precedence < parser.peekPrecedence()
+  ):
     var
       infixFn = getInfixFn(parser.peekToken.tokenType)
 
