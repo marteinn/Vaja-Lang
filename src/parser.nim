@@ -8,8 +8,10 @@ from ast import
   newExpressionStatement,
   newIntegerLiteral,
   newPrefixExpression,
+  newInfixExpression,
   Node,
-  Program
+  Program,
+  toCode
 
 type
   Parser* = object
@@ -20,12 +22,14 @@ type
   Precedence* = enum
     LOWEST = 0
     PREFIX = 1
+    SUM = 4
 var
   precedences: Table[TokenType, Precedence] = {
-    TokenType.MINUS: Precedence.PREFIX
+    TokenType.PLUS: Precedence.SUM,
+    TokenType.MINUS: Precedence.SUM
   }.toTable
 
-method nextParserToken(parser: var Parser): Token =
+method nextParserToken(parser: var Parser): Token {.base.} =
   parser.curToken = parser.peekToken
   parser.peekToken = parser.lexer.nextToken()
 
@@ -34,27 +38,58 @@ method nextParserToken(parser: var Parser): Token =
 proc parseIntegerLiteral(parser: var Parser): Node =
   var
     literal: string = parser.curToken.literal
-    value: int = parseInt(literal)
-  return newIntegerLiteral(token=parser.curToken, value=value)
+    intValue: int = parseInt(literal)
+  return newIntegerLiteral(token=parser.curToken, intValue=intValue)
 
 
-method parseExpression(parser: var Parser, precedence: Precedence): Node # forward declaration
+method parseExpression(parser: var Parser, precedence: Precedence): Node {.base.} # forward declaration
 
 proc parsePrefixExpression(parser: var Parser): Node =
-  var 
+  var
     token: Token = parser.curToken
   discard parser.nextParserToken()
 
-  var right: Node =parser.parseExpression(Precedence.PREFIX)
-  return newPrefixExpression(token=token, right=right, operator=token.literal)
+  var right: Node = parser.parseExpression(Precedence.PREFIX)
+  return newPrefixExpression(
+    token=token, prefixRight=right, prefixOperator=token.literal
+  )
 
-type
-  PrefixFunction = proc (parser: var Parser): Node
+type PrefixFunction = proc (parser: var Parser): Node
 
 proc getPrefixFn(tokenType: TokenType): PrefixFunction =
   return case tokenType:
     of MINUS: parsePrefixExpression
     of INT: parseIntegerLiteral
+    else: nil
+
+method currentPrecedence(parser: var Parser): Precedence {.base.} =
+  if not precedences.hasKey(parser.curToken.tokenType):
+    return Precedence.LOWEST
+
+  return precedences[parser.curToken.tokenType]
+
+method peekPrecedence(parser: var Parser): Precedence {.base.} =
+  if not precedences.hasKey(parser.peekToken.tokenType):
+    return Precedence.LOWEST
+
+  return precedences[parser.peekToken.tokenType]
+
+method parseInfixExpression(parser: var Parser, left: Node): Node {.base.} =
+  var
+    token: Token = parser.curToken
+    precedence: Precedence = parser.currentPrecedence()
+  discard parser.nextParserToken()
+
+  var right: Node = parser.parseExpression(precedence)
+  return newInfixExpression(
+    token=token, infixLeft=left, infixRight=right, infixOperator=token.literal
+  )
+
+type InfixFunction = proc (parser: var Parser, left: Node): Node
+
+proc getInfixFn(tokenType: TokenType): InfixFunction =
+  return case tokenType:
+    of PLUS: parseInfixExpression
     else: nil
 
 method parseExpression(parser: var Parser, precedence: Precedence): Node =
@@ -70,6 +105,16 @@ method parseExpression(parser: var Parser, precedence: Precedence): Node =
   var
     leftExpression: Node = prefixFn(parser)
 
+  while parser.peekToken.tokenType != TokenType.SEMICOLON and precedence < parser.peekPrecedence():
+    var
+      infixFn = getInfixFn(parser.peekToken.tokenType)
+
+    if infixFn == nil:
+      return leftExpression
+
+    discard parser.nextParserToken()
+    leftExpression = infixFn(parser, leftExpression)
+
   return leftExpression
 
 method parseExpressionStatement(parser: var Parser): Node {.base.} =
@@ -77,7 +122,7 @@ method parseExpressionStatement(parser: var Parser): Node {.base.} =
     expression = parser.parseExpression(Precedence.LOWEST)
   return newExpressionStatement(token=parser.curToken, expression=expression)
 
-method parseStatement(parser: var Parser): Node =
+method parseStatement(parser: var Parser): Node {.base.} =
   return parser.parseExpressionStatement()
 
 method parseProgram*(parser: var Parser): Program {.base.} =

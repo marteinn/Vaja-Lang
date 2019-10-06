@@ -4,30 +4,37 @@ type
     NTIntegerLiteral,
     NTExpressionStatement,
     NTPrefixExpression,
+    NTInfixExpression
   Node* = ref object
     token*: Token
     case nodeType*: NodeType
-      of NTIntegerLiteral: value*: int
+      of NTIntegerLiteral: intValue*: int
       of NTExpressionStatement: expression*: Node
       of NTPrefixExpression:
-        right*: Node
-        operator*: string
+        prefixRight*: Node
+        prefixOperator*: string
+      of NTInfixExpression:
+        infixLeft*: Node
+        infixRight*: Node
+        infixOperator*: string
   Program* = ref object
     statements*: seq[Node]
 
-method toCode*(node: Node): string =
+method toCode*(node: Node): string {.base.} =
   return case node.nodeType:
-    of NTIntegerLiteral: $node.value
+    of NTIntegerLiteral: $node.intValue
     of NTExpressionStatement:
       if node.expression != nil: node.expression.toCode() else: ""
     of NTPrefixExpression:
-      if len(node.operator) == 1:
-        "(" & node.operator & node.right.toCode() & ")"
+      if len(node.prefixOperator) == 1:
+        "(" & node.prefixOperator & node.prefixRight.toCode() & ")"
       else:
-        "(" & node.operator & " " & node.right.toCode() & ")"
+        "(" & node.prefixOperator & " " & node.prefixRight.toCode() & ")"
+    of NTInfixExpression:
+      "(" & node.infixLeft.toCode() & " " & node.infixOperator & " " & node.infixRight.toCode() & ")"
 
-proc newIntegerLiteral*(token: Token, value: int): Node =
-  return Node(nodeType: NodeType.NTIntegerLiteral, value: value)
+proc newIntegerLiteral*(token: Token, intValue: int): Node =
+  return Node(nodeType: NodeType.NTIntegerLiteral, intValue: intValue)
 
 proc newExpressionStatement*(token: Token, expression: Node): Node =
   return Node(
@@ -36,12 +43,21 @@ proc newExpressionStatement*(token: Token, expression: Node): Node =
     expression: expression
   )
 
-proc newPrefixExpression*(token: Token, right: Node, operator: string): Node =
+proc newPrefixExpression*(token: Token, prefixRight: Node, prefixOperator: string): Node =
   return Node(
     nodeType: NodeType.NTPrefixExpression,
     token: token,
-    right: right,
-    operator: operator
+    prefixRight: prefixRight,
+    prefixOperator: prefixOperator
+  )
+
+proc newInfixExpression*(token: Token, infixLeft: Node, infixRight: Node, infixOperator: string): Node =
+  return Node(
+    nodeType: NodeType.NTInfixExpression,
+    token: token,
+    infixLeft: infixLeft,
+    infixRight: infixRight,
+    infixOperator: infixOperator
   )
 
 proc newProgram*(statements: seq[Node]): Program =
