@@ -5,6 +5,7 @@ type
     NTExpressionStatement,
     NTPrefixExpression,
     NTInfixExpression
+    NTIdentifier
   Node* = ref object
     token*: Token
     case nodeType*: NodeType
@@ -17,6 +18,7 @@ type
         infixLeft*: Node
         infixRight*: Node
         infixOperator*: string
+      of NTIdentifier: strValue*: string
   Program* = ref object
     statements*: seq[Node]
 
@@ -33,6 +35,7 @@ method toCode*(node: Node): string {.base.} =
     of NTInfixExpression:
       "(" & node.infixLeft.toCode() & " " & node.infixOperator & " " &
       node.infixRight.toCode() & ")"
+    of NTIdentifier: node.strValue
 
 proc newIntegerLiteral*(token: Token, intValue: int): Node =
   return Node(nodeType: NodeType.NTIntegerLiteral, intValue: intValue)
@@ -60,6 +63,9 @@ proc newInfixExpression*(token: Token, infixLeft: Node, infixRight: Node, infixO
     infixRight: infixRight,
     infixOperator: infixOperator
   )
+
+proc newIdentifier*(token: Token, strValue: string): Node =
+  return Node(nodeType: NodeType.NTIdentifier, strValue: strValue)
 
 proc newProgram*(statements: seq[Node]): Program =
   return Program(statements: statements)

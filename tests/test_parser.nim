@@ -57,9 +57,20 @@ suite "parser tests":
         ("-1 + 1", "((-1) + 1)"),
         ("1 * 1", "(1 * 1)"),
         ("1 / 1", "(1 / 1)"),
+        ("1 + 2 * 3", "(1 + (2 * 3))"),
+        ("a + b * c + d / e - f", "(((a + (b * c)) + (d / e)) - f)"),
       ]
     for testPair in tests:
       var program: Program = parseSource(testPair[0])
       check program.statements[0].toCode() == testPair[1]
 
+  test "dentifier":
+    var
+      source: string = "a"
+      program: Program = parseSource(source)
+
+    check len(program.statements) == 1
+    check program.statements[0].nodeType == NodeType.NTExpressionStatement
+    check program.statements[0].expression.nodeType == NodeType.NTIdentifier
+    check program.statements[0].toCode() == "a"
 

@@ -9,6 +9,7 @@ from ast import
   newIntegerLiteral,
   newPrefixExpression,
   newInfixExpression,
+  newIdentifier,
   Node,
   Program,
   toCode
@@ -44,6 +45,12 @@ proc parseIntegerLiteral(parser: var Parser): Node =
     intValue: int = parseInt(literal)
   return newIntegerLiteral(token=parser.curToken, intValue=intValue)
 
+proc parseIdentifier(parser: var Parser): Node =
+  var
+    literal: string = parser.curToken.literal
+  return newIdentifier(token=parser.curToken, strValue=literal)
+
+
 method parseExpression(parser: var Parser, precedence: Precedence): Node {.base.} # forward declaration
 
 proc parsePrefixExpression(parser: var Parser): Node =
@@ -62,6 +69,7 @@ proc getPrefixFn(tokenType: TokenType): PrefixFunction =
   return case tokenType:
     of MINUS: parsePrefixExpression
     of INT: parseIntegerLiteral
+    of IDENT: parseIdentifier
     else: nil
 
 method currentPrecedence(parser: var Parser): Precedence {.base.} =
