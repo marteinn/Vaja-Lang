@@ -37,6 +37,22 @@ method readIdentifier(lexer: var Lexer): string {.base.} =
     lexer.readCharacter()
   return lexer.source[startPos ..< lexer.pos]
 
+method readString(lexer: var Lexer): string {.base.} =
+  lexer.readCharacter()
+
+  var stringOut: string = $lexer.ch
+
+  while true:
+    lexer.readCharacter()
+
+    if lexer.ch == '"':
+      break
+
+    stringOut = stringOut & lexer.ch
+
+  lexer.readCharacter()
+  return stringOut
+
 method nextToken*(lexer: var Lexer): Token {.base.} =
   if lexer.eof:
       return newToken(tokenType=TokenType.EOF, literal="")
@@ -62,6 +78,9 @@ method nextToken*(lexer: var Lexer): Token {.base.} =
       tok = newToken(tokenType=TokenType.ASTERISK, literal=($ch))
     of '/':
       tok = newToken(tokenType=TokenType.SLASH, literal=($ch))
+    of '"':
+      var stringValue = lexer.readString()
+      tok = newToken(tokenType=TokenType.STRING, literal=stringValue)
     elif isLetter(lexer.ch):
       var identifier = lexer.readIdentifier()
       case identifier:

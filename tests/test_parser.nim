@@ -80,3 +80,12 @@ suite "parser tests":
     check program.statements[0].expression.nodeType == NodeType.NTIdentifier
     check program.statements[0].toCode() == "a"
 
+  test "string":
+    var
+      source: string = """"hello""""
+      program: Program = parseSource(source)
+
+    check len(program.statements) == 1
+    check program.statements[0].nodeType == NodeType.NTExpressionStatement
+    check program.statements[0].expression.nodeType == NodeType.NTStringLiteral
+    check program.statements[0].toCode() == "hello"

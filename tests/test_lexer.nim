@@ -82,3 +82,12 @@ false
 
     check(lexer.nextToken().tokenType == TokenType.TRUE)
     check(lexer.nextToken().tokenType == TokenType.FALSE)
+
+  test "strings are parsed":
+    var
+      source: string = """"my string""""
+      lexer: Lexer = newLexer(source)
+
+    var nextToken: Token = lexer.nextToken()
+    check(nextToken.tokenType == TokenType.STRING)
+    check(nextToken.literal == "my string")

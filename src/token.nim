@@ -13,7 +13,8 @@ type
     SLASH,
     ASTERISK,
     TRUE,
-    FALSE
+    FALSE,
+    STRING
 
 type 
   Token* = object

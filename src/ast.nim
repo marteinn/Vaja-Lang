@@ -7,6 +7,7 @@ type
     NTInfixExpression,
     NTIdentifier,
     NTBoolean
+    NTStringLiteral
   Node* = ref object
     token*: Token
     case nodeType*: NodeType
@@ -20,7 +21,8 @@ type
         infixLeft*: Node
         infixRight*: Node
         infixOperator*: string
-      of NTIdentifier: strValue*: string
+      of NTIdentifier: identValue*: string
+      of NTStringLiteral: strValue*: string
   Program* = ref object
     statements*: seq[Node]
 
@@ -38,7 +40,8 @@ method toCode*(node: Node): string {.base.} =
     of NTInfixExpression:
       "(" & node.infixLeft.toCode() & " " & node.infixOperator & " " &
       node.infixRight.toCode() & ")"
-    of NTIdentifier: node.strValue
+    of NTIdentifier: node.identValue
+    of NTStringLiteral: node.strValue
 
 proc newIntegerLiteral*(token: Token, intValue: int): Node =
   return Node(nodeType: NodeType.NTIntegerLiteral, intValue: intValue)
@@ -67,11 +70,14 @@ proc newInfixExpression*(token: Token, infixLeft: Node, infixRight: Node, infixO
     infixOperator: infixOperator
   )
 
-proc newIdentifier*(token: Token, strValue: string): Node =
-  return Node(nodeType: NodeType.NTIdentifier, strValue: strValue)
+proc newIdentifier*(token: Token, identValue: string): Node =
+  return Node(nodeType: NodeType.NTIdentifier, identValue: identValue)
 
 proc newBoolean*(token: Token, boolValue: bool): Node =
   return Node(nodeType: NodeType.NTBoolean, boolValue: boolValue)
+
+proc newStringLiteral*(token: Token, strValue: string): Node =
+  return Node(nodeType: NodeType.NTStringLiteral, strValue: strValue)
 
 proc newProgram*(statements: seq[Node]): Program =
   return Program(statements: statements)
