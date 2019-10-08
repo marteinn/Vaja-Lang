@@ -15,21 +15,27 @@ suite "parser tests":
   test "test integer literal":
     var
       source: string = "1"
-      lexer: Lexer = newLexer(source)
-      parser: Parser = newParser(lexer = lexer)
-      program: Program = parser.parseProgram()
+      program: Program = parseSource(source)
 
     check len(program.statements) == 1
     check program.statements[0].nodeType == NodeType.NTExpressionStatement
     check program.statements[0].expression.nodeType == NodeType.NTIntegerLiteral
     check program.statements[0].toCode() == "1"
 
+  test "test bool types":
+    var
+      source: string = "true"
+      program: Program = parseSource(source)
+
+    check len(program.statements) == 1
+    check program.statements[0].nodeType == NodeType.NTExpressionStatement
+    check program.statements[0].expression.nodeType == NodeType.NTBoolean
+    check program.statements[0].toCode() == "true"
+
   test "prefix parsing":
     var
       source: string = "-1"
-      lexer: Lexer = newLexer(source)
-      parser: Parser = newParser(lexer = lexer)
-      program: Program = parser.parseProgram()
+      program: Program = parseSource(source)
 
     check len(program.statements) == 1
     check program.statements[0].toCode() == "(-1)"

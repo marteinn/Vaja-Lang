@@ -71,3 +71,14 @@ let a = 1
     check(lexer.nextToken().tokenType == TokenType.PLUS)
     check(lexer.nextToken().tokenType == TokenType.INT)
     check(lexer.nextToken().tokenType == TokenType.EOF)
+
+  test "bools are parsed":
+    var
+      source: string = """
+true
+false
+"""
+      lexer: Lexer = newLexer(source)
+
+    check(lexer.nextToken().tokenType == TokenType.TRUE)
+    check(lexer.nextToken().tokenType == TokenType.FALSE)

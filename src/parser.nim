@@ -10,6 +10,7 @@ from ast import
   newPrefixExpression,
   newInfixExpression,
   newIdentifier,
+  newBoolean,
   Node,
   Program,
   toCode
@@ -50,6 +51,10 @@ proc parseIdentifier(parser: var Parser): Node =
     literal: string = parser.curToken.literal
   return newIdentifier(token=parser.curToken, strValue=literal)
 
+proc parseBoolean(parser: var Parser): Node =
+  var
+    literal: string = parser.curToken.literal
+  return newBoolean(token=parser.curToken, boolValue=literal == "true")
 
 method parseExpression(parser: var Parser, precedence: Precedence): Node {.base.} # forward declaration
 
@@ -70,6 +75,7 @@ proc getPrefixFn(tokenType: TokenType): PrefixFunction =
     of MINUS: parsePrefixExpression
     of INT: parseIntegerLiteral
     of IDENT: parseIdentifier
+    of TRUE: parseBoolean
     else: nil
 
 method currentPrecedence(parser: var Parser): Precedence {.base.} =

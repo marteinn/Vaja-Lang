@@ -11,7 +11,9 @@ type
     IDENT,
     SEMICOLON,
     SLASH,
-    ASTERISK
+    ASTERISK,
+    TRUE,
+    FALSE
 
 type 
   Token* = object

@@ -4,12 +4,14 @@ type
     NTIntegerLiteral,
     NTExpressionStatement,
     NTPrefixExpression,
-    NTInfixExpression
-    NTIdentifier
+    NTInfixExpression,
+    NTIdentifier,
+    NTBoolean
   Node* = ref object
     token*: Token
     case nodeType*: NodeType
       of NTIntegerLiteral: intValue*: int
+      of NTBoolean: boolValue*: bool
       of NTExpressionStatement: expression*: Node
       of NTPrefixExpression:
         prefixRight*: Node
@@ -25,6 +27,7 @@ type
 method toCode*(node: Node): string {.base.} =
   return case node.nodeType:
     of NTIntegerLiteral: $node.intValue
+    of NTBoolean: $node.boolValue
     of NTExpressionStatement:
       if node.expression != nil: node.expression.toCode() else: ""
     of NTPrefixExpression:
@@ -66,6 +69,9 @@ proc newInfixExpression*(token: Token, infixLeft: Node, infixRight: Node, infixO
 
 proc newIdentifier*(token: Token, strValue: string): Node =
   return Node(nodeType: NodeType.NTIdentifier, strValue: strValue)
+
+proc newBoolean*(token: Token, boolValue: bool): Node =
+  return Node(nodeType: NodeType.NTBoolean, boolValue: boolValue)
 
 proc newProgram*(statements: seq[Node]): Program =
   return Program(statements: statements)

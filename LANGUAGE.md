@@ -1,15 +1,16 @@
 ## General
 
 - No oop / inheritance
+- No for loop
 
 
 ## Types
 
 ```
-var status = true
-var msg = "hello"
-var num = 1
-var decimal = 1.1
+let status = true
+let msg = "hello"
+let num = 1
+let decimal = 1.1
 ```
 
 ## Functions
@@ -19,34 +20,55 @@ fn () -> 1
 
 fn (a, b) -> 2
 
-fn hello(a, b) -> {
+fn hello(a, b)
     let a = 5
     return  5
-}
+end
 
 map([1, 2], fn (x) -> x * 2)
 
-map([1, 2], fn (x) -> {x * 2})
+```
 
+## If/else
+
+```
+if (1 > 2) 1 end
+
+if (1 > 2)
+    1
+elif (2 > 2)
+    2
+else
+    3
+end
+```
+
+## Switch
+
+```
+case (1 > 2)
+    true -> 1
+    _ -> 2
+end
 ```
 
 ## Pipeline operator
 
 ```
-"hello" |> capitalize()
+"hello" -> capitalize()
 ```
 
 ## Array
 
 ```
-var a = [1, 2, 3]
+let a = [1, 2, 3]
 ```
 
 ## Iterators
 
 ```
 map(a, fn (x) -> x)
-map(a, fn (x) -> {
+map(a, fn (x)
     x
-})
+end)
 ```

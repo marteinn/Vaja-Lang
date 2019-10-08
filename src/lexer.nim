@@ -67,6 +67,10 @@ method nextToken*(lexer: var Lexer): Token {.base.} =
       case identifier:
         of "let":
           tok = newToken(tokenType=TokenType.LET, literal=identifier)
+        of "true":
+          tok = newToken(tokenType=TokenType.TRUE, literal=identifier)
+        of "false":
+          tok = newToken(tokenType=TokenType.FALSE, literal=identifier)
         else:
           tok = newToken(tokenType=TokenType.IDENT, literal=identifier)
     elif isInt(lexer.ch):
