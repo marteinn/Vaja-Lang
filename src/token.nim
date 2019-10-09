@@ -1,20 +1,37 @@
 type
   TokenType* = enum
+    # Types
     INT,
+    STRING,
+    TRUE,
+    FALSE
+    # Arithmetic
     PLUS,
     MINUS,
+    SLASH,
+    ASTERISK,
+    # TODO: Modulo %
+    # TODO: Floor? //
+    # TODO: Exponent **
+    # Special
     ILLEGAL,
     EOF,
     NEWLINE,
-    LET,
-    ASSIGN,
-    IDENT,
     SEMICOLON,
-    SLASH,
-    ASTERISK,
-    TRUE,
-    FALSE,
-    STRING
+    LPAREN,
+    RPAREN,
+    # Operators
+    LET,
+    # Identifier
+    IDENT,
+    # Assignment
+    ASSIGN,
+    # Logical
+    # TODO: AND,
+    # TODO: OR,
+    # TODO: NOT
+    # Comparison
+    EQ
 
 type 
   Token* = object

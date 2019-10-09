@@ -21,6 +21,12 @@ method readCharacter*(lexer: var Lexer) {.base.} =
   lexer.pos = lexer.readPos
   lexer.readPos = lexer.readPos + 1
 
+method peekAhead*(lexer: var Lexer, steps: int): char {.base.} =
+  if lexer.readPos + steps >= len(lexer.source):
+    return
+  else:
+    return lexer.source[lexer.readPos + steps]
+
 proc isInt(ch: char): bool =
   return ($ch).match(re"[0-9]").isSome()
 
@@ -31,9 +37,15 @@ method skipWhitespace(lexer: var Lexer) {.base.} =
   while lexer.ch == ' ':
     lexer.readCharacter()
 
+method readNumber(lexer: var Lexer): string {.base.} =
+  var startPos = lexer.pos
+  while isInt(lexer.ch) and not lexer.eof:
+    lexer.readCharacter()
+  return lexer.source[startPos ..< lexer.pos]
+
 method readIdentifier(lexer: var Lexer): string {.base.} =
   var startPos = lexer.pos
-  while isLetter(lexer.ch):
+  while isLetter(lexer.ch) and not lexer.eof:
     lexer.readCharacter()
   return lexer.source[startPos ..< lexer.pos]
 
@@ -70,8 +82,17 @@ method nextToken*(lexer: var Lexer): Token {.base.} =
       tok = newToken(tokenType=TokenType.PLUs, literal=($ch))
     of '-':
       tok = newToken(tokenType=TokenType.MINUS, literal=($ch))
+    of '(':
+      tok = newToken(tokenType=TokenType.LPAREN, literal=($ch))
+    of ')':
+      tok = newToken(tokenType=TokenType.RPAREN, literal=($ch))
     of '=':
-      tok = newToken(tokenType=TokenType.ASSIGN, literal=($ch))
+      if lexer.peekAhead(0) == '=':
+        var nextCh: char = lexer.peekAhead(0)
+        lexer.readCharacter()
+        tok = newToken(tokenType=TokenType.EQ, literal=($ch & $nextCh))
+      else:
+        tok = newToken(tokenType=TokenType.ASSIGN, literal=($ch))
     of ';':
       tok = newToken(tokenType=TokenType.SEMICOLON, literal=($ch))
     of '*':
@@ -92,8 +113,11 @@ method nextToken*(lexer: var Lexer): Token {.base.} =
           tok = newToken(tokenType=TokenType.FALSE, literal=identifier)
         else:
           tok = newToken(tokenType=TokenType.IDENT, literal=identifier)
+      return tok
     elif isInt(lexer.ch):
-      tok = newToken(tokenType=TokenType.INT, literal=($ch))
+      var number: string = lexer.readNumber()
+      tok = newToken(tokenType=TokenType.INT, literal=number)
+      return tok
     else:
       tok = newToken(tokenType=TokenType.ILLEGAL, literal=($ch))
 

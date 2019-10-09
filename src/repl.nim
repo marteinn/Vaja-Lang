@@ -1,5 +1,6 @@
 from lexer import newLexer, Lexer
 from parser import newParser, Parser, parseProgram
+from ast import toProgramCode
 
 echo "Väja repl"
 while true:
@@ -7,4 +8,5 @@ while true:
   var lexer: Lexer = newLexer(source = source)
   var parser: Parser = newParser(lexer = lexer)
   var program = parser.parseProgram()
-  echo source
+  echo program.toProgramCode()
+

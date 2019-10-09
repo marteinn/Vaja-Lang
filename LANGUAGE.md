@@ -7,6 +7,15 @@
 ## Types
 
 ```
+true
+ "hello"
+1
+1.1
+```
+
+## Assignemnt
+
+```
 let status = true
 let msg = "hello"
 let num = 1
@@ -71,4 +80,32 @@ map(a, fn (x) -> x)
 map(a, fn (x)
     x
 end)
+```
+
+
+## Builints
+
+```
+print("hello")
+len("hello")
+```
+
+
+## Logical operators
+
+```
+1 and 5
+not 5
+1 or 5
+```
+
+## Comparison operators
+
+```
+>
+<
+==
+!=
+>=
+<=
 ```

@@ -12,11 +12,12 @@ let a = 1
 -1
 2*3
 2/3
+123
 """
       lexer: Lexer = newLexer(source)
     type
       ExpectedTokenPair = (TokenType, string)
-      ExpectedTokens = array[27, ExpectedTokenPair]
+      ExpectedTokens = array[29, ExpectedTokenPair]
     let
       tokens: ExpectedTokens = [
         (TokenType.INT, "1"),
@@ -44,6 +45,8 @@ let a = 1
         (TokenType.INT, "2"),
         (TokenType.SLASH, "/"),
         (TokenType.INT, "3"),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.INT, "123"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.EOF, "")
       ]
@@ -81,6 +84,7 @@ false
       lexer: Lexer = newLexer(source)
 
     check(lexer.nextToken().tokenType == TokenType.TRUE)
+    check(lexer.nextToken().tokenType == TokenType.NEWLINE)
     check(lexer.nextToken().tokenType == TokenType.FALSE)
 
   test "strings are parsed":
@@ -91,3 +95,13 @@ false
     var nextToken: Token = lexer.nextToken()
     check(nextToken.tokenType == TokenType.STRING)
     check(nextToken.literal == "my string")
+
+  test "function calls are properly parsed":
+    var
+      source: string = "hello()"
+      lexer: Lexer = newLexer(source)
+
+    check(lexer.nextToken().tokenType == TokenType.IDENT)
+    check(lexer.nextToken().tokenType == TokenType.LPAREN)
+    check(lexer.nextToken().tokenType == TokenType.RPAREN)
+    check(lexer.nextToken().tokenType == TokenType.EOF)

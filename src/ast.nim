@@ -1,4 +1,7 @@
+import sequtils
+import strutils
 from token import Token
+
 type
   NodeType* = enum
     NTIntegerLiteral,
@@ -42,6 +45,10 @@ method toCode*(node: Node): string {.base.} =
       node.infixRight.toCode() & ")"
     of NTIdentifier: node.identValue
     of NTStringLiteral: node.strValue
+
+method toProgramCode*(program: Program): string {.base.} =
+  let nodeCode = map(program.statements, proc (x: Node): string = toCode(x))
+  return join(nodeCode, "\n")
 
 proc newIntegerLiteral*(token: Token, intValue: int): Node =
   return Node(nodeType: NodeType.NTIntegerLiteral, intValue: intValue)
