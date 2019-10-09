@@ -21,6 +21,9 @@ suite "eval tests":
     var
       tests: ExpectedEvals = @[
         ("1", "1"),
+        ("1+1", "2"),
+        ("1-1", "0"),
+        ("5*2", "10"),
       ]
 
     for testPair in tests:
