@@ -1,12 +1,16 @@
 from lexer import newLexer, Lexer
+from ast import Node, toCode
 from parser import newParser, Parser, parseProgram
-from ast import toProgramCode
+from obj import Obj, Env, newEnv, inspect
+from evaluator import eval
 
 echo "Väja repl"
 while true:
-  var source: string = readLine(stdin)
-  var lexer: Lexer = newLexer(source = source)
-  var parser: Parser = newParser(lexer = lexer)
-  var program = parser.parseProgram()
-  echo program.toProgramCode()
-
+  var
+    source: string = readLine(stdin)
+    lexer: Lexer = newLexer(source = source)
+    parser: Parser = newParser(lexer = lexer)
+    program: Node = parser.parseProgram()
+    env: Env = newEnv()
+    evaluated: Obj = eval(program, env)
+  echo program.toCode() & "> " & evaluated.inspect()
