@@ -1,13 +1,13 @@
 import unittest
 from lexer import newLexer, Lexer, nextToken, readCharacter
 from parser import Parser, newParser, parseProgram
-from ast import Program, NodeType, toCode
+from ast import Node, NodeType, toCode
 
-proc parseSource(source:string): Program =
+proc parseSource(source:string): Node =
   var
     lexer: Lexer = newLexer(source)
     parser: Parser = newParser(lexer = lexer)
-    program: Program = parser.parseProgram()
+    program: Node = parser.parseProgram()
 
   return program
 
@@ -15,7 +15,7 @@ suite "parser tests":
   test "test integer literal":
     var
       source: string = "1"
-      program: Program = parseSource(source)
+      program: Node = parseSource(source)
 
     check len(program.statements) == 1
     check program.statements[0].nodeType == NodeType.NTExpressionStatement
@@ -25,7 +25,7 @@ suite "parser tests":
   test "test bool types":
     var
       source: string = "true"
-      program: Program = parseSource(source)
+      program: Node = parseSource(source)
 
     check len(program.statements) == 1
     check program.statements[0].nodeType == NodeType.NTExpressionStatement
@@ -35,7 +35,7 @@ suite "parser tests":
   test "prefix parsing":
     var
       source: string = "-1"
-      program: Program = parseSource(source)
+      program: Node = parseSource(source)
 
     check len(program.statements) == 1
     check program.statements[0].toCode() == "(-1)"
@@ -45,7 +45,7 @@ suite "parser tests":
       source: string = "$1"
       lexer: Lexer = newLexer(source)
       parser: Parser = newParser(lexer = lexer)
-      program: Program = parser.parseProgram()
+      program: Node = parser.parseProgram()
 
     discard program
 
@@ -67,13 +67,13 @@ suite "parser tests":
         ("a + b * c + d / e - f", "(((a + (b * c)) + (d / e)) - f)"),
       ]
     for testPair in tests:
-      var program: Program = parseSource(testPair[0])
+      var program: Node = parseSource(testPair[0])
       check program.statements[0].toCode() == testPair[1]
 
   test "dentifier":
     var
       source: string = "a"
-      program: Program = parseSource(source)
+      program: Node = parseSource(source)
 
     check len(program.statements) == 1
     check program.statements[0].nodeType == NodeType.NTExpressionStatement
@@ -83,7 +83,7 @@ suite "parser tests":
   test "string":
     var
       source: string = """"hello""""
-      program: Program = parseSource(source)
+      program: Node = parseSource(source)
 
     check len(program.statements) == 1
     check program.statements[0].nodeType == NodeType.NTExpressionStatement

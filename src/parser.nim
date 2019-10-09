@@ -13,7 +13,6 @@ from ast import
   newBoolean,
   newStringLiteral,
   Node,
-  Program,
   toCode
 
 type
@@ -155,7 +154,7 @@ method parseExpressionStatement(parser: var Parser): Node {.base.} =
 method parseStatement(parser: var Parser): Node {.base.} =
   return parser.parseExpressionStatement()
 
-method parseProgram*(parser: var Parser): Program {.base.} =
+method parseProgram*(parser: var Parser): Node {.base.} =
   var statements: seq[Node] = @[]
   while parser.curToken.tokenType != TokenType.EOF:
     var statement = parser.parseStatement()

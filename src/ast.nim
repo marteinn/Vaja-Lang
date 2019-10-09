@@ -1,5 +1,5 @@
-import sequtils
-import strutils
+from sequtils import map
+from strutils import join
 from token import Token
 
 type
@@ -9,8 +9,9 @@ type
     NTPrefixExpression,
     NTInfixExpression,
     NTIdentifier,
-    NTBoolean
-    NTStringLiteral
+    NTBoolean,
+    NTStringLiteral,
+    NTProgram
   Node* = ref object
     token*: Token
     case nodeType*: NodeType
@@ -26,8 +27,7 @@ type
         infixOperator*: string
       of NTIdentifier: identValue*: string
       of NTStringLiteral: strValue*: string
-  Program* = ref object
-    statements*: seq[Node]
+      of NTProgram: statements*: seq[Node]
 
 method toCode*(node: Node): string {.base.} =
   return case node.nodeType:
@@ -45,10 +45,9 @@ method toCode*(node: Node): string {.base.} =
       node.infixRight.toCode() & ")"
     of NTIdentifier: node.identValue
     of NTStringLiteral: node.strValue
-
-method toProgramCode*(program: Program): string {.base.} =
-  let nodeCode = map(program.statements, proc (x: Node): string = toCode(x))
-  return join(nodeCode, "\n")
+    of NTProgram: 
+      let nodeCode = map(node.statements, proc (x: Node): string = toCode(x))
+      join(nodeCode, "\n")
 
 proc newIntegerLiteral*(token: Token, intValue: int): Node =
   return Node(nodeType: NodeType.NTIntegerLiteral, intValue: intValue)
@@ -86,5 +85,5 @@ proc newBoolean*(token: Token, boolValue: bool): Node =
 proc newStringLiteral*(token: Token, strValue: string): Node =
   return Node(nodeType: NodeType.NTStringLiteral, strValue: strValue)
 
-proc newProgram*(statements: seq[Node]): Program =
-  return Program(statements: statements)
+proc newProgram*(statements: seq[Node]): Node =
+  return Node(nodeType: NodeType.NTProgram, statements: statements)
