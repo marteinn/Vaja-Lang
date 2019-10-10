@@ -33,6 +33,7 @@ var
     TokenType.MINUS: Precedence.SUM,
     TokenType.SLASH: Precedence.PRODUCT,
     TokenType.ASTERISK: Precedence.PRODUCT,
+    TokenType.MODULO: Precedence.PRODUCT,
   }.toTable
 
 method nextParserToken(parser: var Parser): Token {.base.} =
@@ -124,6 +125,7 @@ proc getInfixFn(tokenType: TokenType): InfixFunction =
     of MINUS: parseInfixExpression
     of SLASH: parseInfixExpression
     of ASTERISK: parseInfixExpression
+    of MODULO: parseInfixExpression
     else: nil
 
 method parseExpression(parser: var Parser, precedence: Precedence): Node =

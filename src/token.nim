@@ -11,7 +11,7 @@ type
     MINUS,
     SLASH,
     ASTERISK,
-    # TODO: Modulo %
+    MODULO,
     # TODO: Floor? //
     # TODO: Exponent **
     # Special

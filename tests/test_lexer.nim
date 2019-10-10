@@ -14,11 +14,12 @@ let a = 1
 2/3
 123
 1.1
+5%5
 """
       lexer: Lexer = newLexer(source)
     type
       ExpectedTokenPair = (TokenType, string)
-      ExpectedTokens = array[31, ExpectedTokenPair]
+      ExpectedTokens = array[35, ExpectedTokenPair]
     let
       tokens: ExpectedTokens = [
         (TokenType.INT, "1"),
@@ -50,6 +51,10 @@ let a = 1
         (TokenType.INT, "123"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.FLOAT, "1.1"),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.INT, "5"),
+        (TokenType.MODULO, "%"),
+        (TokenType.INT, "5"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.EOF, "")
       ]

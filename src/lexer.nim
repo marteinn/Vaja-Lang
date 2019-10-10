@@ -82,6 +82,8 @@ method nextToken*(lexer: var Lexer): Token {.base.} =
       tok = newToken(tokenType=TokenType.PLUs, literal=($ch))
     of '-':
       tok = newToken(tokenType=TokenType.MINUS, literal=($ch))
+    of '%':
+      tok = newToken(tokenType=TokenType.MODULO, literal=($ch))
     of '(':
       tok = newToken(tokenType=TokenType.LPAREN, literal=($ch))
     of ')':

@@ -21,6 +21,8 @@ proc evalInfixIntegerExpression(operator: string, left: Obj, right: Obj): Obj =
       return newInteger(left.intValue * right.intValue)
     of "/":
       return newFloat(left.intValue / right.intValue)
+    of "%":
+      return newInteger(left.intValue mod right.intValue)
   nil
 
 proc evalInfixFloatExpression(operator: string, left: Obj, right: Obj): Obj =

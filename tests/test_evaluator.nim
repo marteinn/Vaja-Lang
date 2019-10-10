@@ -25,6 +25,7 @@ suite "eval tests":
         ("1-1", "0"),
         ("5*2", "10"),
         ("5/2", "2.5"),
+        ("5%5", "0"),
       ]
 
     for testPair in tests:

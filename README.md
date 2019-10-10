@@ -2,6 +2,9 @@
 
 Väja is a experimental language built in Nim.
 
+## Running repl
+- `make repl`
+
 ## Running tests
 - `make test`
 

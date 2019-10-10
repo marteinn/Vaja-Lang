@@ -75,6 +75,7 @@ suite "parser tests":
         ("1 / 1", "(1 / 1)"),
         ("1 + 2 * 3", "(1 + (2 * 3))"),
         ("a + b * c + d / e - f", "(((a + (b * c)) + (d / e)) - f)"),
+        ("5 % 5", "(5 % 5)"),
       ]
     for testPair in tests:
       var program: Node = parseSource(testPair[0])

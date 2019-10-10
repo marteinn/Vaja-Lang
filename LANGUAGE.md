@@ -88,6 +88,7 @@ end)
 ```
 print("hello")
 len("hello")
+type(1)
 ```
 
 
