@@ -88,6 +88,8 @@ method nextToken*(lexer: var Lexer): Token {.base.} =
       tok = newToken(tokenType=TokenType.LPAREN, literal=($ch))
     of ')':
       tok = newToken(tokenType=TokenType.RPAREN, literal=($ch))
+    of '&':
+      tok = newToken(tokenType=TokenType.AMP, literal=($ch))
     of '=':
       if lexer.peekAhead(0) == '=':
         var nextCh: char = lexer.peekAhead(0)

@@ -49,3 +49,21 @@ suite "eval tests":
     for testPair in tests:
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
+
+  test "string expressions":
+    type
+      ExpectedEval = (string, string)
+      ExpectedEvals = seq[ExpectedEval]
+    var
+      tests: ExpectedEvals = @[
+        ("\"hello\"", "hello"),
+        ("\"hi\" & \"again\"", "hiagain"),
+        #("2.2 + 1.1", "3.3"),
+        #("1 - 0.5", "0.5"),
+        #("1*5.5", "5.5"),
+        #("10/2", "5.0"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]

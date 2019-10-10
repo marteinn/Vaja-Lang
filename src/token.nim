@@ -21,6 +21,7 @@ type
     SEMICOLON,
     LPAREN,
     RPAREN,
+    AMP,
     # Operators
     LET,
     # Identifier

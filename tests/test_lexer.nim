@@ -118,3 +118,13 @@ false
     check(lexer.nextToken().tokenType == TokenType.LPAREN)
     check(lexer.nextToken().tokenType == TokenType.RPAREN)
     check(lexer.nextToken().tokenType == TokenType.EOF)
+
+  test "strings concatination":
+    var
+      source: string = """"my" & "string""""
+      lexer: Lexer = newLexer(source)
+
+    check(lexer.nextToken().tokenType == TokenType.STRING)
+    check(lexer.nextToken().tokenType == TokenType.AMP)
+    check(lexer.nextToken().tokenType == TokenType.STRING)
+    check(lexer.nextToken().tokenType == TokenType.EOF)

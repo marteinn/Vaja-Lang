@@ -121,3 +121,9 @@ not 5
 %
 **
 ```
+
+## String operators
+
+```
+"a" & "b" >> "ab"
+```
