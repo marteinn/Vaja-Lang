@@ -1,5 +1,5 @@
 import tables
-from strutils import parseInt
+from strutils import parseInt, parseFloat
 
 from lexer import Lexer, nextToken
 from token import Token, TokenType
@@ -7,6 +7,7 @@ from ast import
   newProgram,
   newExpressionStatement,
   newIntegerLiteral,
+  newFloatLiteral,
   newPrefixExpression,
   newInfixExpression,
   newIdentifier,
@@ -46,6 +47,12 @@ proc parseIntegerLiteral(parser: var Parser): Node =
     intValue: int = parseInt(literal)
   return newIntegerLiteral(token=parser.curToken, intValue=intValue)
 
+proc parseFloatLiteral(parser: var Parser): Node =
+  var
+    literal: string = parser.curToken.literal
+    floatValue: float = parseFloat(literal)
+  return newFloatLiteral(token=parser.curToken, floatValue=floatValue)
+
 proc parseIdentifier(parser: var Parser): Node =
   var
     literal: string = parser.curToken.literal
@@ -79,6 +86,7 @@ proc getPrefixFn(tokenType: TokenType): PrefixFunction =
   return case tokenType:
     of MINUS: parsePrefixExpression
     of INT: parseIntegerLiteral
+    of FLOAT: parseFloatLiteral
     of IDENT: parseIdentifier
     of TRUE: parseBoolean
     of FALSE: parseBoolean

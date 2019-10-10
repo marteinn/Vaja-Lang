@@ -5,6 +5,7 @@ from token import Token
 type
   NodeType* = enum
     NTIntegerLiteral,
+    NTFloatLiteral,
     NTExpressionStatement,
     NTPrefixExpression,
     NTInfixExpression,
@@ -16,6 +17,7 @@ type
     token*: Token
     case nodeType*: NodeType
       of NTIntegerLiteral: intValue*: int
+      of NTFloatLiteral: floatValue*: float
       of NTBoolean: boolValue*: bool
       of NTExpressionStatement: expression*: Node
       of NTPrefixExpression:
@@ -32,6 +34,7 @@ type
 method toCode*(node: Node): string {.base.} =
   return case node.nodeType:
     of NTIntegerLiteral: $node.intValue
+    of NTFLoatLiteral: $node.floatValue
     of NTBoolean: $node.boolValue
     of NTExpressionStatement:
       if node.expression != nil: node.expression.toCode() else: ""
@@ -51,6 +54,9 @@ method toCode*(node: Node): string {.base.} =
 
 proc newIntegerLiteral*(token: Token, intValue: int): Node =
   return Node(nodeType: NodeType.NTIntegerLiteral, intValue: intValue)
+
+proc newFloatLiteral*(token: Token, floatValue: float): Node =
+  return Node(nodeType: NodeType.NTFloatLiteral, floatValue: floatValue)
 
 proc newExpressionStatement*(token: Token, expression: Node): Node =
   return Node(

@@ -2,6 +2,7 @@ type
   TokenType* = enum
     # Types
     INT,
+    FLOAT,
     STRING,
     TRUE,
     FALSE
@@ -33,7 +34,7 @@ type
     # Comparison
     EQ
 
-type 
+type
   Token* = object
     tokenType*: TokenType
     literal*: string

@@ -22,6 +22,16 @@ suite "parser tests":
     check program.statements[0].expression.nodeType == NodeType.NTIntegerLiteral
     check program.statements[0].toCode() == "1"
 
+  test "test float literal":
+    var
+      source: string = "2.2"
+      program: Node = parseSource(source)
+
+    check len(program.statements) == 1
+    check program.statements[0].nodeType == NodeType.NTExpressionStatement
+    check program.statements[0].expression.nodeType == NodeType.NTFloatLiteral
+    check program.statements[0].toCode() == "2.2"
+
   test "test bool types":
     var
       source: string = "true"

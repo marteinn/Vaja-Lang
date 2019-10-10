@@ -19,7 +19,7 @@ true
 let status = true
 let msg = "hello"
 let num = 1
-let decimal = 1.1
+let float = 1.1
 ```
 
 ## Functions

@@ -1,5 +1,6 @@
 from ast import Node, NodeType
-from obj import Obj, Env, newInteger, ObjType
+from obj import
+  Obj, Env, newInteger, newFloat, ObjType, hasNumberType, promoteToFloatValue
 
 
 proc eval*(node: Node, env: Env): Obj # Forward declaration
@@ -18,11 +19,31 @@ proc evalInfixIntegerExpression(operator: string, left: Obj, right: Obj): Obj =
       return newInteger(left.intValue - right.intValue)
     of "*":
       return newInteger(left.intValue * right.intValue)
+    of "/":
+      return newFloat(left.intValue / right.intValue)
+  nil
+
+proc evalInfixFloatExpression(operator: string, left: Obj, right: Obj): Obj =
+  var
+    leftValue: float = left.promoteToFloatValue()
+    rightValue: float = right.promoteToFloatValue()
+
+  case operator:
+    of "+":
+      return newFloat(leftValue + rightValue)
+    of "-":
+      return newFloat(leftValue - rightValue)
+    of "*":
+      return newFloat(leftValue * rightValue)
+    of "/":
+      return newFloat(leftValue / rightValue)
   nil
 
 proc evalInfixExpression(operator: string, left: Obj, right: Obj): Obj =
   if left.objType == ObjType.OTInteger and right.objType == ObjType.OTInteger:
     return evalInfixIntegerExpression(operator, left, right)
+  if left.hasNumberType() and right.hasNumberType():
+    return evalInfixFloatExpression(operator, left, right)
 
   nil
 
@@ -31,6 +52,7 @@ proc eval*(node: Node, env: Env): Obj =
     of NTProgram: evaluateProgram(node, env)
     of NTExpressionStatement: eval(node.expression, env)
     of NTIntegerLiteral: newInteger(intValue=node.intValue)
+    of NTFloatLiteral: newFloat(floatValue=node.floatValue)
     of NTInfixExpression:
       var infixLeft: Obj = eval(node.infixLeft, env)
       var infixRight: Obj = eval(node.infixRight, env)

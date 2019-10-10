@@ -39,7 +39,7 @@ method skipWhitespace(lexer: var Lexer) {.base.} =
 
 method readNumber(lexer: var Lexer): string {.base.} =
   var startPos = lexer.pos
-  while isInt(lexer.ch) and not lexer.eof:
+  while (isInt(lexer.ch) or lexer.ch == '.') and not lexer.eof:
     lexer.readCharacter()
   return lexer.source[startPos ..< lexer.pos]
 
@@ -116,7 +116,10 @@ method nextToken*(lexer: var Lexer): Token {.base.} =
       return tok
     elif isInt(lexer.ch):
       var number: string = lexer.readNumber()
-      tok = newToken(tokenType=TokenType.INT, literal=number)
+      if contains(number, '.'):
+        tok = newToken(tokenType=TokenType.FLOAT, literal=number)
+      else:
+        tok = newToken(tokenType=TokenType.INT, literal=number)
       return tok
     else:
       tok = newToken(tokenType=TokenType.ILLEGAL, literal=($ch))
