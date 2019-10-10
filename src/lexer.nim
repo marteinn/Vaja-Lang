@@ -98,7 +98,12 @@ method nextToken*(lexer: var Lexer): Token {.base.} =
     of ';':
       tok = newToken(tokenType=TokenType.SEMICOLON, literal=($ch))
     of '*':
-      tok = newToken(tokenType=TokenType.ASTERISK, literal=($ch))
+      if lexer.peekAhead(0) == '*':
+        var nextCh: char = lexer.peekAhead(0)
+        lexer.readCharacter()
+        tok = newToken(tokenType=TokenType.EXPONENT, literal=($ch & $nextCh))
+      else:
+        tok = newToken(tokenType=TokenType.ASTERISK, literal=($ch))
     of '/':
       tok = newToken(tokenType=TokenType.SLASH, literal=($ch))
     of '"':

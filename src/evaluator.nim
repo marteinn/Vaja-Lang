@@ -1,3 +1,5 @@
+import math
+
 from ast import Node, NodeType
 from obj import
   Obj, Env, newInteger, newFloat, ObjType, hasNumberType, promoteToFloatValue
@@ -23,6 +25,8 @@ proc evalInfixIntegerExpression(operator: string, left: Obj, right: Obj): Obj =
       return newFloat(left.intValue / right.intValue)
     of "%":
       return newInteger(left.intValue mod right.intValue)
+    of "**":
+      return newInteger(left.intValue ^ right.intValue)
   nil
 
 proc evalInfixFloatExpression(operator: string, left: Obj, right: Obj): Obj =

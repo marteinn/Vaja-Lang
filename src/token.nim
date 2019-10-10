@@ -12,8 +12,8 @@ type
     SLASH,
     ASTERISK,
     MODULO,
+    EXPONENT,
     # TODO: Floor? //
-    # TODO: Exponent **
     # Special
     ILLEGAL,
     EOF,
