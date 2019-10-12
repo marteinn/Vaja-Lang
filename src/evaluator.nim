@@ -10,6 +10,7 @@ from obj import
   newInteger,
   newFloat,
   newStr,
+  newError,
   ObjType,
   hasNumberType,
   promoteToFloatValue,
@@ -19,10 +20,16 @@ from obj import
 
 proc eval*(node: Node, env: var Env): Obj # Forward declaration
 
-proc evaluateProgram(node: Node, env: var Env): Obj =
+proc evalProgram(node: Node, env: var Env): Obj =
   var resultValue: Obj = nil
   for statement in node.statements:
     resultValue = eval(statement, env)
+
+    if resultValue == nil:
+      continue
+
+    if resultValue.objType == ObjType.OTError:
+      return resultValue
   return resultValue
 
 proc evalInfixIntegerExpression(operator: string, left: Obj, right: Obj): Obj =
@@ -39,7 +46,8 @@ proc evalInfixIntegerExpression(operator: string, left: Obj, right: Obj): Obj =
       return newInteger(left.intValue mod right.intValue)
     of "**":
       return newInteger(left.intValue ^ right.intValue)
-  nil
+
+  return newError(errorMsg="Unknown infix operator " & operator)
 
 proc evalInfixFloatExpression(operator: string, left: Obj, right: Obj): Obj =
   var
@@ -55,13 +63,15 @@ proc evalInfixFloatExpression(operator: string, left: Obj, right: Obj): Obj =
       return newFloat(leftValue * rightValue)
     of "/":
       return newFloat(leftValue / rightValue)
-  nil
+
+  return newError(errorMsg="Unknown infix operator " & operator)
 
 proc evalInfixStringExpression(operator: string, left: Obj, right: Obj): Obj =
   case operator:
     of "&":
       return newStr(left.strValue & right.strValue)
-  nil
+
+  return newError(errorMsg="Unknown infix operator " & operator)
 
 proc evalInfixExpression(operator: string, left: Obj, right: Obj): Obj =
   if left.objType == ObjType.OTInteger and right.objType == ObjType.OTInteger:
@@ -71,7 +81,14 @@ proc evalInfixExpression(operator: string, left: Obj, right: Obj): Obj =
   if left.objType == ObjType.OTString and right.objType == ObjType.OTString:
     return evalInfixStringExpression(operator, left, right)
 
+  return newError(errorMsg="Unknown infix operator " & operator)
+
 proc evalIdentifier(node: Node, env: var Env) : Obj =
+  var exists: bool = containsVar(env, node.identValue)
+
+  if not exists:
+    return newError(errorMsg="Name " & node.identValue & " is not defined")
+
   return getVar(env, node.identValue)
 
 proc toBoolObj(boolValue: bool): Obj =
@@ -79,7 +96,7 @@ proc toBoolObj(boolValue: bool): Obj =
 
 proc eval*(node: Node, env: var Env): Obj =
   case node.nodeType:
-    of NTProgram: evaluateProgram(node, env)
+    of NTProgram: evalProgram(node, env)
     of NTExpressionStatement: eval(node.expression, env)
     of NTIntegerLiteral: newInteger(intValue=node.intValue)
     of NTFloatLiteral: newFloat(floatValue=node.floatValue)

@@ -6,12 +6,14 @@ type
     OTFloat
     OTString
     OTBoolean
+    OTError
   Obj* = ref object
     case objType*: ObjType
       of OTInteger: intValue*: int
       of OTFloat: floatValue*: float
       of OTString: strValue*: string
       of OTBoolean: boolValue*: bool
+      of OTError: errorMsg*: string
   Env* = ref object
     store: Table[string, Obj]
 
@@ -49,6 +51,7 @@ method inspect*(obj: Obj): string =
     of OTString: obj.strValue
     of OTBoolean:
       if obj.boolValue: "true" else: "false"
+    of OTError: obj.errorMsg
     #else: ""
 
 proc newInteger*(intValue: int): Obj =
@@ -62,6 +65,9 @@ proc newBoolean*(boolValue: bool): Obj =
 
 proc newStr*(strValue: string): Obj =
   return Obj(objType: ObjType.OTString, strValue: strValue)
+
+proc newError*(errorMsg: string): Obj =
+  return Obj(objType: ObjType.OTError, errorMsg: errorMsg)
 
 var
   TRUE*: Obj = newBoolean(boolValue=true)

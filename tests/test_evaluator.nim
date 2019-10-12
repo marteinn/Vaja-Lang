@@ -2,7 +2,7 @@ import unittest
 from lexer import newLexer, Lexer
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
-from obj import Obj, Env, newEnv, inspect
+from obj import Obj, ObjType, Env, newEnv, inspect
 from evaluator import eval
 
 proc evalSource(source:string): Obj =
@@ -79,16 +79,20 @@ suite "eval tests":
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
 
-  test "boolean expressions":
+  test "error handling":
     type
       ExpectedEval = (string, string)
       ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
-        ("true", "true"),
-        ("false", "false"),
+        ("a", "Name a is not defined"),
+        ("1 & 1", "Unknown infix operator &"),
+        ("1 & 1; 5", "Unknown infix operator &"),
+        ("\"a\" + \"b\"", "Unknown infix operator +"),
+        #("-true", "Unknown prefix operator -"),
       ]
 
     for testPair in tests:
       var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.objType == ObjType.OTError
       check evaluated.inspect() == testPair[1]
