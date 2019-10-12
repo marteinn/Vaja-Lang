@@ -84,7 +84,7 @@ suite "parser tests":
         ("6 ** 6", "(6 ** 6)"),
         ("\"hi\" & \"again\"", "(hi & again)"),
         ("true and false", "(true and false)"),
-        #("true or false", "(true or false)"),
+        ("true or false", "(true or false)"),
       ]
     for testPair in tests:
       var program: Node = parseSource(testPair[0])

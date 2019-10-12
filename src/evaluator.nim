@@ -80,6 +80,8 @@ proc evalInfixBooleanExpression(operator: string, left: Obj, right: Obj): Obj =
   case operator:
     of "and":
       return toBoolObj(left.boolValue and right.boolValue)
+    of "or":
+      return toBoolObj(left.boolValue or right.boolValue)
 
   return newError(errorMsg="Unknown infix operator " & operator)
 

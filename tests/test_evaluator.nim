@@ -108,9 +108,9 @@ suite "eval tests":
         ("true and true", "true"),
         ("false and true", "false"),
         ("let a = true; let b = true; a and b", "true"),
-        #("false or true", True),
-        #("false or false", False),
-        #("(true and false) or false", False),
+        ("false or true", "true"),
+        ("false or false", "false"),
+        #("(true and false) or false", "true"),
         #("function a () return false end; a() or false", False),
         #("function a () return true end; a() and true", True),
       ]

@@ -17,11 +17,12 @@ let a = 1
 5%5
 6**6
 true and true
+true or false
 """
       lexer: Lexer = newLexer(source)
     type
       ExpectedTokenPair = (TokenType, string)
-      ExpectedTokens = array[43, ExpectedTokenPair]
+      ExpectedTokens = array[47, ExpectedTokenPair]
     let
       tokens: ExpectedTokens = [
         (TokenType.INT, "1"),
@@ -65,6 +66,10 @@ true and true
         (TokenType.TRUE, "true"),
         (TokenType.AND, "and"),
         (TokenType.TRUE, "true"),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.TRUE, "true"),
+        (TokenType.OR, "or"),
+        (TokenType.FALSE, "false"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.EOF, "")
       ]

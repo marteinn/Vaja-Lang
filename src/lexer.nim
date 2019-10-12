@@ -122,6 +122,8 @@ method nextToken*(lexer: var Lexer): Token {.base.} =
           tok = newToken(tokenType=TokenType.FALSE, literal=identifier)
         of "and":
           tok = newToken(tokenType=TokenType.AND, literal=identifier)
+        of "or":
+          tok = newToken(tokenType=TokenType.OR, literal=identifier)
         else:
           tok = newToken(tokenType=TokenType.IDENT, literal=identifier)
       return tok
