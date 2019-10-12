@@ -9,11 +9,6 @@ jobs:
       image: docker://nimlang/nim:latest
     steps:
     - uses: actions/checkout@v1
-      #run: sudo apt-get install nim
     - name: Run tests
       run: nim tests
-    #- name: Run a multi-line script
-      #run: |
-        #echo Add other actions to build,
-        #echo test, and deploy your project.
 
