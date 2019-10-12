@@ -2,12 +2,22 @@ import math
 
 from ast import Node, NodeType
 from obj import
-  Obj, Env, newInteger, newFloat, newStr, ObjType, hasNumberType, promoteToFloatValue
+  Obj,
+  Env,
+  setVar,
+  getVar,
+  containsVar,
+  newInteger,
+  newFloat,
+  newStr,
+  ObjType,
+  hasNumberType,
+  promoteToFloatValue
 
 
-proc eval*(node: Node, env: Env): Obj # Forward declaration
+proc eval*(node: Node, env: var Env): Obj # Forward declaration
 
-proc evaluateProgram(node: Node, env: Env): Obj =
+proc evaluateProgram(node: Node, env: var Env): Obj =
   var resultValue: Obj = nil
   for statement in node.statements:
     resultValue = eval(statement, env)
@@ -59,7 +69,10 @@ proc evalInfixExpression(operator: string, left: Obj, right: Obj): Obj =
   if left.objType == ObjType.OTString and right.objType == ObjType.OTString:
     return evalInfixStringExpression(operator, left, right)
 
-proc eval*(node: Node, env: Env): Obj =
+proc evalIdentifier(node: Node, env: var Env) : Obj =
+  return getVar(env, node.identValue)
+
+proc eval*(node: Node, env: var Env): Obj =
   case node.nodeType:
     of NTProgram: evaluateProgram(node, env)
     of NTExpressionStatement: eval(node.expression, env)
@@ -72,4 +85,9 @@ proc eval*(node: Node, env: Env): Obj =
       evalInfixExpression(
         node.infixOperator, infixLeft, infixRight
       )
+    of NTAssignStatement:
+      var assignmentValue = eval(node.assignValue, env)
+      env = setVar(env, node.assignName.identValue, assignmentValue)
+      nil
+    of NTIdentifier: evalIdentifier(node, env)
     else: nil

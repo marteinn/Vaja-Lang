@@ -1,3 +1,5 @@
+import tables
+
 type
   ObjType* = enum
     OTInteger
@@ -9,14 +11,26 @@ type
       of OTFloat: floatValue*: float
       of OTString: strValue*: string
   Env* = ref object
+    store: Table[string, Obj]
 
-proc newEnv*():Env =
-  return Env()
 
-method hasNumberType*(obj: Obj): bool =
+proc newEnv*(): Env =
+  return Env(store: initTable[string, Obj]())
+
+method setVar*(env: Env, name: string, value: Obj): Env {.base.} =
+  env.store[name] = value
+  return env
+
+method containsVar*(env: Env, name: string): bool {.base.} =
+  return contains(env.store, name)
+
+method getVar*(env: Env, name: string): Obj {.base.} =
+  return env.store[name]
+
+method hasNumberType*(obj: Obj): bool {.base.} =
   obj.objType == OTInteger or obj.objType == OTFloat
 
-method promoteToFloatValue*(obj: Obj): float =
+method promoteToFloatValue*(obj: Obj): float {.base.} =
   if obj.objType == OTInteger:
     return float(obj.intValue)
 
@@ -24,10 +38,14 @@ method promoteToFloatValue*(obj: Obj): float =
     return obj.floatValue
 
 method inspect*(obj: Obj): string =
+  if obj == nil:
+    return ""
+
   case obj.objType:
     of OTInteger: $obj.intValue
     of OTFloat: $obj.floatValue
     of OTString: obj.strValue
+    #else: ""
 
 proc newInteger*(intValue: int): Obj =
   return Obj(objType: ObjType.OTInteger, intValue: intValue)

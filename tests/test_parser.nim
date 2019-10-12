@@ -102,3 +102,35 @@ suite "parser tests":
     check program.statements[0].nodeType == NodeType.NTExpressionStatement
     check program.statements[0].expression.nodeType == NodeType.NTStringLiteral
     check program.statements[0].toCode() == "hello"
+
+  test "variable assignment struct test":
+    var
+      source: string = "let a = 1"
+      program: Node = parseSource(source)
+
+    check len(program.statements) == 1
+    check program.statements[0].nodeType == NodeType.NTAssignStatement
+    check program.statements[0].assignName.nodeType == NodeType.NTIdentifier
+    check program.statements[0].assignName.identValue == "a"
+    check program.statements[0].assignValue.nodeType == NodeType.NTIntegerLiteral
+    check program.statements[0].assignValue.toCode() == "1"
+    check program.statements[0].toCode() == "let a = 1"
+
+  test "variable assignment variations":
+    check parseSource("let a = b").toCode() == "let a = b"
+    check parseSource("let a = true").toCode() == "let a = true"
+    check parseSource("let a = 2.2").toCode() == "let a = 2.2"
+    check parseSource("let a = \"string\"").toCode() == "let a = string"
+
+  test "multiple assignments":
+    var
+      source: string = """let a = 1
+let b = 2
+let c = "hello"
+"""
+      program: Node = parseSource(source)
+    check len(program.statements) == 3
+
+  test "semicolon delimiter":
+    check len(parseSource("1;2").statements) == 2
+    check len(parseSource("let a = 1;2").statements) == 2

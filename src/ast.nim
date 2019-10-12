@@ -13,6 +13,7 @@ type
     NTBoolean,
     NTStringLiteral,
     NTProgram
+    NTAssignStatement
   Node* = ref object
     token*: Token
     case nodeType*: NodeType
@@ -30,6 +31,9 @@ type
       of NTIdentifier: identValue*: string
       of NTStringLiteral: strValue*: string
       of NTProgram: statements*: seq[Node]
+      of NTAssignStatement:
+        assignName*: Node
+        assignValue*: Node
 
 method toCode*(node: Node): string {.base.} =
   return case node.nodeType:
@@ -51,6 +55,8 @@ method toCode*(node: Node): string {.base.} =
     of NTProgram: 
       let nodeCode = map(node.statements, proc (x: Node): string = toCode(x))
       join(nodeCode, "\n")
+    of NTAssignStatement:
+      "let " & node.assignName.identValue & " = " & toCode(node.assignValue)
 
 proc newIntegerLiteral*(token: Token, intValue: int): Node =
   return Node(nodeType: NodeType.NTIntegerLiteral, intValue: intValue)
@@ -90,6 +96,13 @@ proc newBoolean*(token: Token, boolValue: bool): Node =
 
 proc newStringLiteral*(token: Token, strValue: string): Node =
   return Node(nodeType: NodeType.NTStringLiteral, strValue: strValue)
+
+proc newAssignStatement*(token: Token, assignName: Node, assignValue: Node): Node =
+  return Node(
+    nodeType: NodeType.NTAssignStatement,
+    assignName: assignName,
+    assignValue: assignValue
+  )
 
 proc newProgram*(statements: seq[Node]): Node =
   return Node(nodeType: NodeType.NTProgram, statements: statements)

@@ -13,6 +13,7 @@ from ast import
   newIdentifier,
   newBoolean,
   newStringLiteral,
+  newAssignStatement,
   Node,
   toCode
 
@@ -165,12 +166,38 @@ method parseExpressionStatement(parser: var Parser): Node {.base.} =
     expression = parser.parseExpression(Precedence.LOWEST)
   return newExpressionStatement(token=parser.curToken, expression=expression)
 
+method parseAssignmentStatement(parser: var Parser): Node {.base.} =
+  var
+    token: Token = parser.nextParserToken()
+    identToken: Token = parser.curToken
+    assignName: Node = newIdentifier(token=identToken, identValue=token.literal)
+
+  discard parser.nextParserToken()
+  discard parser.nextParserToken()
+
+  var assignValue: Node = parser.parseExpression(Precedence.LOWEST)
+
+  if parser.peekToken.tokenType in [TokenType.NEWLINE, TokenType.SEMICOLON]:
+    discard parser.nextParserToken()
+
+  return newAssignStatement(
+    token=token,
+    assignName=assignName,
+    assignValue=assignValue,
+  )
+
 method parseStatement(parser: var Parser): Node {.base.} =
+  if parser.curToken.tokenType == TokenType.LET:
+    return parser.parseAssignmentStatement()
   return parser.parseExpressionStatement()
 
 method parseProgram*(parser: var Parser): Node {.base.} =
   var statements: seq[Node] = @[]
   while parser.curToken.tokenType != TokenType.EOF:
+    if parser.curToken.tokenType in [TokenType.SEMICOLON, TokenType.NEWLINE]:
+      discard parser.nextParserToken()
+      continue
+
     var statement = parser.parseStatement()
     statements.add(statement)
 
