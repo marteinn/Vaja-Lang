@@ -27,6 +27,7 @@ suite "eval tests":
         ("5/2", "2.5"),
         ("5%5", "0"),
         ("5**5", "3125"),
+        ("-1", "-1"),
       ]
 
     for testPair in tests:
@@ -44,6 +45,7 @@ suite "eval tests":
         ("1 - 0.5", "0.5"),
         ("1*5.5", "5.5"),
         ("10/2", "5.0"),
+        ("-1.1", "-1.1"),
       ]
 
     for testPair in tests:
@@ -89,7 +91,7 @@ suite "eval tests":
         ("1 & 1", "Unknown infix operator &"),
         ("1 & 1; 5", "Unknown infix operator &"),
         ("\"a\" + \"b\"", "Unknown infix operator +"),
-        #("-true", "Unknown prefix operator -"),
+        ("-true", "Prefix operator - does not support type OTBoolean"),
       ]
 
     for testPair in tests:

@@ -41,7 +41,7 @@ method promoteToFloatValue*(obj: Obj): float {.base.} =
   if obj.objType == OTFloat:
     return obj.floatValue
 
-method inspect*(obj: Obj): string =
+method inspect*(obj: Obj): string {.base.} =
   if obj == nil:
     return ""
 

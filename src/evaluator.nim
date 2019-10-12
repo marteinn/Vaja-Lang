@@ -83,6 +83,23 @@ proc evalInfixExpression(operator: string, left: Obj, right: Obj): Obj =
 
   return newError(errorMsg="Unknown infix operator " & operator)
 
+proc evaluateMinusOperatorExpression(right: Obj): Obj =
+  if right.objType == ObjType.OTInteger:
+    return newInteger(-right.intValue)
+  if right.objType == ObjType.OTFloat:
+    return newFloat(-right.floatValue)
+
+  return newError(
+    errorMsg="Prefix operator - does not support type " & $(right.objType)
+  )
+
+proc evalPrefixExpression(operator: string, right: Obj): Obj =
+  case operator:
+    of "-":
+      return evaluateMinusOperatorExpression(right)
+
+  return newError(errorMsg="Unknown prefix operator " & operator)
+
 proc evalIdentifier(node: Node, env: var Env) : Obj =
   var exists: bool = containsVar(env, node.identValue)
 
@@ -107,10 +124,13 @@ proc eval*(node: Node, env: var Env): Obj =
       evalInfixExpression(
         node.infixOperator, infixLeft, infixRight
       )
+    of NTPrefixExpression:
+      var prefixRight: Obj = eval(node.prefixRight, env)
+      evalPrefixExpression(node.prefixOperator, prefixRight)
     of NTAssignStatement:
       var assignmentValue = eval(node.assignValue, env)
       env = setVar(env, node.assignName.identValue, assignmentValue)
       nil
     of NTIdentifier: evalIdentifier(node, env)
     of NTBoolean: toBoolObj(node.boolValue)
-    else: nil
+    #else: nil

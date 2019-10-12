@@ -3,3 +3,15 @@ task tests, "Run all tests":
   exec r"nim c -r tests/test_parser.nim"
   exec r"nim c -r tests/test_evaluator.nim"
   setCommand "nop"
+
+task test_lexer, "Test lexer":
+  exec r"nim c -r tests/test_lexer.nim"
+  setCommand "nop"
+
+task test_parser, "Test parser":
+  exec r"nim c -r tests/test_parser.nim"
+  setCommand "nop"
+
+task test_eval, "Test eval":
+  exec r"nim c -r tests/test_evaluator.nim"
+  setCommand "nop"
