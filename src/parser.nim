@@ -53,6 +53,16 @@ method nextParserToken(parser: var Parser): Token {.base.} =
 
   return parser.curToken
 
+proc expectPeek(parser: var Parser, tokenType: TokenType): bool =
+  if parser.peekToken.tokenType != tokenType:
+    var errorMsg = "Expected token to be " & $(tokenType) & " got " & $(parser.peekToken.tokenType)
+    parser.errors.add(errorMsg)
+    echo errorMsg
+    return false
+
+  discard parser.nextParserToken()
+  return true
+
 proc parseIntegerLiteral(parser: var Parser): Node =
   var
     literal: string = parser.curToken.literal
@@ -92,6 +102,17 @@ proc parsePrefixExpression(parser: var Parser): Node =
     token=token, prefixRight=right, prefixOperator=token.literal
   )
 
+proc parseGroupedExpression(parser: var Parser): Node =
+  discard parser.nextParserToken()
+
+  var expression: Node = parser.parseExpression(Precedence.LOWEST)
+
+  if not expectPeek(parser, TokenType.RPAREN):
+      return nil
+
+  return expression
+
+
 type PrefixFunction = proc (parser: var Parser): Node
 
 proc getPrefixFn(tokenType: TokenType): PrefixFunction =
@@ -104,6 +125,7 @@ proc getPrefixFn(tokenType: TokenType): PrefixFunction =
     of TRUE: parseBoolean
     of FALSE: parseBoolean
     of STRING: parseStringLiteral
+    of LPAREN: parseGroupedExpression
     else: nil
 
 method currentPrecedence(parser: var Parser): Precedence {.base.} =

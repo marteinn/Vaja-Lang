@@ -50,6 +50,7 @@ suite "parser tests":
       tests: ExpectedTokens = @[
         ("-1", "(-1)"),
         ("not true", "(not true)"),
+        ("not (not true)", "(not (not true))"),
       ]
     for testPair in tests:
       var program: Node = parseSource(testPair[0])
@@ -65,6 +66,18 @@ suite "parser tests":
     discard program
 
     check len(parser.errors) == 1
+
+  test "operator precedence":
+    type
+      ExpectedParsing = (string, string)
+      ExpectedTokens = seq[ExpectedParsing]
+    var
+      tests: ExpectedTokens = @[
+        ("true and not false", "(true and (not false))"),
+      ]
+    for testPair in tests:
+      var program: Node = parseSource(testPair[0])
+      check program.statements[0].toCode() == testPair[1]
 
   test "influx parsing":
     type
