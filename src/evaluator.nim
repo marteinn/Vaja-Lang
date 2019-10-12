@@ -12,7 +12,9 @@ from obj import
   newStr,
   ObjType,
   hasNumberType,
-  promoteToFloatValue
+  promoteToFloatValue,
+  TRUE,
+  FALSE
 
 
 proc eval*(node: Node, env: var Env): Obj # Forward declaration
@@ -72,6 +74,9 @@ proc evalInfixExpression(operator: string, left: Obj, right: Obj): Obj =
 proc evalIdentifier(node: Node, env: var Env) : Obj =
   return getVar(env, node.identValue)
 
+proc toBoolObj(boolValue: bool): Obj =
+  if boolValue: TRUE else: FALSE
+
 proc eval*(node: Node, env: var Env): Obj =
   case node.nodeType:
     of NTProgram: evaluateProgram(node, env)
@@ -90,4 +95,5 @@ proc eval*(node: Node, env: var Env): Obj =
       env = setVar(env, node.assignName.identValue, assignmentValue)
       nil
     of NTIdentifier: evalIdentifier(node, env)
+    of NTBoolean: toBoolObj(node.boolValue)
     else: nil

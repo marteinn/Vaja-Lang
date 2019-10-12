@@ -78,3 +78,17 @@ suite "eval tests":
     for testPair in tests:
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
+
+  test "boolean expressions":
+    type
+      ExpectedEval = (string, string)
+      ExpectedEvals = seq[ExpectedEval]
+    var
+      tests: ExpectedEvals = @[
+        ("true", "true"),
+        ("false", "false"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
