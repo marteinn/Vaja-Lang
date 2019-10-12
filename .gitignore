@@ -2,3 +2,5 @@ src/repl
 tests/test_parser
 tests/test_lexer
 tests/test_evaluator
+bin/*
+!bin/.gitkeep

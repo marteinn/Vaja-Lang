@@ -1,5 +1,5 @@
 repl:
-	nim compile --run src/repl.nim
+	nim compile --run src/vaja.nim
 
-test:
-	nim tests
+compile:
+	nim --run c -o:bin/vaja src/vaja.nim

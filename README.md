@@ -2,11 +2,20 @@
 
 Väja is a experimental language built in Nim.
 
-## Running repl
-- `make repl`
+## Requirements
+- nim
+
+## Getting started
+- Compile vaja: `nim --run c -o:bin/vaja src/vaja.nim`
+
+## Run repl
+- `./bin/vaja`
+
+## Run file
+- `./bin/vaja examples/hello.vaja`
 
 ## Running tests
-- `make test`
+- `nim tests`
 
 ### Links:
 - [Nim by Example](https://nim-by-example.github.io/procs/)
