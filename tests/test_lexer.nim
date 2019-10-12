@@ -142,3 +142,27 @@ false
     check(lexer.nextToken().tokenType == TokenType.AMP)
     check(lexer.nextToken().tokenType == TokenType.STRING)
     check(lexer.nextToken().tokenType == TokenType.EOF)
+
+  test "comparison operators":
+    var
+      source: string = """
+==
+!=
+>
+>=
+<
+<=
+"""
+      lexer: Lexer = newLexer(source)
+
+    check(lexer.nextToken().tokenType == TokenType.EQ)
+    discard lexer.nextToken() # newline
+    check(lexer.nextToken().tokenType == TokenType.NOT_EQ)
+    discard lexer.nextToken() # newline
+    check(lexer.nextToken().tokenType == TokenType.GT)
+    discard lexer.nextToken() # newline
+    check(lexer.nextToken().tokenType == TokenType.GTE)
+    discard lexer.nextToken() # newline
+    check(lexer.nextToken().tokenType == TokenType.LT)
+    discard lexer.nextToken() # newline
+    check(lexer.nextToken().tokenType == TokenType.LTE)

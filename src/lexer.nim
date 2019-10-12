@@ -90,6 +90,27 @@ method nextToken*(lexer: var Lexer): Token {.base.} =
       tok = newToken(tokenType=TokenType.RPAREN, literal=($ch))
     of '&':
       tok = newToken(tokenType=TokenType.AMP, literal=($ch))
+    of '>':
+      if lexer.peekAhead(0) == '=':
+        var nextCh: char = lexer.peekAhead(0)
+        lexer.readCharacter()
+        tok = newToken(tokenType=TokenType.GTE, literal=($ch & $nextCh))
+      else:
+        tok = newToken(tokenType=TokenType.GT, literal=($ch))
+    of '<':
+      if lexer.peekAhead(0) == '=':
+        var nextCh: char = lexer.peekAhead(0)
+        lexer.readCharacter()
+        tok = newToken(tokenType=TokenType.LTE, literal=($ch & $nextCh))
+      else:
+        tok = newToken(tokenType=TokenType.LT, literal=($ch))
+    of '!':
+      if lexer.peekAhead(0) == '=':
+        var nextCh: char = lexer.peekAhead(0)
+        lexer.readCharacter()
+        tok = newToken(tokenType=TokenType.NOT_EQ, literal=($ch & $nextCh))
+      else:
+        tok = newToken(tokenType=TokenType.BANG, literal=($ch))
     of '=':
       if lexer.peekAhead(0) == '=':
         var nextCh: char = lexer.peekAhead(0)

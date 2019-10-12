@@ -85,6 +85,12 @@ suite "parser tests":
         ("\"hi\" & \"again\"", "(hi & again)"),
         ("true and false", "(true and false)"),
         ("true or false", "(true or false)"),
+        ("1 == 2", "(1 == 2)"),
+        ("1 != 2", "(1 != 2)"),
+        ("1 > 2", "(1 > 2)"),
+        ("1 >= 2", "(1 >= 2)"),
+        ("1 < 2", "(1 < 2)"),
+        ("1 <= 2", "(1 <= 2)"),
       ]
     for testPair in tests:
       var program: Node = parseSource(testPair[0])

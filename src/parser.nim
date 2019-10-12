@@ -39,6 +39,12 @@ var
     TokenType.AMP: Precedence.PRODUCT,
     TokenType.AND: Precedence.PRODUCT,
     TokenType.OR: Precedence.PRODUCT,
+    TokenType.EQ: Precedence.PRODUCT,
+    TokenType.NOT_EQ: Precedence.PRODUCT,
+    TokenType.GT: Precedence.PRODUCT,
+    TokenType.GTE: Precedence.PRODUCT,
+    TokenType.LT: Precedence.PRODUCT,
+    TokenType.LTE: Precedence.PRODUCT,
   }.toTable
 
 method nextParserToken(parser: var Parser): Token {.base.} =
@@ -136,6 +142,12 @@ proc getInfixFn(tokenType: TokenType): InfixFunction =
     of AMP: parseInfixExpression
     of AND: parseInfixExpression
     of OR: parseInfixExpression
+    of EQ: parseInfixExpression
+    of NOT_EQ: parseInfixExpression
+    of GT: parseInfixExpression
+    of GTE: parseInfixExpression
+    of LT: parseInfixExpression
+    of LTE: parseInfixExpression
     else: nil
 
 method parseExpression(parser: var Parser, precedence: Precedence): Node =

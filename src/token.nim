@@ -32,8 +32,14 @@ type
     AND,
     OR,
     NOT,
+    BANG,
     # Comparison
-    EQ
+    EQ,
+    NOT_EQ,
+    GT,
+    GTE,
+    LT,
+    LTE
 
 type
   Token* = object

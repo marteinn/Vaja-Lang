@@ -49,6 +49,18 @@ proc evalInfixIntegerExpression(operator: string, left: Obj, right: Obj): Obj =
       return newInteger(left.intValue mod right.intValue)
     of "**":
       return newInteger(left.intValue ^ right.intValue)
+    of "==":
+      return toBoolObj(left.intValue == right.intValue)
+    of "!=":
+      return toBoolObj(left.intValue != right.intValue)
+    of ">":
+      return toBoolObj(left.intValue > right.intValue)
+    of ">=":
+      return toBoolObj(left.intValue >= right.intValue)
+    of "<":
+      return toBoolObj(left.intValue < right.intValue)
+    of "<=":
+      return toBoolObj(left.intValue <= right.intValue)
 
   return newError(errorMsg="Unknown infix operator " & operator)
 
@@ -66,6 +78,18 @@ proc evalInfixFloatExpression(operator: string, left: Obj, right: Obj): Obj =
       return newFloat(leftValue * rightValue)
     of "/":
       return newFloat(leftValue / rightValue)
+    of "==":
+      return toBoolObj(left.floatValue == right.floatValue)
+    of "!=":
+      return toBoolObj(left.floatValue != right.floatValue)
+    of ">":
+      return toBoolObj(left.floatValue > right.floatValue)
+    of ">=":
+      return toBoolObj(left.floatValue >= right.floatValue)
+    of "<":
+      return toBoolObj(left.floatValue < right.floatValue)
+    of "<=":
+      return toBoolObj(left.floatValue <= right.floatValue)
 
   return newError(errorMsg="Unknown infix operator " & operator)
 
@@ -73,6 +97,10 @@ proc evalInfixStringExpression(operator: string, left: Obj, right: Obj): Obj =
   case operator:
     of "&":
       return newStr(left.strValue & right.strValue)
+    of "==":
+      return toBoolObj(left.strValue == right.strValue)
+    of "!=":
+      return toBoolObj(left.strValue != right.strValue)
 
   return newError(errorMsg="Unknown infix operator " & operator)
 
@@ -82,6 +110,10 @@ proc evalInfixBooleanExpression(operator: string, left: Obj, right: Obj): Obj =
       return toBoolObj(left.boolValue and right.boolValue)
     of "or":
       return toBoolObj(left.boolValue or right.boolValue)
+    of "==":
+      return toBoolObj(left.boolValue == right.boolValue)
+    of "!=":
+      return toBoolObj(left.boolValue != right.boolValue)
 
   return newError(errorMsg="Unknown infix operator " & operator)
 

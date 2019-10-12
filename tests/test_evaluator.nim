@@ -28,6 +28,13 @@ suite "eval tests":
         ("5%5", "0"),
         ("5**5", "3125"),
         ("-1", "-1"),
+        ("1 == 1", "true"),
+        ("1 != 1", "false"),
+        ("1 > 1", "false"),
+        ("1 >= 1", "true"),
+        ("5 < 10", "true"),
+        ("10 < 5", "false"),
+        ("5 <= 5", "true"),
       ]
 
     for testPair in tests:
@@ -46,6 +53,13 @@ suite "eval tests":
         ("1*5.5", "5.5"),
         ("10/2", "5.0"),
         ("-1.1", "-1.1"),
+        ("1.0 == 1.0", "true"),
+        ("1.0 != 1.0", "false"),
+        ("1.0 > 1.0", "false"),
+        ("1.0 >= 1.0", "true"),
+        ("5.0 < 10.0", "true"),
+        ("10.0 < 5.0", "false"),
+        ("5.0 <= 5.0", "true"),
       ]
 
     for testPair in tests:
@@ -60,6 +74,8 @@ suite "eval tests":
       tests: ExpectedEvals = @[
         ("\"hello\"", "hello"),
         ("\"hi\" & \"again\"", "hiagain"),
+        ("\"hi\" == \"hi\"", "true"),
+        ("\"hi\" != \"hi\"", "false"),
       ]
 
     for testPair in tests:
@@ -125,6 +141,8 @@ suite "eval tests":
         ("let a = true; let b = true; a and b", "true"),
         ("false or true", "true"),
         ("false or false", "false"),
+        ("false == false", "true"),
+        ("false != false", "false"),
         #("(true and false) or false", "true"),
         #("function a () return false end; a() or false", False),
         #("function a () return true end; a() and true", True),
