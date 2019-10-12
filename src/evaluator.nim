@@ -107,10 +107,20 @@ proc evaluateMinusOperatorExpression(right: Obj): Obj =
     errorMsg="Prefix operator - does not support type " & $(right.objType)
   )
 
+proc evaluateNotOperatorExpression(right: Obj): Obj =
+  if right.objType == ObjType.OTBoolean:
+    return toBoolObj(not right.boolValue)
+
+  return newError(
+    errorMsg="Prefix operator - does not support type " & $(right.objType)
+  )
+
 proc evalPrefixExpression(operator: string, right: Obj): Obj =
   case operator:
     of "-":
       return evaluateMinusOperatorExpression(right)
+    of "not":
+      return evaluateNotOperatorExpression(right)
 
   return newError(errorMsg="Unknown prefix operator " & operator)
 

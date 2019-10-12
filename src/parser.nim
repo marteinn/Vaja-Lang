@@ -91,6 +91,7 @@ type PrefixFunction = proc (parser: var Parser): Node
 proc getPrefixFn(tokenType: TokenType): PrefixFunction =
   return case tokenType:
     of MINUS: parsePrefixExpression
+    of NOT: parsePrefixExpression
     of INT: parseIntegerLiteral
     of FLOAT: parseFloatLiteral
     of IDENT: parseIdentifier

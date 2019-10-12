@@ -99,6 +99,21 @@ suite "eval tests":
       check evaluated.objType == ObjType.OTError
       check evaluated.inspect() == testPair[1]
 
+  test "bool prefix operations":
+    type
+      ExpectedEval = (string, string)
+      ExpectedEvals = seq[ExpectedEval]
+    var
+      tests: ExpectedEvals = @[
+        ("not true", "false"),
+        ("not not true", "true"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.objType == ObjType.OTBoolean
+      check evaluated.inspect() == testPair[1]
+
   test "bool infix operations":
     type
       ExpectedEval = (string, string)

@@ -49,7 +49,7 @@ suite "parser tests":
     var
       tests: ExpectedTokens = @[
         ("-1", "(-1)"),
-        #("not 1", "(not 1)"),
+        ("not true", "(not true)"),
       ]
     for testPair in tests:
       var program: Node = parseSource(testPair[0])
