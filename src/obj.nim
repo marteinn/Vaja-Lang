@@ -71,4 +71,4 @@ proc newError*(errorMsg: string): Obj =
 
 var
   TRUE*: Obj = newBoolean(boolValue=true)
-  FALSE*: Obj = newBoolean(boolValue=true)
+  FALSE*: Obj = newBoolean(boolValue=false)

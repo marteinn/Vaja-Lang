@@ -29,9 +29,9 @@ type
     # Assignment
     ASSIGN,
     # Logical
-    # TODO: AND,
-    # TODO: OR,
-    # TODO: NOT
+    AND,
+    OR,
+    NOT,
     # Comparison
     EQ
 

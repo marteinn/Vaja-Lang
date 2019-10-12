@@ -20,6 +20,9 @@ from obj import
 
 proc eval*(node: Node, env: var Env): Obj # Forward declaration
 
+proc toBoolObj(boolValue: bool): Obj =
+  if boolValue: TRUE else: FALSE
+
 proc evalProgram(node: Node, env: var Env): Obj =
   var resultValue: Obj = nil
   for statement in node.statements:
@@ -73,6 +76,13 @@ proc evalInfixStringExpression(operator: string, left: Obj, right: Obj): Obj =
 
   return newError(errorMsg="Unknown infix operator " & operator)
 
+proc evalInfixBooleanExpression(operator: string, left: Obj, right: Obj): Obj =
+  case operator:
+    of "and":
+      return toBoolObj(left.boolValue and right.boolValue)
+
+  return newError(errorMsg="Unknown infix operator " & operator)
+
 proc evalInfixExpression(operator: string, left: Obj, right: Obj): Obj =
   if left.objType == ObjType.OTInteger and right.objType == ObjType.OTInteger:
     return evalInfixIntegerExpression(operator, left, right)
@@ -80,6 +90,8 @@ proc evalInfixExpression(operator: string, left: Obj, right: Obj): Obj =
     return evalInfixFloatExpression(operator, left, right)
   if left.objType == ObjType.OTString and right.objType == ObjType.OTString:
     return evalInfixStringExpression(operator, left, right)
+  if left.objType == ObjType.OTBoolean and right.objType == ObjType.OTBoolean:
+    return evalInfixBooleanExpression(operator, left, right)
 
   return newError(errorMsg="Unknown infix operator " & operator)
 
@@ -108,8 +120,6 @@ proc evalIdentifier(node: Node, env: var Env) : Obj =
 
   return getVar(env, node.identValue)
 
-proc toBoolObj(boolValue: bool): Obj =
-  if boolValue: TRUE else: FALSE
 
 proc eval*(node: Node, env: var Env): Obj =
   case node.nodeType:

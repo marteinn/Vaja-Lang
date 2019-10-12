@@ -43,12 +43,17 @@ suite "parser tests":
     check program.statements[0].toCode() == "true"
 
   test "prefix parsing":
+    type
+      ExpectedParsing = (string, string)
+      ExpectedTokens = seq[ExpectedParsing]
     var
-      source: string = "-1"
-      program: Node = parseSource(source)
-
-    check len(program.statements) == 1
-    check program.statements[0].toCode() == "(-1)"
+      tests: ExpectedTokens = @[
+        ("-1", "(-1)"),
+        #("not 1", "(not 1)"),
+      ]
+    for testPair in tests:
+      var program: Node = parseSource(testPair[0])
+      check program.statements[0].toCode() == testPair[1]
 
   test "illegal prefix operators returns error":
     var
@@ -78,6 +83,8 @@ suite "parser tests":
         ("5 % 5", "(5 % 5)"),
         ("6 ** 6", "(6 ** 6)"),
         ("\"hi\" & \"again\"", "(hi & again)"),
+        ("true and false", "(true and false)"),
+        #("true or false", "(true or false)"),
       ]
     for testPair in tests:
       var program: Node = parseSource(testPair[0])
