@@ -62,7 +62,6 @@ method readString(lexer: var Lexer): string {.base.} =
 
     stringOut = stringOut & lexer.ch
 
-  lexer.readCharacter()
   return stringOut
 
 method nextToken*(lexer: var Lexer): Token {.base.} =

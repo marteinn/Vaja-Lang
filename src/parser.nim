@@ -16,6 +16,7 @@ from ast import
   newAssignStatement,
   newFuntionLiteral,
   newBlockStatement,
+  newCallExpression,
   Node,
   toCode
 
@@ -30,6 +31,7 @@ type
     SUM = 4
     PRODUCT = 5
     PREFIX = 6
+    CALL = 7
 var
   precedences: Table[TokenType, Precedence] = {
     TokenType.PLUS: Precedence.SUM,
@@ -47,6 +49,7 @@ var
     TokenType.GTE: Precedence.PRODUCT,
     TokenType.LT: Precedence.PRODUCT,
     TokenType.LTE: Precedence.PRODUCT,
+    TokenType.LPAREN: Precedence.CALL,
   }.toTable
 
 method nextParserToken(parser: var Parser): Token {.base.} =
@@ -223,6 +226,39 @@ method parseInfixExpression(parser: var Parser, left: Node): Node {.base.} =
     token=token, infixLeft=left, infixRight=right, infixOperator=token.literal
   )
 
+proc parseCallArguments(parser: var Parser): seq[Node] =
+  if parser.peekToken.tokenType == TokenType.RPAREN:
+    discard parser.nextParserToken()
+    return @[]
+
+  discard parser.nextParserToken()
+
+  var callArguments: seq[Node] = @[
+    parser.parseExpression(Precedence.LOWEST)
+  ]
+
+  while parser.peekToken.tokenType == TokenType.COMMA:
+    discard parser.nextParserToken()
+    discard parser.nextParserToken()
+
+    callArguments.add(
+      parser.parseExpression(Precedence.LOWEST)
+    )
+
+  if not parser.expectPeek(TokenType.RPAREN):
+    return @[]
+
+  return callArguments
+
+method parseCallExpression(parser: var Parser, function: Node): Node {.base.} =
+  var
+    token: Token = parser.curToken
+    callArguments: seq[Node] = parseCallArguments(parser)
+
+  return newCallExpression(
+    token=token, callFunction=function, callArguments=callArguments
+  )
+
 type InfixFunction = proc (parser: var Parser, left: Node): Node
 
 proc getInfixFn(tokenType: TokenType): InfixFunction =
@@ -242,6 +278,7 @@ proc getInfixFn(tokenType: TokenType): InfixFunction =
     of GTE: parseInfixExpression
     of LT: parseInfixExpression
     of LTE: parseInfixExpression
+    of LPAREN: parseCallExpression
     else: nil
 
 method parseExpression(parser: var Parser, precedence: Precedence): Node =

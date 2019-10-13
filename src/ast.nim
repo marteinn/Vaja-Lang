@@ -15,7 +15,8 @@ type
     NTProgram
     NTAssignStatement,
     NTFunctionLiteral,
-    NTBlockStatement
+    NTBlockStatement,
+    NTCallExpression
   Node* = ref object
     token*: Token
     case nodeType*: NodeType
@@ -41,6 +42,9 @@ type
         functionParams*: seq[Node]
         functionName*: Node
       of NTBlockStatement: blockStatements*: seq[Node]
+      of NTCallExpression:
+        callFunction*: Node
+        callArguments*: seq[Node]
 
 method toCode*(node: Node): string {.base.} =
   return case node.nodeType:
@@ -68,10 +72,19 @@ method toCode*(node: Node): string {.base.} =
       let 
         paramsCode: seq[string] = map(node.functionParams, proc (x: Node): string = toCode(x))
         paramsCodeString: string = join(paramsCode, ", ")
-      "fn " & node.functionName.identValue & "(" & paramsCodeString & ") " & node.functionBody.toCode() & " end"
+      if node.functionName != nil:
+        "fn " & node.functionName.identValue & "(" & paramsCodeString & ") " & node.functionBody.toCode() & " end"
+      else:
+        "fn" & "(" & paramsCodeString & ") " & node.functionBody.toCode() & " end"
+
     of NTBlockStatement:
       let nodeCode = map(node.blockStatements, proc (x: Node): string = toCode(x))
       join(nodeCode, "\n")
+    of NTCallExpression:
+      let argumentsCode = map(
+        node.callArguments, proc (x: Node): string = toCode(x)
+      )
+      node.callFunction.toCode() & "(" & join(argumentsCode, ", ") & ")"
 
 proc newIntegerLiteral*(token: Token, intValue: int): Node =
   return Node(nodeType: NodeType.NTIntegerLiteral, intValue: intValue)
@@ -115,6 +128,7 @@ proc newStringLiteral*(token: Token, strValue: string): Node =
 proc newAssignStatement*(token: Token, assignName: Node, assignValue: Node): Node =
   return Node(
     nodeType: NodeType.NTAssignStatement,
+    token: token,
     assignName: assignName,
     assignValue: assignValue
   )
@@ -127,6 +141,7 @@ proc newFuntionLiteral*(
 ): Node =
   return Node(
     nodeType: NodeType.NTFunctionLiteral,
+    token: token,
     functionBody: functionBody,
     functionParams: functionParams,
     functionName: functionName
@@ -134,6 +149,14 @@ proc newFuntionLiteral*(
 
 proc newBlockStatement*(blockStatements: seq[Node]): Node =
   return Node(nodeType: NodeType.NTBlockStatement, blockStatements: blockStatements)
+
+proc newCallExpression*(token: Token, callFunction: Node, callArguments: seq[Node]): Node =
+  return Node(
+    nodeType: NodeType.NTCallExpression,
+    token: token,
+    callFunction: callFunction,
+    callArguments: callArguments
+  )
 
 proc newProgram*(statements: seq[Node]): Node =
   return Node(nodeType: NodeType.NTProgram, statements: statements)

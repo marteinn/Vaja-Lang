@@ -12,9 +12,11 @@ from obj import
   newStr,
   newError,
   newFunction,
+  newEnclosedEnv,
   ObjType,
   hasNumberType,
   promoteToFloatValue,
+  inspect,
   TRUE,
   FALSE
 
@@ -130,7 +132,7 @@ proc evalInfixExpression(operator: string, left: Obj, right: Obj): Obj =
 
   return newError(errorMsg="Unknown infix operator " & operator)
 
-proc evaluateMinusOperatorExpression(right: Obj): Obj =
+proc evalMinusOperatorExpression(right: Obj): Obj =
   if right.objType == ObjType.OTInteger:
     return newInteger(-right.intValue)
   if right.objType == ObjType.OTFloat:
@@ -140,7 +142,7 @@ proc evaluateMinusOperatorExpression(right: Obj): Obj =
     errorMsg="Prefix operator - does not support type " & $(right.objType)
   )
 
-proc evaluateNotOperatorExpression(right: Obj): Obj =
+proc evalNotOperatorExpression(right: Obj): Obj =
   if right.objType == ObjType.OTBoolean:
     return toBoolObj(not right.boolValue)
 
@@ -151,14 +153,16 @@ proc evaluateNotOperatorExpression(right: Obj): Obj =
 proc evalPrefixExpression(operator: string, right: Obj): Obj =
   case operator:
     of "-":
-      return evaluateMinusOperatorExpression(right)
+      return evalMinusOperatorExpression(right)
     of "not":
-      return evaluateNotOperatorExpression(right)
+      return evalNotOperatorExpression(right)
 
   return newError(errorMsg="Unknown prefix operator " & operator)
 
 proc evalBlockStatement(node: Node, env: var Env): Obj =
-  return nil
+  for statement in node.blockStatements:
+    result = eval(statement, env)
+    # TODO: Add return and error support
 
 proc evalIdentifier(node: Node, env: var Env) : Obj =
   var exists: bool = containsVar(env, node.identValue)
@@ -168,6 +172,26 @@ proc evalIdentifier(node: Node, env: var Env) : Obj =
 
   return getVar(env, node.identValue)
 
+proc evalExpressions(expressions: seq[Node], env: var Env): seq[Obj] =
+  var res: seq[Obj] = @[]
+
+  for exp in expressions:
+    var evaluated: Obj = eval(exp, env)
+    res.add(evaluated)
+
+  return res
+
+proc extendFunctionEnv(fn: Obj, arguments: seq[Obj]): Env =
+  var enclosedEnv: Env = newEnclosedEnv(fn.functionEnv)
+  for index, param in fn.functionParams:
+    enclosedEnv = setVar(enclosedEnv, param.identValue, arguments[index])
+
+  return enclosedEnv
+
+proc applyFunction(fn: Obj, arguments: seq[Obj], env: var Env): Obj =
+  var extendedEnv: Env = extendFunctionEnv(fn, arguments)
+  var res: Obj = eval(fn.functionBody, extendedEnv)
+  return res
 
 proc eval*(node: Node, env: var Env): Obj =
   case node.nodeType:
@@ -199,9 +223,12 @@ proc eval*(node: Node, env: var Env): Obj =
           functionEnv=env,
           functionParams=node.functionParams
         )
-
       if node.functionName != nil:
         discard setVar(env, node.functionName.identValue, fn)
         nil
       else:
         fn
+    of NTCallExpression:
+      var fn: Obj = eval(node.callFunction, env)
+      var arguments: seq[Obj] = evalExpressions(node.callArguments, env)
+      applyFunction(fn, arguments, env)

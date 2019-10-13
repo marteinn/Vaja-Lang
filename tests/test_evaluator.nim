@@ -168,3 +168,21 @@ suite "eval tests":
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.objType == ObjType.OTFunction
       check evaluated.inspect() == testPair[1]
+
+  test "call expression":
+    type
+      ExpectedEval = (string, string)
+      ExpectedEvals = seq[ExpectedEval]
+    var
+      tests: ExpectedEvals = @[
+        ("fn hello() 1 end; hello()", "1"),
+        ("fn hello(x) x end; hello(2)", "2"),
+        ("fn add(x, y) x+y end; add(2,3)", "5"),
+        ("fn add(x, y) x+y end; let value = 5; add(value,3)", "8"),
+        ("let add = fn(x, y) x+y end; add(1,2)", "3"),
+        #("(fn a(x) x end)(1)", "1"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]

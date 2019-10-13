@@ -162,6 +162,17 @@ false
     check(lexer.nextToken().tokenType == TokenType.STRING)
     check(lexer.nextToken().tokenType == TokenType.EOF)
 
+  test "passing string to function call":
+    var
+      source: string = """a("hello")"""
+      lexer: Lexer = newLexer(source)
+
+    check(lexer.nextToken().tokenType == TokenType.IDENT)
+    check(lexer.nextToken().tokenType == TokenType.LPAREN)
+    check(lexer.nextToken().tokenType == TokenType.STRING)
+    check(lexer.nextToken().tokenType == TokenType.RPAREN)
+    check(lexer.nextToken().tokenType == TokenType.EOF)
+
   test "comparison operators":
     var
       source: string = """

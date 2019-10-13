@@ -19,15 +19,19 @@ type
       of OTBoolean: boolValue*: bool
       of OTError: errorMsg*: string
       of OTFunction:
-        functionBody: Node
-        functionEnv: Env
-        functionParams: seq[Node]
+        functionBody*: Node
+        functionEnv*: Env
+        functionParams*: seq[Node]
   Env* = ref object
     store: Table[string, Obj]
+    outer: Env
 
 
 proc newEnv*(): Env =
   return Env(store: initTable[string, Obj]())
+
+proc newEnclosedEnv*(env: Env): Env =
+  return Env(outer: env, store: initTable[string, Obj]())
 
 method setVar*(env: Env, name: string, value: Obj): Env {.base.} =
   env.store[name] = value

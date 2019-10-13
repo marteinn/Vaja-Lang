@@ -172,3 +172,22 @@ let c = "hello"
     check len(program.statements[0].expression.functionParams) == 2
     check len(program.statements) == 1
     check program.statements[0].expression.toCode() == "fn hello(a, b) 1 end"
+
+  test "function parsing":
+    var
+      source: string = "hello(1, 2)"
+      program: Node = parseSource(source)
+
+    check program.statements[0].nodeType == NodeType.NTExpressionStatement
+    check program.statements[0].expression.nodeType == NodeType.NTCallExpression
+    check program.statements[0].expression.toCode() == "hello(1, 2)"
+
+  test "function parsing argument variation":
+    check parseSource("a()").toCode() == "a()"
+    check parseSource("a(1)").toCode() == "a(1)"
+    check parseSource("a(1.2, 2.2)").toCode() == "a(1.2, 2.2)"
+    check parseSource("a(1, 2, 3, 4, 5, 6)").toCode() == "a(1, 2, 3, 4, 5, 6)"
+    check parseSource("a(b)").toCode() == "a(b)"
+    check parseSource("a(true)").toCode() == "a(true)"
+    check parseSource("""a("val", "val2")""").toCode() == "a(val, val2)"
+    check parseSource("a(fn(x) 1 end)").toCode() == "a(fn(x) 1 end)"
