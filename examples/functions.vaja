@@ -3,3 +3,10 @@ fn hello(name)
 end
 
 hello("martin")
+
+fn multiply(x, y)
+  let res = x * y
+  return res
+end
+
+multiply(5, 7)
