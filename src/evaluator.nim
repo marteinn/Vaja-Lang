@@ -250,6 +250,6 @@ proc eval*(node: Node, env: var Env): Obj =
       var returnValue: Obj = eval(node.returnValue, env)
       # TODO: Add error check
       newReturn(returnValue=returnValue)
-    of NTPipe:
+    of NTPipeLR:
       node.pipeRight.callArguments.add(node.pipeLeft)
       eval(node.pipeRight, env)

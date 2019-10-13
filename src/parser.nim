@@ -18,7 +18,7 @@ from ast import
   newBlockStatement,
   newCallExpression,
   newReturnStatement,
-  newPipe,
+  newPipeLR,
   Node,
   toCode
 
@@ -282,17 +282,16 @@ method parseCallExpression(parser: var Parser, function: Node): Node {.base.} =
     token=token, callFunction=function, callArguments=callArguments
   )
 
-method parsePipeInfix(parser: var Parser, left: Node): Node {.base.} =
+method parsePipeLRInfix(parser: var Parser, left: Node): Node {.base.} =
   var
     token: Token = parser.curToken
     precedence: Precedence = parser.currentPrecedence()
   discard parser.nextParserToken()
 
   var right: Node = parser.parseExpression(precedence)
-  return newPipe(
+  return newPipeLR(
     token=token, pipeLeft=left, pipeRight=right
   )
-
 
 type InfixFunction = proc (parser: var Parser, left: Node): Node
 
@@ -314,7 +313,7 @@ proc getInfixFn(tokenType: TokenType): InfixFunction =
     of LT: parseInfixExpression
     of LTE: parseInfixExpression
     of LPAREN: parseCallExpression
-    of PIPERARROW: parsePipeInfix
+    of PIPERARROW: parsePipeLRInfix
     else: nil
 
 method parseExpression(parser: var Parser, precedence: Precedence): Node =

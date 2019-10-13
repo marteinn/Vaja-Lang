@@ -18,7 +18,7 @@ type
     NTBlockStatement,
     NTCallExpression,
     NTReturnStatement
-    NTPipe
+    NTPipeLR
   Node* = ref object
     token*: Token
     case nodeType*: NodeType
@@ -49,7 +49,7 @@ type
         callArguments*: seq[Node]
       of NTReturnStatement:
         returnValue*: Node
-      of NTPipe:
+      of NTPipeLR:
         pipeLeft*: Node
         pipeRight*: Node
 
@@ -94,7 +94,7 @@ method toCode*(node: Node): string {.base.} =
       node.callFunction.toCode() & "(" & join(argumentsCode, ", ") & ")"
     of NTReturnStatement:
       "return " & toCode(node.returnValue)
-    of NTPipe:
+    of NTPipeLR:
       var pipeLeftCode: string
       if node.pipeLeft.nodeType != NTCallExpression:
         pipeLeftCode = "(" & node.pipeLeft.toCode() & ")"
@@ -184,10 +184,10 @@ proc newReturnStatement*(token: Token, returnValue: Node): Node =
     token: token, nodeType: NodeType.NTReturnStatement, returnValue: returnValue
   )
 
-proc newPipe*(token: Token, pipeLeft: Node, pipeRight: Node): Node =
+proc newPipeLR*(token: Token, pipeLeft: Node, pipeRight: Node): Node =
   return Node(
     token: token,
-    nodeType: NodeType.NTPipe,
+    nodeType: NodeType.NTPipeLR,
     pipeLeft: pipeLeft,
     pipeRight: pipeRight
   )
