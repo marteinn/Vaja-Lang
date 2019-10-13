@@ -4,9 +4,16 @@ end
 
 hello("martin")
 
+
 fn multiply(x, y)
   let res = x * y
   return res
 end
 
 multiply(5, 7)
+
+
+fn addFive(x) -> x + 5
+fn multiplyTwo(x) -> x * 2
+
+2 |> addFive() |> multiplyTwo()
