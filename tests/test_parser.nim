@@ -233,8 +233,8 @@ end
       ExpectedTokens = seq[ExpectedParsing]
     var
       tests: ExpectedTokens = @[
-        ("1 $ a()", "a(1)"),
-        ("1 $ a() $ b()", "b(a(1))"),
+        ("1 |> a()", "a(1)"),
+        ("1 |> a() |> b()", "b(a(1))"),
       ]
     for testPair in tests:
       var program: Node = parseSource(testPair[0])

@@ -30,7 +30,6 @@ type
     peekToken: Token
   Precedence* = enum
     LOWEST = 0
-    PIPE = 1
     SUM = 4
     PRODUCT = 5
     PREFIX = 6
@@ -53,7 +52,7 @@ var
     TokenType.LT: Precedence.PRODUCT,
     TokenType.LTE: Precedence.PRODUCT,
     TokenType.LPAREN: Precedence.CALL,
-    TokenType.DOLLAR: Precedence.SUM,
+    TokenType.PIPERARROW: Precedence.SUM,
   }.toTable
 
 method nextParserToken(parser: var Parser): Token {.base.} =
@@ -315,7 +314,7 @@ proc getInfixFn(tokenType: TokenType): InfixFunction =
     of LT: parseInfixExpression
     of LTE: parseInfixExpression
     of LPAREN: parseCallExpression
-    of DOLLAR: parsePipeInfix
+    of PIPERARROW: parsePipeInfix
     else: nil
 
 method parseExpression(parser: var Parser, precedence: Precedence): Node =

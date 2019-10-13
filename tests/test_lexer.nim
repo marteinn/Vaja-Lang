@@ -21,6 +21,7 @@ true or false
 not true
 return false
 $
+|>
 """
       lexer: Lexer = newLexer(source)
     type
@@ -81,6 +82,8 @@ $
         (TokenType.FALSE, "false"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.DOLLAR, "$"),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.PIPERARROW, "|>"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.EOF, "")
       ]

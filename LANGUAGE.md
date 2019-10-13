@@ -86,8 +86,8 @@ end
 ## Pipe operator
 
 ```
-"hello" $ capitalize()  # HELLO
-1 $ print()  # 1
+"hello" |> capitalize()  # HELLO
+1 |> print()  # 1
 ```
 
 ## Array

@@ -98,6 +98,11 @@ method nextToken*(lexer: var Lexer): Token {.base.} =
       tok = newToken(tokenType=TokenType.COMMA, literal=($ch))
     of '$':
       tok = newToken(tokenType=TokenType.DOLLAR, literal=($ch))
+    of '|':
+      if lexer.peekAhead(0) == '>':
+        var nextCh: char = lexer.peekAhead(0)
+        lexer.readCharacter()
+        tok = newToken(tokenType=TokenType.PIPERARROW, literal=($ch & $nextCh))
     of '>':
       if lexer.peekAhead(0) == '=':
         var nextCh: char = lexer.peekAhead(0)

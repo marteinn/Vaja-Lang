@@ -262,15 +262,15 @@ end; myFunc(1)(2)""", "3"),
       tests: ExpectedEvals = @[
         ("""fn a(x) -> x + 1
 fn b(x) -> x + 2
-0 $ a() $ b()""", "3"),
+0 |> a() |> b()""", "3"),
       ("""fn a(x) -> x + 1
 fn b(x) -> x + 2
 fn c(x) -> x + 3
-2 $ a() $ b() $ c()""", "8"),
+2 |> a() |> b() |> c()""", "8"),
     ("""fn a(x, y) -> x * y
 fn b(x) -> x + 2
 fn c(x) -> x + 3
-2 $ a(5) $ b() $ c()""", "15"),
+2 |> a(5) |> b() |> c()""", "15"),
       ]
 
     for testPair in tests:

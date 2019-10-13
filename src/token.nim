@@ -26,6 +26,7 @@ type
     RETURN,
     RARROW,
     DOLLAR,
+    PIPERARROW,
     # Operators
     LET,
     FUNCTION,
