@@ -26,8 +26,8 @@ type
       of OTReturn:
         returnValue*: Obj
   Env* = ref object
-    store: Table[string, Obj]
-    outer: Env
+    store*: Table[string, Obj]
+    outer*: Env
 
 
 proc newEnv*(): Env =
@@ -41,10 +41,17 @@ method setVar*(env: Env, name: string, value: Obj): Env {.base.} =
   return env
 
 method containsVar*(env: Env, name: string): bool {.base.} =
-  return contains(env.store, name)
+  if env.outer == nil:
+    return contains(env.store, name)
+
+  return contains(env.store, name) or contains(env.outer.store, name)
 
 method getVar*(env: Env, name: string): Obj {.base.} =
-  return env.store[name]
+  if contains(env.store, name):
+    return env.store[name]
+
+  if env != nil and contains(env.outer.store, name):
+    return env.outer.store[name]
 
 method hasNumberType*(obj: Obj): bool {.base.} =
   obj.objType == OTInteger or obj.objType == OTFloat

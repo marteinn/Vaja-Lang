@@ -80,7 +80,12 @@ method nextToken*(lexer: var Lexer): Token {.base.} =
     of '+':
       tok = newToken(tokenType=TokenType.PLUs, literal=($ch))
     of '-':
-      tok = newToken(tokenType=TokenType.MINUS, literal=($ch))
+      if lexer.peekAhead(0) == '>':
+        var nextCh: char = lexer.peekAhead(0)
+        lexer.readCharacter()
+        tok = newToken(tokenType=TokenType.RARROW, literal=($ch & $nextCh))
+      else:
+        tok = newToken(tokenType=TokenType.MINUS, literal=($ch))
     of '%':
       tok = newToken(tokenType=TokenType.MODULO, literal=($ch))
     of '(':

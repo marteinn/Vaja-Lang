@@ -162,11 +162,27 @@ suite "eval tests":
         ("fn hello(a, b) 1 end; hello", "fn (a, b) 1 end"),
         ("fn (a, b) 1 end", "fn (a, b) 1 end"),
         ("let a = fn () 1 end; a", "fn () 1 end"),
+        ("let a = fn(x) -> x; a", "fn (x) x end"),
       ]
 
     for testPair in tests:
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.objType == ObjType.OTFunction
+      check evaluated.inspect() == testPair[1]
+
+  test "passing function as a argument":
+    type
+      ExpectedEval = (string, string)
+      ExpectedEvals = seq[ExpectedEval]
+    var
+      tests: ExpectedEvals = @[
+        ("""let calc = fn(sum) -> sum(5)
+calc(fn(x) -> x*2)
+""", "10")
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
 
   test "call expression":
@@ -184,8 +200,8 @@ suite "eval tests":
         ("""fn a()
 return 5
 10
-end; a()""", "5")
-        #("(fn a(x) x end)(1)", "1"),
+end; a()""", "5"),
+        ("(fn (x) x end)(1)", "1"),
       ]
 
     for testPair in tests:
@@ -215,6 +231,23 @@ end; a()""", "5")
     var
       tests: ExpectedEvals = @[
         ("fn a() return 1 end; a()", "1"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.objType == ObjType.OTInteger
+      check evaluated.inspect() == testPair[1]
+
+
+  test "closure behaves":
+    type
+      ExpectedEval = (string, string)
+      ExpectedEvals = seq[ExpectedEval]
+    var
+      tests: ExpectedEvals = @[
+        ("""fn myFunc(x)
+return fn(y) -> x+y
+end; myFunc(1)(2)""", "3"),
       ]
 
     for testPair in tests:

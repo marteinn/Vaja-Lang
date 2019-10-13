@@ -42,15 +42,23 @@ And fn/end syntax, that allows multiline statments, `return` is optional
 ```
 # Named function
 fn hello(name)
-    "hello " & name
+  "hello " & name
 end
 hello("Martin")  # "hello Martin"
 
 # Anonymous
 map(["John", "Paul", "Ringo", "George"], fn (x)
-    return x
+  return x
 end)
+```
 
+Closures look like this
+
+```
+fn adder(x)
+  fn (y) -> x + y
+end
+adder(1)(2)  # 3
 ```
 
 ## If/else

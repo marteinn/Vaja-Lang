@@ -24,6 +24,7 @@ type
     RPAREN,
     AMP,
     RETURN,
+    RARROW,
     # Operators
     LET,
     FUNCTION,

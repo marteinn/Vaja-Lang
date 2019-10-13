@@ -185,7 +185,21 @@ proc parseFunctionLiteral(parser: var Parser): Node =
 
   var
     parameters: seq[Node] = parseFunctionParameters(parser)
-    functionBody: Node = parseBlockStatement(parser)
+    functionBody: Node
+
+  if parser.peekToken.tokenType == TokenType.RARROW:
+    discard parser.nextParserToken()
+    discard parser.nextParserToken()
+
+    var
+      statement: Node = parser.parseExpression(Precedence.LOWEST)
+      statements: seq[Node] = @[statement]
+    functionBody = newBlockStatement(
+      token=token,
+      blockStatements=statements,
+    )
+  else:
+    functionBody = parseBlockStatement(parser)
 
   return newFuntionLiteral(
     token=token,

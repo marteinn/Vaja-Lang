@@ -200,3 +200,16 @@ false
     check(lexer.nextToken().tokenType == TokenType.LT)
     discard lexer.nextToken() # newline
     check(lexer.nextToken().tokenType == TokenType.LTE)
+
+  test "lexing arrow functions":
+    var
+      source: string = "fn(x) -> x"
+      lexer: Lexer = newLexer(source)
+
+    check(lexer.nextToken().tokenType == TokenType.FUNCTION)
+    check(lexer.nextToken().tokenType == TokenType.LPAREN)
+    check(lexer.nextToken().tokenType == TokenType.IDENT)
+    check(lexer.nextToken().tokenType == TokenType.RPAREN)
+    check(lexer.nextToken().tokenType == TokenType.RARROW)
+    check(lexer.nextToken().tokenType == TokenType.IDENT)
+    check(lexer.nextToken().tokenType == TokenType.EOF)

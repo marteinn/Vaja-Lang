@@ -172,12 +172,12 @@ proc evalBlockStatement(node: Node, env: var Env): Obj =
   return res
 
 proc evalIdentifier(node: Node, env: var Env) : Obj =
-  var exists: bool = containsVar(env, node.identValue)
+  var exists: bool = env.containsVar(node.identValue)
 
   if not exists:
     return newError(errorMsg="Name " & node.identValue & " is not defined")
 
-  return getVar(env, node.identValue)
+  return env.getVar(node.identValue)
 
 proc evalExpressions(expressions: seq[Node], env: var Env): seq[Obj] =
   var res: seq[Obj] = @[]

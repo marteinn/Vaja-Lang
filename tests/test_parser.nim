@@ -173,8 +173,18 @@ let c = "hello"
     check len(program.statements) == 1
     check program.statements[0].expression.toCode() == "fn hello(a, b) 1 end"
 
-  
-  test "function parsing":
+  test "function parsing short syntax":
+    var
+      source: string = "fn(x) -> x"
+      program: Node = parseSource(source)
+
+    check program.statements[0].nodeType == NodeType.NTExpressionStatement
+    check program.statements[0].expression.nodeType == NodeType.NTFunctionLiteral
+    check len(program.statements[0].expression.functionParams) == 1
+    check len(program.statements) == 1
+    check program.statements[0].expression.toCode() == "fn(x) x end"
+
+  test "function call parsing":
     var
       source: string = "hello(1, 2)"
       program: Node = parseSource(source)
@@ -204,7 +214,7 @@ let c = "hello"
 
   test "function with multiline":
     var
-      source: string = """fn hello(a, b) 
+      source: string = """fn hello(a, b)
 1
 end
 """
