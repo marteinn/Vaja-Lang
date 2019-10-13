@@ -31,8 +31,8 @@ if mode == RMRepl:
       parser: Parser = newParser(lexer = lexer)
       program: Node = parser.parseProgram()
       evaluated: Obj = eval(program, env)
-    echo evaluated.inspect()
-    #echo program.toCode() & " = " & evaluated.inspect()
+    # echo evaluated.inspect()
+    echo program.toCode() & " = " & evaluated.inspect()
 
 if mode == RMFile:
   let fileContent = readFile(filePath)

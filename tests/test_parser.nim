@@ -226,3 +226,16 @@ end
     check len(program.statements[0].expression.functionParams) == 2
     check len(program.statements) == 1
     check program.statements[0].expression.toCode() == """fn hello(a, b) 1 end"""
+
+  test "right associative piping":
+    type
+      ExpectedParsing = (string, string)
+      ExpectedTokens = seq[ExpectedParsing]
+    var
+      tests: ExpectedTokens = @[
+        ("1 $ a()", "a(1)"),
+        ("1 $ a() $ b()", "b(a(1))"),
+      ]
+    for testPair in tests:
+      var program: Node = parseSource(testPair[0])
+      check program.statements[0].toCode() == testPair[1]

@@ -1,9 +1,5 @@
 ## General
 
-- No oop / inheritance
-- No for loop
-
-
 ## Types
 
 ```
@@ -13,7 +9,7 @@ true
 1.1
 ```
 
-## Assignemnt
+## Variable assignment
 
 ```
 let status = true
@@ -21,6 +17,9 @@ let msg = "hello"
 let num = 1
 let float = 1.1
 ```
+
+Variables named or starting with `_` are discarded.
+
 
 ## Functions
 
@@ -84,10 +83,11 @@ case (1 > 2)
 end
 ```
 
-## Pipeline operator
+## Pipe operator
 
 ```
-"hello" -> capitalize()
+"hello" $ capitalize()  # HELLO
+1 $ print()  # 1
 ```
 
 ## Array

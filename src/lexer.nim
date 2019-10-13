@@ -78,7 +78,7 @@ method nextToken*(lexer: var Lexer): Token {.base.} =
     of '\n':
       tok = newToken(tokenType=TokenType.NEWLINE, literal=($ch))
     of '+':
-      tok = newToken(tokenType=TokenType.PLUs, literal=($ch))
+      tok = newToken(tokenType=TokenType.PLUS, literal=($ch))
     of '-':
       if lexer.peekAhead(0) == '>':
         var nextCh: char = lexer.peekAhead(0)
@@ -96,6 +96,8 @@ method nextToken*(lexer: var Lexer): Token {.base.} =
       tok = newToken(tokenType=TokenType.AMP, literal=($ch))
     of ',':
       tok = newToken(tokenType=TokenType.COMMA, literal=($ch))
+    of '$':
+      tok = newToken(tokenType=TokenType.DOLLAR, literal=($ch))
     of '>':
       if lexer.peekAhead(0) == '=':
         var nextCh: char = lexer.peekAhead(0)

@@ -18,6 +18,7 @@ from ast import
   newBlockStatement,
   newCallExpression,
   newReturnStatement,
+  newPipe,
   Node,
   toCode
 
@@ -29,6 +30,7 @@ type
     peekToken: Token
   Precedence* = enum
     LOWEST = 0
+    PIPE = 1
     SUM = 4
     PRODUCT = 5
     PREFIX = 6
@@ -51,6 +53,7 @@ var
     TokenType.LT: Precedence.PRODUCT,
     TokenType.LTE: Precedence.PRODUCT,
     TokenType.LPAREN: Precedence.CALL,
+    TokenType.DOLLAR: Precedence.SUM,
   }.toTable
 
 method nextParserToken(parser: var Parser): Token {.base.} =
@@ -280,6 +283,18 @@ method parseCallExpression(parser: var Parser, function: Node): Node {.base.} =
     token=token, callFunction=function, callArguments=callArguments
   )
 
+method parsePipeInfix(parser: var Parser, left: Node): Node {.base.} =
+  var
+    token: Token = parser.curToken
+    precedence: Precedence = parser.currentPrecedence()
+  discard parser.nextParserToken()
+
+  var right: Node = parser.parseExpression(precedence)
+  return newPipe(
+    token=token, pipeLeft=left, pipeRight=right
+  )
+
+
 type InfixFunction = proc (parser: var Parser, left: Node): Node
 
 proc getInfixFn(tokenType: TokenType): InfixFunction =
@@ -300,6 +315,7 @@ proc getInfixFn(tokenType: TokenType): InfixFunction =
     of LT: parseInfixExpression
     of LTE: parseInfixExpression
     of LPAREN: parseCallExpression
+    of DOLLAR: parsePipeInfix
     else: nil
 
 method parseExpression(parser: var Parser, precedence: Precedence): Node =

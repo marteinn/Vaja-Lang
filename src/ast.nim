@@ -18,6 +18,7 @@ type
     NTBlockStatement,
     NTCallExpression,
     NTReturnStatement
+    NTPipe
   Node* = ref object
     token*: Token
     case nodeType*: NodeType
@@ -48,6 +49,9 @@ type
         callArguments*: seq[Node]
       of NTReturnStatement:
         returnValue*: Node
+      of NTPipe:
+        pipeLeft*: Node
+        pipeRight*: Node
 
 method toCode*(node: Node): string {.base.} =
   return case node.nodeType:
@@ -90,6 +94,14 @@ method toCode*(node: Node): string {.base.} =
       node.callFunction.toCode() & "(" & join(argumentsCode, ", ") & ")"
     of NTReturnStatement:
       "return " & toCode(node.returnValue)
+    of NTPipe:
+      var pipeLeftCode: string
+      if node.pipeLeft.nodeType != NTCallExpression:
+        pipeLeftCode = "(" & node.pipeLeft.toCode() & ")"
+      else:
+        pipeLeftCode = node.pipeLeft.toCode()
+
+      node.pipeRight.callFunction.toCode() & pipeLeftCode
 
 proc newIntegerLiteral*(token: Token, intValue: int): Node =
   return Node(nodeType: NodeType.NTIntegerLiteral, intValue: intValue)
@@ -170,6 +182,14 @@ proc newCallExpression*(token: Token, callFunction: Node, callArguments: seq[Nod
 proc newReturnStatement*(token: Token, returnValue: Node): Node =
   return Node(
     token: token, nodeType: NodeType.NTReturnStatement, returnValue: returnValue
+  )
+
+proc newPipe*(token: Token, pipeLeft: Node, pipeRight: Node): Node =
+  return Node(
+    token: token,
+    nodeType: NodeType.NTPipe,
+    pipeLeft: pipeLeft,
+    pipeRight: pipeRight
   )
 
 proc newProgram*(statements: seq[Node]): Node =

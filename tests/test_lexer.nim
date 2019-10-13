@@ -20,6 +20,7 @@ true and true
 true or false
 not true
 return false
+$
 """
       lexer: Lexer = newLexer(source)
     type
@@ -78,6 +79,8 @@ return false
         (TokenType.NEWLINE, "\n"),
         (TokenType.RETURN, "return"),
         (TokenType.FALSE, "false"),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.DOLLAR, "$"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.EOF, "")
       ]

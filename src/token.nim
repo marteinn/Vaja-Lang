@@ -25,6 +25,7 @@ type
     AMP,
     RETURN,
     RARROW,
+    DOLLAR,
     # Operators
     LET,
     FUNCTION,
