@@ -1,23 +1,33 @@
 # Väja
 
-Väja is a experimental language built in Nim.
+Väja is a experimental language built in Nim and is primarly inspired by Elixir, Lua, Python and Nim.
 
-## Requirements
-- nim
-
-## Getting started
+## Compiling from source
+- First [install nim](https://nim-lang.org/install.html)
 - Compile vaja: `nim --run c -o:bin/vaja src/vaja.nim`
 
-## Run repl
-- `./bin/vaja`
+## Running
 
-## Run file
-- `./bin/vaja examples/hello.vaja`
+### Using the repl
 
-## Running tests
+```
+./bin/vaja
+Väja
+>>> 1+1
+2
+```
+
+### Executing a file
+
+```
+./bin/vaja examples/hello.vaja
+2
+```
+
+## Tests
 - `nim tests`
 
-### Links:
+## Links:
 - [Nim by Example](https://nim-by-example.github.io/procs/)
 - [unittest](https://nim-lang.org/docs/unittest.html)
 - [Nim for python programmers](https://github.com/nim-lang/Nim/wiki/Nim-for-Python-Programmers)

@@ -37,7 +37,7 @@ a()  # 1
 map(["John", "Paul", "Ringo", "George"], fn (x) -> x)
 ```
 
-And if/end syntax, where the `return` statement is required when returning a value
+And fn/end syntax, where the `return` statement is required when returning a value
 
 ```
 # Named function
