@@ -24,25 +24,33 @@ let float = 1.1
 
 ## Functions
 
-Väja supports two types of function syntax:
+Functions are first class and can be both named and anonymous, Väja supports two types of function syntax:
 
-- Arrow syntax for short function declarations, where the last statement are automatically returned:
+Arrow syntax for short function declarations, where the last statement are automatically returned:
 
 ```
-# Short syntax
+# Assigned to variable a
 let a = fn () -> 1
 a()  # 1
 
-map(["John", "Paul", "Ringo", "George"], , fn (x) -> x)
+# Anonymous
+map(["John", "Paul", "Ringo", "George"], fn (x) -> x)
 ```
 
-- Named functions, where the `return` statement is required with returning a value
+And if/end syntax, where the `return` statement is required when returning a value
+
 ```
+# Named function
 fn hello(name)
     return  "hello " & name
 end
-
 hello("Martin")  # "hello Martin"
+
+# Anonymous
+map(["John", "Paul", "Ringo", "George"], fn (x)
+    return x
+end)
+
 ```
 
 ## If/else
