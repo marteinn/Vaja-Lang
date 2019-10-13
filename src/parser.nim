@@ -14,6 +14,8 @@ from ast import
   newBoolean,
   newStringLiteral,
   newAssignStatement,
+  newFuntionLiteral,
+  newBlockStatement,
   Node,
   toCode
 
@@ -92,6 +94,8 @@ proc parseStringLiteral(parser: var Parser): Node =
 
 method parseExpression(parser: var Parser, precedence: Precedence): Node {.base.} # forward declaration
 
+method parseStatement(parser: var Parser): Node {.base.} # Forward declaration
+
 proc parsePrefixExpression(parser: var Parser): Node =
   var
     token: Token = parser.curToken
@@ -112,6 +116,73 @@ proc parseGroupedExpression(parser: var Parser): Node =
 
   return expression
 
+proc parseFunctionParameters(parser: var Parser): seq[Node] =
+  if parser.peekToken.tokenType == TokenType.RPAREN:
+    discard parser.nextParserToken()
+    return @[]
+
+  discard parser.nextParserToken()
+
+  var parameters: seq[Node] = @[newIdentifier(
+    token=parser.curToken, identValue=parser.curToken.literal
+  )]
+
+  while parser.peekToken.tokenType == TokenType.COMMA:
+    discard parser.nextParserToken()
+    discard parser.nextParserToken()
+
+    parameters.add(
+      newIdentifier(
+        token=parser.curToken, identValue=parser.curToken.literal
+      )
+    )
+
+  if not parser.expectPeek(TokenType.RPAREN):
+    return @[]
+
+  return parameters
+
+proc parseBlockStatement(parser: var Parser): Node =
+  var 
+    token: Token = parser.curToken
+    statements: seq[Node] = @[]
+
+  discard parser.nextParserToken()
+
+  while parser.curToken.tokenType != TokenType.END and
+    parser.curToken.tokenType != TokenType.EOF:
+    var statement: Node = parser.parseStatement()
+
+    if statement != nil:
+      statements.add(statement)
+
+    discard parser.nextParserToken()
+
+  return newBlockStatement(blockStatements=statements)
+
+proc parseFunctionLiteral(parser: var Parser): Node =
+  var 
+    token: Token = parser.curToken
+    fnName: Node = nil
+
+  if parser.peekToken.tokenType == TokenType.IDENT:
+    discard parser.nextParserToken()
+
+    fnName = newIdentifier(token=parser.curToken, identValue=parser.curToken.literal)
+
+  if not parser.expectPeek(TokenType.LPAREN):
+    return nil
+
+  var
+    parameters: seq[Node] = parseFunctionParameters(parser)
+    functionBody: Node = parseBlockStatement(parser)
+
+  return newFuntionLiteral(
+    token=token,
+    functionBody=functionBody,
+    functionParams=parameters,
+    functionName=fnName,
+  )
 
 type PrefixFunction = proc (parser: var Parser): Node
 
@@ -126,6 +197,7 @@ proc getPrefixFn(tokenType: TokenType): PrefixFunction =
     of FALSE: parseBoolean
     of STRING: parseStringLiteral
     of LPAREN: parseGroupedExpression
+    of FUNCTION: parseFunctionLiteral
     else: nil
 
 method currentPrecedence(parser: var Parser): Precedence {.base.} =

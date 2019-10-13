@@ -90,6 +90,8 @@ method nextToken*(lexer: var Lexer): Token {.base.} =
       tok = newToken(tokenType=TokenType.RPAREN, literal=($ch))
     of '&':
       tok = newToken(tokenType=TokenType.AMP, literal=($ch))
+    of ',':
+      tok = newToken(tokenType=TokenType.COMMA, literal=($ch))
     of '>':
       if lexer.peekAhead(0) == '=':
         var nextCh: char = lexer.peekAhead(0)
@@ -147,6 +149,10 @@ method nextToken*(lexer: var Lexer): Token {.base.} =
           tok = newToken(tokenType=TokenType.OR, literal=identifier)
         of "not":
           tok = newToken(tokenType=TokenType.NOT, literal=identifier)
+        of "fn":
+          tok = newToken(tokenType=TokenType.FUNCTION, literal=identifier)
+        of "end":
+          tok = newToken(tokenType=TokenType.END, literal=identifier)
         else:
           tok = newToken(tokenType=TokenType.IDENT, literal=identifier)
       return tok

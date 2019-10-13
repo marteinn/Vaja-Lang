@@ -13,7 +13,9 @@ type
     NTBoolean,
     NTStringLiteral,
     NTProgram
-    NTAssignStatement
+    NTAssignStatement,
+    NTFunctionLiteral,
+    NTBlockStatement
   Node* = ref object
     token*: Token
     case nodeType*: NodeType
@@ -34,6 +36,11 @@ type
       of NTAssignStatement:
         assignName*: Node
         assignValue*: Node
+      of NTFunctionLiteral:
+        functionBody*: Node
+        functionParams*: seq[Node]
+        functionName*: Node
+      of NTBlockStatement: blockStatements*: seq[Node]
 
 method toCode*(node: Node): string {.base.} =
   return case node.nodeType:
@@ -57,6 +64,14 @@ method toCode*(node: Node): string {.base.} =
       join(nodeCode, "\n")
     of NTAssignStatement:
       "let " & node.assignName.identValue & " = " & toCode(node.assignValue)
+    of NTFunctionLiteral:
+      let 
+        paramsCode: seq[string] = map(node.functionParams, proc (x: Node): string = toCode(x))
+        paramsCodeString: string = join(paramsCode, ", ")
+      "fn " & node.functionName.identValue & "(" & paramsCodeString & ") " & node.functionBody.toCode() & " end"
+    of NTBlockStatement:
+      let nodeCode = map(node.blockStatements, proc (x: Node): string = toCode(x))
+      join(nodeCode, "\n")
 
 proc newIntegerLiteral*(token: Token, intValue: int): Node =
   return Node(nodeType: NodeType.NTIntegerLiteral, intValue: intValue)
@@ -103,6 +118,22 @@ proc newAssignStatement*(token: Token, assignName: Node, assignValue: Node): Nod
     assignName: assignName,
     assignValue: assignValue
   )
+
+proc newFuntionLiteral*(
+  token: Token,
+  functionBody: Node,
+  functionParams: seq[Node],
+  functionName: Node
+): Node =
+  return Node(
+    nodeType: NodeType.NTFunctionLiteral,
+    functionBody: functionBody,
+    functionParams: functionParams,
+    functionName: functionName
+  )
+
+proc newBlockStatement*(blockStatements: seq[Node]): Node =
+  return Node(nodeType: NodeType.NTBlockStatement, blockStatements: blockStatements)
 
 proc newProgram*(statements: seq[Node]): Node =
   return Node(nodeType: NodeType.NTProgram, statements: statements)

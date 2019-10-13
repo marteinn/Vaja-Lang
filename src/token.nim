@@ -19,11 +19,14 @@ type
     EOF,
     NEWLINE,
     SEMICOLON,
+    COMMA,
     LPAREN,
     RPAREN,
     AMP,
     # Operators
     LET,
+    FUNCTION,
+    END,
     # Identifier
     IDENT,
     # Assignment

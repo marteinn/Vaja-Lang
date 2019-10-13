@@ -160,3 +160,15 @@ let c = "hello"
   test "semicolon delimiter":
     check len(parseSource("1;2").statements) == 2
     check len(parseSource("let a = 1;2").statements) == 2
+
+  test "function parsing":
+    var
+      source: string = "fn hello(a, b) 1 end"
+      program: Node = parseSource(source)
+
+    check program.statements[0].nodeType == NodeType.NTExpressionStatement
+    check program.statements[0].expression.nodeType == NodeType.NTFunctionLiteral
+    check program.statements[0].expression.functionName.identValue == "hello"
+    check len(program.statements[0].expression.functionParameters) == 2
+    check len(program.statements) == 1
+    check program.statements[0].expression.toCode() == "fn hello(a, b) 1 end"

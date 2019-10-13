@@ -11,6 +11,7 @@ from obj import
   newFloat,
   newStr,
   newError,
+  newFunction,
   ObjType,
   hasNumberType,
   promoteToFloatValue,
@@ -156,6 +157,9 @@ proc evalPrefixExpression(operator: string, right: Obj): Obj =
 
   return newError(errorMsg="Unknown prefix operator " & operator)
 
+proc evalBlockStatement(node: Node, env: var Env): Obj =
+  return nil
+
 proc evalIdentifier(node: Node, env: var Env) : Obj =
   var exists: bool = containsVar(env, node.identValue)
 
@@ -187,4 +191,17 @@ proc eval*(node: Node, env: var Env): Obj =
       nil
     of NTIdentifier: evalIdentifier(node, env)
     of NTBoolean: toBoolObj(node.boolValue)
-    #else: nil
+    of NTBlockStatement: evalBlockStatement(node, env)
+    of NTFunctionLiteral:
+      var
+        fn: Obj = newFunction(
+          functionBody=node.functionBody,
+          functionEnv=env,
+          functionParams=node.functionParams
+        )
+
+      if node.functionName != nil:
+        discard setVar(env, node.functionName.identValue, fn)
+        nil
+      else:
+        fn

@@ -1,4 +1,7 @@
+from sequtils import map
+from strutils import join
 import tables
+from ast import Node, toCode
 
 type
   ObjType* = enum
@@ -7,6 +10,7 @@ type
     OTString
     OTBoolean
     OTError
+    OTFunction
   Obj* = ref object
     case objType*: ObjType
       of OTInteger: intValue*: int
@@ -14,6 +18,10 @@ type
       of OTString: strValue*: string
       of OTBoolean: boolValue*: bool
       of OTError: errorMsg*: string
+      of OTFunction:
+        functionBody: Node
+        functionEnv: Env
+        functionParams: seq[Node]
   Env* = ref object
     store: Table[string, Obj]
 
@@ -52,7 +60,11 @@ method inspect*(obj: Obj): string {.base.} =
     of OTBoolean:
       if obj.boolValue: "true" else: "false"
     of OTError: obj.errorMsg
-    #else: ""
+    of OTFunction: 
+      let 
+        paramsCode: seq[string] = map(obj.functionParams, proc (x: Node): string = toCode(x))
+        paramsCodeString: string = join(paramsCode, ", ")
+      "fn (" & paramsCodeString & ") " & obj.functionBody.toCode() & " end"
 
 proc newInteger*(intValue: int): Obj =
   return Obj(objType: ObjType.OTInteger, intValue: intValue)
@@ -68,6 +80,14 @@ proc newStr*(strValue: string): Obj =
 
 proc newError*(errorMsg: string): Obj =
   return Obj(objType: ObjType.OTError, errorMsg: errorMsg)
+
+proc newFunction*(functionBody: Node, functionEnv: Env, functionParams: seq[Node]): Obj =
+  return Obj(
+    objType: ObjType.OTFunction,
+    functionBody: functionBody,
+    functionEnv: functionEnv,
+    functionParams: functionParams
+  )
 
 var
   TRUE*: Obj = newBoolean(boolValue=true)

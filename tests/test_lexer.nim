@@ -123,6 +123,25 @@ false
     check(nextToken.tokenType == TokenType.STRING)
     check(nextToken.literal == "my string")
 
+  test "regular function construction":
+    var
+      source: string = "fn hello(a, b) let a = 1 end"
+      lexer: Lexer = newLexer(source)
+
+    check(lexer.nextToken().tokenType == TokenType.FUNCTION)
+    check(lexer.nextToken().tokenType == TokenType.IDENT)
+    check(lexer.nextToken().tokenType == TokenType.LPAREN)
+    check(lexer.nextToken().tokenType == TokenType.IDENT)
+    check(lexer.nextToken().tokenType == TokenType.COMMA)
+    check(lexer.nextToken().tokenType == TokenType.IDENT)
+    check(lexer.nextToken().tokenType == TokenType.RPAREN)
+    check(lexer.nextToken().tokenType == TokenType.LET)
+    check(lexer.nextToken().tokenType == TokenType.IDENT)
+    check(lexer.nextToken().tokenType == TokenType.ASSIGN)
+    check(lexer.nextToken().tokenType == TokenType.INT)
+    check(lexer.nextToken().tokenType == TokenType.END)
+    check(lexer.nextToken().tokenType == TokenType.EOF)
+
   test "function calls are properly parsed":
     var
       source: string = "hello()"

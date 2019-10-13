@@ -152,3 +152,19 @@ suite "eval tests":
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.objType == ObjType.OTBoolean
       check evaluated.inspect() == testPair[1]
+
+  test "function declaration":
+    type
+      ExpectedEval = (string, string)
+      ExpectedEvals = seq[ExpectedEval]
+    var
+      tests: ExpectedEvals = @[
+        ("fn hello(a, b) 1 end; hello", "fn (a, b) 1 end"),
+        ("fn (a, b) 1 end", "fn (a, b) 1 end"),
+        ("let a = fn () 1 end; a", "fn () 1 end"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.objType == ObjType.OTFunction
+      check evaluated.inspect() == testPair[1]
