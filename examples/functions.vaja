@@ -1,0 +1,5 @@
+fn hello(name)
+  "hello " & name
+end
+
+hello("martin")
