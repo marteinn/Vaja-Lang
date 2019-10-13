@@ -173,6 +173,7 @@ let c = "hello"
     check len(program.statements) == 1
     check program.statements[0].expression.toCode() == "fn hello(a, b) 1 end"
 
+  
   test "function parsing":
     var
       source: string = "hello(1, 2)"
@@ -191,3 +192,27 @@ let c = "hello"
     check parseSource("a(true)").toCode() == "a(true)"
     check parseSource("""a("val", "val2")""").toCode() == "a(val, val2)"
     check parseSource("a(fn(x) 1 end)").toCode() == "a(fn(x) 1 end)"
+
+  test "return statements":
+    var
+      source: string = "return 1"
+      program: Node = parseSource(source)
+
+    check program.statements[0].nodeType == NodeType.NTReturnStatement
+    check program.statements[0].returnValue.nodeType == NodeType.NTIntegerLiteral
+    check program.statements[0].toCode() == "return 1"
+
+  test "function with multiline":
+    var
+      source: string = """fn hello(a, b) 
+1
+end
+"""
+      program: Node = parseSource(source)
+
+    check program.statements[0].nodeType == NodeType.NTExpressionStatement
+    check program.statements[0].expression.nodeType == NodeType.NTFunctionLiteral
+    check program.statements[0].expression.functionName.identValue == "hello"
+    check len(program.statements[0].expression.functionParams) == 2
+    check len(program.statements) == 1
+    check program.statements[0].expression.toCode() == """fn hello(a, b) 1 end"""

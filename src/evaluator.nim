@@ -13,6 +13,7 @@ from obj import
   newError,
   newFunction,
   newEnclosedEnv,
+  newReturn,
   ObjType,
   hasNumberType,
   promoteToFloatValue,
@@ -33,6 +34,9 @@ proc evalProgram(node: Node, env: var Env): Obj =
 
     if resultValue == nil:
       continue
+
+    if resultValue.objType == ObjType.OTReturn:
+      return resultValue
 
     if resultValue.objType == ObjType.OTError:
       return resultValue
@@ -160,9 +164,12 @@ proc evalPrefixExpression(operator: string, right: Obj): Obj =
   return newError(errorMsg="Unknown prefix operator " & operator)
 
 proc evalBlockStatement(node: Node, env: var Env): Obj =
+  var res: Obj = nil
   for statement in node.blockStatements:
-    result = eval(statement, env)
-    # TODO: Add return and error support
+    res = eval(statement, env)
+    if res != nil and res.objType in [ObjType.OTReturn, ObjType.OTError]:
+      return res
+  return res
 
 proc evalIdentifier(node: Node, env: var Env) : Obj =
   var exists: bool = containsVar(env, node.identValue)
@@ -188,10 +195,17 @@ proc extendFunctionEnv(fn: Obj, arguments: seq[Obj]): Env =
 
   return enclosedEnv
 
+proc unwrapReturnValue(obj: Obj): Obj =
+  if obj.objType == ObjType.OTReturn:
+    return obj.returnValue
+  return obj
+
 proc applyFunction(fn: Obj, arguments: seq[Obj], env: var Env): Obj =
   var extendedEnv: Env = extendFunctionEnv(fn, arguments)
   var res: Obj = eval(fn.functionBody, extendedEnv)
-  return res
+
+  # TODO: Add builtin call
+  return unwrapReturnValue(res)
 
 proc eval*(node: Node, env: var Env): Obj =
   case node.nodeType:
@@ -232,3 +246,7 @@ proc eval*(node: Node, env: var Env): Obj =
       var fn: Obj = eval(node.callFunction, env)
       var arguments: seq[Obj] = evalExpressions(node.callArguments, env)
       applyFunction(fn, arguments, env)
+    of NTReturnStatement:
+      var returnValue: Obj = eval(node.returnValue, env)
+      # TODO: Add error check
+      newReturn(returnValue=returnValue)

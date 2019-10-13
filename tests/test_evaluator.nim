@@ -180,9 +180,44 @@ suite "eval tests":
         ("fn add(x, y) x+y end; add(2,3)", "5"),
         ("fn add(x, y) x+y end; let value = 5; add(value,3)", "8"),
         ("let add = fn(x, y) x+y end; add(1,2)", "3"),
+        ("""fn a() 10 end; a()""", "10"),
+        ("""fn a()
+return 5
+10
+end; a()""", "5")
         #("(fn a(x) x end)(1)", "1"),
       ]
 
     for testPair in tests:
       var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+
+  test "return statements":
+    type
+      ExpectedEval = (string, string)
+      ExpectedEvals = seq[ExpectedEval]
+    var
+      tests: ExpectedEvals = @[
+        ("return 1", "1"),
+        ("return 2*2", "4"),
+        ("""return 1
+10""", "1"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+
+  test "return statement unwrap":
+    type
+      ExpectedEval = (string, string)
+      ExpectedEvals = seq[ExpectedEval]
+    var
+      tests: ExpectedEvals = @[
+        ("fn a() return 1 end; a()", "1"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.objType == ObjType.OTInteger
       check evaluated.inspect() == testPair[1]

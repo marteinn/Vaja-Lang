@@ -37,12 +37,12 @@ a()  # 1
 map(["John", "Paul", "Ringo", "George"], fn (x) -> x)
 ```
 
-And fn/end syntax, where the `return` statement is required when returning a value
+And fn/end syntax, that allows multiline statments, `return` is optional
 
 ```
 # Named function
 fn hello(name)
-    return  "hello " & name
+    "hello " & name
 end
 hello("Martin")  # "hello Martin"
 

@@ -152,6 +152,8 @@ method nextToken*(lexer: var Lexer): Token {.base.} =
           tok = newToken(tokenType=TokenType.FUNCTION, literal=identifier)
         of "end":
           tok = newToken(tokenType=TokenType.END, literal=identifier)
+        of "return":
+          tok = newToken(tokenType=TokenType.RETURN, literal=identifier)
         else:
           tok = newToken(tokenType=TokenType.IDENT, literal=identifier)
       return tok

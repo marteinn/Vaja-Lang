@@ -23,6 +23,7 @@ type
     LPAREN,
     RPAREN,
     AMP,
+    RETURN,
     # Operators
     LET,
     FUNCTION,

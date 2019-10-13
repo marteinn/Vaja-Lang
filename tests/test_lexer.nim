@@ -19,13 +19,14 @@ let a = 1
 true and true
 true or false
 not true
+return false
 """
       lexer: Lexer = newLexer(source)
     type
       ExpectedTokenPair = (TokenType, string)
-      ExpectedTokens = array[50, ExpectedTokenPair]
+      ExpectedTokens = seq[ExpectedTokenPair]
     let
-      tokens: ExpectedTokens = [
+      tokens: ExpectedTokens = @[
         (TokenType.INT, "1"),
         (TokenType.PLUS, "+"),
         (TokenType.INT, "2"),
@@ -74,6 +75,9 @@ not true
         (TokenType.NEWLINE, "\n"),
         (TokenType.NOT, "not"),
         (TokenType.TRUE, "true"),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.RETURN, "return"),
+        (TokenType.FALSE, "false"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.EOF, "")
       ]

@@ -17,6 +17,7 @@ from ast import
   newFuntionLiteral,
   newBlockStatement,
   newCallExpression,
+  newReturnStatement,
   Node,
   toCode
 
@@ -146,14 +147,20 @@ proc parseFunctionParameters(parser: var Parser): seq[Node] =
   return parameters
 
 proc parseBlockStatement(parser: var Parser): Node =
-  var 
+  var
     token: Token = parser.curToken
     statements: seq[Node] = @[]
 
   discard parser.nextParserToken()
 
-  while parser.curToken.tokenType != TokenType.END and
-    parser.curToken.tokenType != TokenType.EOF:
+  while (
+    parser.curToken.tokenType != TokenType.END and
+    parser.curToken.tokenType != TokenType.EOF
+  ):
+    if parser.curToken.tokenType == TokenType.NEWLINE:
+      discard parser.nextParserToken()
+      continue
+
     var statement: Node = parser.parseStatement()
 
     if statement != nil:
@@ -161,10 +168,10 @@ proc parseBlockStatement(parser: var Parser): Node =
 
     discard parser.nextParserToken()
 
-  return newBlockStatement(blockStatements=statements)
+  return newBlockStatement(token=token, blockStatements=statements)
 
 proc parseFunctionLiteral(parser: var Parser): Node =
-  var 
+  var
     token: Token = parser.curToken
     fnName: Node = nil
 
@@ -296,6 +303,7 @@ method parseExpression(parser: var Parser, precedence: Precedence): Node =
 
   while (
     parser.peekToken.tokenType != TokenType.SEMICOLON and
+    parser.peekToken.tokenType != TokenType.NEWLINE and
     precedence < parser.peekPrecedence()
   ):
     var
@@ -334,19 +342,34 @@ method parseAssignmentStatement(parser: var Parser): Node {.base.} =
     assignValue=assignValue,
   )
 
+method parseReturnStatement(parser: var Parser): Node {.base.} =
+  var
+    token: Token = parser.curToken
+  discard parser.nextParserToken()
+
+  var returnValue: Node = parser.parseExpression(Precedence.LOWEST)
+  return newReturnStatement(
+    token=token,
+    returnValue=returnValue,
+  )
+
 method parseStatement(parser: var Parser): Node {.base.} =
   if parser.curToken.tokenType == TokenType.LET:
     return parser.parseAssignmentStatement()
+  if parser.curToken.tokenType == TokenType.RETURN:
+    return parser.parseReturnStatement()
   return parser.parseExpressionStatement()
 
 method parseProgram*(parser: var Parser): Node {.base.} =
   var statements: seq[Node] = @[]
   while parser.curToken.tokenType != TokenType.EOF:
-    if parser.curToken.tokenType in [TokenType.SEMICOLON, TokenType.NEWLINE]:
+    if parser.curToken.tokenType in [
+      TokenType.SEMICOLON, TokenType.NEWLINE
+    ]:
       discard parser.nextParserToken()
       continue
 
-    var statement = parser.parseStatement()
+    var statement: Node = parser.parseStatement()
     statements.add(statement)
 
     discard parser.nextParserToken()

@@ -11,6 +11,7 @@ type
     OTBoolean
     OTError
     OTFunction
+    OTReturn
   Obj* = ref object
     case objType*: ObjType
       of OTInteger: intValue*: int
@@ -22,6 +23,8 @@ type
         functionBody*: Node
         functionEnv*: Env
         functionParams*: seq[Node]
+      of OTReturn:
+        returnValue*: Obj
   Env* = ref object
     store: Table[string, Obj]
     outer: Env
@@ -64,11 +67,13 @@ method inspect*(obj: Obj): string {.base.} =
     of OTBoolean:
       if obj.boolValue: "true" else: "false"
     of OTError: obj.errorMsg
-    of OTFunction: 
-      let 
+    of OTFunction:
+      let
         paramsCode: seq[string] = map(obj.functionParams, proc (x: Node): string = toCode(x))
         paramsCodeString: string = join(paramsCode, ", ")
       "fn (" & paramsCodeString & ") " & obj.functionBody.toCode() & " end"
+    of OTReturn:
+      obj.returnValue.inspect()
 
 proc newInteger*(intValue: int): Obj =
   return Obj(objType: ObjType.OTInteger, intValue: intValue)
@@ -92,6 +97,9 @@ proc newFunction*(functionBody: Node, functionEnv: Env, functionParams: seq[Node
     functionEnv: functionEnv,
     functionParams: functionParams
   )
+
+proc newReturn*(returnValue: Obj): Obj =
+  return Obj(objType: ObjType.OTReturn, returnValue: returnValue)
 
 var
   TRUE*: Obj = newBoolean(boolValue=true)

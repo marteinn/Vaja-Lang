@@ -16,7 +16,8 @@ type
     NTAssignStatement,
     NTFunctionLiteral,
     NTBlockStatement,
-    NTCallExpression
+    NTCallExpression,
+    NTReturnStatement
   Node* = ref object
     token*: Token
     case nodeType*: NodeType
@@ -45,6 +46,8 @@ type
       of NTCallExpression:
         callFunction*: Node
         callArguments*: seq[Node]
+      of NTReturnStatement:
+        returnValue*: Node
 
 method toCode*(node: Node): string {.base.} =
   return case node.nodeType:
@@ -63,13 +66,13 @@ method toCode*(node: Node): string {.base.} =
       node.infixRight.toCode() & ")"
     of NTIdentifier: node.identValue
     of NTStringLiteral: node.strValue
-    of NTProgram: 
+    of NTProgram:
       let nodeCode = map(node.statements, proc (x: Node): string = toCode(x))
       join(nodeCode, "\n")
     of NTAssignStatement:
       "let " & node.assignName.identValue & " = " & toCode(node.assignValue)
     of NTFunctionLiteral:
-      let 
+      let
         paramsCode: seq[string] = map(node.functionParams, proc (x: Node): string = toCode(x))
         paramsCodeString: string = join(paramsCode, ", ")
       if node.functionName != nil:
@@ -85,6 +88,8 @@ method toCode*(node: Node): string {.base.} =
         node.callArguments, proc (x: Node): string = toCode(x)
       )
       node.callFunction.toCode() & "(" & join(argumentsCode, ", ") & ")"
+    of NTReturnStatement:
+      "return " & toCode(node.returnValue)
 
 proc newIntegerLiteral*(token: Token, intValue: int): Node =
   return Node(nodeType: NodeType.NTIntegerLiteral, intValue: intValue)
@@ -147,8 +152,12 @@ proc newFuntionLiteral*(
     functionName: functionName
   )
 
-proc newBlockStatement*(blockStatements: seq[Node]): Node =
-  return Node(nodeType: NodeType.NTBlockStatement, blockStatements: blockStatements)
+proc newBlockStatement*(token: Token, blockStatements: seq[Node]): Node =
+  return Node(
+    token: token,
+    nodeType: NodeType.NTBlockStatement,
+    blockStatements: blockStatements
+  )
 
 proc newCallExpression*(token: Token, callFunction: Node, callArguments: seq[Node]): Node =
   return Node(
@@ -156,6 +165,11 @@ proc newCallExpression*(token: Token, callFunction: Node, callArguments: seq[Nod
     token: token,
     callFunction: callFunction,
     callArguments: callArguments
+  )
+
+proc newReturnStatement*(token: Token, returnValue: Node): Node =
+  return Node(
+    token: token, nodeType: NodeType.NTReturnStatement, returnValue: returnValue
   )
 
 proc newProgram*(statements: seq[Node]): Node =
