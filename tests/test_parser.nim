@@ -169,6 +169,6 @@ let c = "hello"
     check program.statements[0].nodeType == NodeType.NTExpressionStatement
     check program.statements[0].expression.nodeType == NodeType.NTFunctionLiteral
     check program.statements[0].expression.functionName.identValue == "hello"
-    check len(program.statements[0].expression.functionParameters) == 2
+    check len(program.statements[0].expression.functionParams) == 2
     check len(program.statements) == 1
     check program.statements[0].expression.toCode() == "fn hello(a, b) 1 end"
