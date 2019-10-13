@@ -24,18 +24,25 @@ let float = 1.1
 
 ## Functions
 
+Väja supports two types of function syntax:
+
+- Arrow syntax for short function declarations, where the last statement are automatically returned:
+
 ```
-fn () -> 1
+# Short syntax
+let a = fn () -> 1
+a()  # 1
 
-fn (a, b) -> 2
+map(["John", "Paul", "Ringo", "George"], , fn (x) -> x)
+```
 
-fn hello(a, b)
-    let a = 5
-    return  5
+- Named functions, where the `return` statement is required with returning a value
+```
+fn hello(name)
+    return  "hello " & name
 end
 
-map([1, 2], fn (x) -> x * 2)
-
+hello("Martin")  # "hello Martin"
 ```
 
 ## If/else
