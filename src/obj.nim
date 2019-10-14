@@ -12,6 +12,7 @@ type
     OTError
     OTFunction
     OTReturn
+    OTNil
   Obj* = ref object
     case objType*: ObjType
       of OTInteger: intValue*: int
@@ -23,8 +24,9 @@ type
         functionBody*: Node
         functionEnv*: Env
         functionParams*: seq[Node]
-      of OTReturn:
-        returnValue*: Obj
+      of OTReturn: returnValue*: Obj
+      of OTNil: discard
+
   Env* = ref object
     store*: Table[string, Obj]
     outer*: Env
@@ -81,6 +83,7 @@ method inspect*(obj: Obj): string {.base.} =
       "fn (" & paramsCodeString & ") " & obj.functionBody.toCode() & " end"
     of OTReturn:
       obj.returnValue.inspect()
+    of OTNil: "nil"
 
 proc newInteger*(intValue: int): Obj =
   return Obj(objType: ObjType.OTInteger, intValue: intValue)
@@ -108,6 +111,10 @@ proc newFunction*(functionBody: Node, functionEnv: Env, functionParams: seq[Node
 proc newReturn*(returnValue: Obj): Obj =
   return Obj(objType: ObjType.OTReturn, returnValue: returnValue)
 
+proc newNil*(): Obj =
+  return Obj(objType: ObjType.OTNil)
+
 var
   TRUE*: Obj = newBoolean(boolValue=true)
   FALSE*: Obj = newBoolean(boolValue=false)
+  NIL*: Obj = newNil()

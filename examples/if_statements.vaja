@@ -1,0 +1,13 @@
+let status = 1 == 1
+
+if (status)
+  let sub = false
+
+  if (sub)
+    1
+  else
+    11
+  end
+else
+  2
+end

@@ -19,7 +19,8 @@ from obj import
   promoteToFloatValue,
   inspect,
   TRUE,
-  FALSE
+  FALSE,
+  NIL
 
 
 proc eval*(node: Node, env: var Env): Obj # Forward declaration
@@ -207,6 +208,14 @@ proc applyFunction(fn: Obj, arguments: seq[Obj], env: var Env): Obj =
   # TODO: Add builtin call
   return unwrapReturnValue(res)
 
+proc evalIfExpression(node: Node, env: var Env): Obj =
+  var condition: Obj = eval(node.ifCondition, env)
+  if condition == TRUE:
+    return eval(node.ifConsequence, env)
+  if node.ifAlternative != nil:
+    return eval(node.ifAlternative, env)
+  return NIL
+
 proc eval*(node: Node, env: var Env): Obj =
   case node.nodeType:
     of NTProgram: evalProgram(node, env)
@@ -253,3 +262,5 @@ proc eval*(node: Node, env: var Env): Obj =
     of NTPipeLR:
       node.pipeRight.callArguments.add(node.pipeLeft)
       eval(node.pipeRight, env)
+    of NTIfExpression: evalIfExpression(node, env)
+    of NTNil: NIL

@@ -6,25 +6,28 @@ type
   NodeType* = enum
     NTIntegerLiteral,
     NTFloatLiteral,
+    NTBoolean,
+    NTNil,
     NTExpressionStatement,
     NTPrefixExpression,
     NTInfixExpression,
     NTIdentifier,
-    NTBoolean,
     NTStringLiteral,
     NTProgram
     NTAssignStatement,
     NTFunctionLiteral,
     NTBlockStatement,
     NTCallExpression,
-    NTReturnStatement
-    NTPipeLR
+    NTReturnStatement,
+    NTPipeLR,
+    NTIfExpression,
   Node* = ref object
     token*: Token
     case nodeType*: NodeType
       of NTIntegerLiteral: intValue*: int
       of NTFloatLiteral: floatValue*: float
       of NTBoolean: boolValue*: bool
+      of NTNil: discard
       of NTExpressionStatement: expression*: Node
       of NTPrefixExpression:
         prefixRight*: Node
@@ -52,12 +55,17 @@ type
       of NTPipeLR:
         pipeLeft*: Node
         pipeRight*: Node
+      of NTIfExpression:
+        ifCondition*: Node
+        ifConsequence*: Node
+        ifAlternative*: Node
 
 method toCode*(node: Node): string {.base.} =
   return case node.nodeType:
     of NTIntegerLiteral: $node.intValue
     of NTFLoatLiteral: $node.floatValue
     of NTBoolean: $node.boolValue
+    of NTNil: "nil"
     of NTExpressionStatement:
       if node.expression != nil: node.expression.toCode() else: ""
     of NTPrefixExpression:
@@ -95,6 +103,7 @@ method toCode*(node: Node): string {.base.} =
     of NTReturnStatement:
       "return " & toCode(node.returnValue)
     of NTPipeLR:
+      # TODO: Fix issue where already specified args does not appear
       var pipeLeftCode: string
       if node.pipeLeft.nodeType != NTCallExpression:
         pipeLeftCode = "(" & node.pipeLeft.toCode() & ")"
@@ -102,12 +111,21 @@ method toCode*(node: Node): string {.base.} =
         pipeLeftCode = node.pipeLeft.toCode()
 
       node.pipeRight.callFunction.toCode() & pipeLeftCode
+    of NTIfExpression:
+      if node.ifAlternative != nil:
+        "if (" & node.ifCondition.toCode() & ") " & node.ifConsequence.toCode() & " else " & node.ifAlternative.toCode() & " end"
+      else:
+        "if (" & node.ifCondition.toCode() & ") " & node.ifConsequence.toCode() & " end"
+
 
 proc newIntegerLiteral*(token: Token, intValue: int): Node =
   return Node(nodeType: NodeType.NTIntegerLiteral, intValue: intValue)
 
 proc newFloatLiteral*(token: Token, floatValue: float): Node =
   return Node(nodeType: NodeType.NTFloatLiteral, floatValue: floatValue)
+
+proc newNil*(token: Token): Node =
+  return Node(nodeType: NodeType.NTNil)
 
 proc newExpressionStatement*(token: Token, expression: Node): Node =
   return Node(
@@ -190,6 +208,17 @@ proc newPipeLR*(token: Token, pipeLeft: Node, pipeRight: Node): Node =
     nodeType: NodeType.NTPipeLR,
     pipeLeft: pipeLeft,
     pipeRight: pipeRight
+  )
+
+proc newIfExpression*(
+  token: Token, ifCondition: Node, ifConsequence: Node, ifAlternative: Node
+): Node =
+  return Node(
+    nodeType: NTIfExpression,
+    token: token,
+    ifCondition: ifCondition,
+    ifConsequence: ifConsequence,
+    ifAlternative: ifAlternative
   )
 
 proc newProgram*(statements: seq[Node]): Node =

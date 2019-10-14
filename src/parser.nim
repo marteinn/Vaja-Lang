@@ -8,6 +8,7 @@ from ast import
   newExpressionStatement,
   newIntegerLiteral,
   newFloatLiteral,
+  newNil,
   newPrefixExpression,
   newInfixExpression,
   newIdentifier,
@@ -19,6 +20,7 @@ from ast import
   newCallExpression,
   newReturnStatement,
   newPipeLR,
+  newIfExpression,
   Node,
   toCode
 
@@ -93,6 +95,9 @@ proc parseBoolean(parser: var Parser): Node =
     literal: string = parser.curToken.literal
   return newBoolean(token=parser.curToken, boolValue=literal == "true")
 
+proc parseNil(parser: var Parser): Node =
+  return newNil(token=parser.curToken)
+
 proc parseStringLiteral(parser: var Parser): Node =
   var
     literal: string = parser.curToken.literal
@@ -157,6 +162,7 @@ proc parseBlockStatement(parser: var Parser): Node =
 
   while (
     parser.curToken.tokenType != TokenType.END and
+    parser.curToken.tokenType != TokenType.ELSE and
     parser.curToken.tokenType != TokenType.EOF
   ):
     if parser.curToken.tokenType == TokenType.NEWLINE:
@@ -210,6 +216,25 @@ proc parseFunctionLiteral(parser: var Parser): Node =
     functionName=fnName,
   )
 
+proc parseIfExpression(parser: var Parser): Node  =
+  var token: Token = parser.curToken
+  discard parser.nextParserToken()
+
+  var condition: Node = parser.parseExpression(Precedence.LOWEST)
+  var consequence: Node = parser.parseBlockStatement()
+  var alternative: Node = nil
+  if parser.curToken.tokenType == TokenType.ELSE:
+    alternative = parser.parseBlockStatement()
+
+  discard parser.nextParserToken()
+
+  return newIfExpression(
+    token=token,
+    ifCondition=condition,
+    ifConsequence=consequence,
+    ifAlternative=alternative
+  )
+
 type PrefixFunction = proc (parser: var Parser): Node
 
 proc getPrefixFn(tokenType: TokenType): PrefixFunction =
@@ -219,11 +244,13 @@ proc getPrefixFn(tokenType: TokenType): PrefixFunction =
     of INT: parseIntegerLiteral
     of FLOAT: parseFloatLiteral
     of IDENT: parseIdentifier
+    of NIL: parseNil
     of TRUE: parseBoolean
     of FALSE: parseBoolean
     of STRING: parseStringLiteral
     of LPAREN: parseGroupedExpression
     of FUNCTION: parseFunctionLiteral
+    of IF: parseIfExpression
     else: nil
 
 method currentPrecedence(parser: var Parser): Precedence {.base.} =

@@ -22,6 +22,7 @@ not true
 return false
 $
 |>
+nil
 """
       lexer: Lexer = newLexer(source)
     type
@@ -84,6 +85,8 @@ $
         (TokenType.DOLLAR, "$"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.PIPERARROW, "|>"),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.NIL, "nil"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.EOF, "")
       ]
@@ -218,4 +221,19 @@ false
     check(lexer.nextToken().tokenType == TokenType.RPAREN)
     check(lexer.nextToken().tokenType == TokenType.RARROW)
     check(lexer.nextToken().tokenType == TokenType.IDENT)
+    check(lexer.nextToken().tokenType == TokenType.EOF)
+
+  test "lexing if else statement":
+    var
+      source: string = "if (true) 1 else 0 end"
+      lexer: Lexer = newLexer(source)
+
+    check(lexer.nextToken().tokenType == TokenType.IF)
+    check(lexer.nextToken().tokenType == TokenType.LPAREN)
+    check(lexer.nextToken().tokenType == TokenType.TRUE)
+    check(lexer.nextToken().tokenType == TokenType.RPAREN)
+    check(lexer.nextToken().tokenType == TokenType.INT)
+    check(lexer.nextToken().tokenType == TokenType.ELSE)
+    check(lexer.nextToken().tokenType == TokenType.INT)
+    check(lexer.nextToken().tokenType == TokenType.END)
     check(lexer.nextToken().tokenType == TokenType.EOF)

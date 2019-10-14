@@ -5,7 +5,8 @@ type
     FLOAT,
     STRING,
     TRUE,
-    FALSE
+    FALSE,
+    NIL,
     # Arithmetic
     PLUS,
     MINUS,
@@ -27,6 +28,8 @@ type
     RARROW,
     DOLLAR,
     PIPERARROW,
+    IF,
+    ELSE,
     # Operators
     LET,
     FUNCTION,

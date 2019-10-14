@@ -13,5 +13,5 @@ task test_parser, "Test parser":
   setCommand "nop"
 
 task test_eval, "Test eval":
-  exec r"nim c -r tests/test_evaluator.nim"
+  exec r"nim c -r tests/test_eval.nim"
   setCommand "nop"

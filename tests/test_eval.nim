@@ -14,6 +14,19 @@ proc evalSource(source:string): Obj =
   return eval(program, env)
 
 suite "eval tests":
+  test "nil expression":
+    type
+      ExpectedEval = (string, string)
+      ExpectedEvals = seq[ExpectedEval]
+    var
+      tests: ExpectedEvals = @[
+        ("nil", "nil"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+
   test "int expressions":
     type
       ExpectedEval = (string, string)
@@ -276,4 +289,19 @@ fn c(x) -> x + 3
     for testPair in tests:
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.objType == ObjType.OTInteger
+      check evaluated.inspect() == testPair[1]
+  test "if statements":
+    type
+      ExpectedEval = (string, string)
+      ExpectedEvals = seq[ExpectedEval]
+    var
+      tests: ExpectedEvals = @[
+        ("if (true) 1 else 2 end", "1"),
+        ("if (false) 1 else 2 end", "2"),
+        ("if (1 == 1) 1 end", "1"),
+        ("if (1 == 2) 1 end", "nil"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]

@@ -7,6 +7,7 @@ true
  "hello"
 1
 1.1
+nil
 ```
 
 ## Variable assignment
@@ -67,11 +68,13 @@ if (1 > 2) 1 end
 
 if (1 > 2)
     1
-elif (2 > 2)
-    2
 else
     3
 end
+
+let value = if (1 > 2) true else false end
+
+let value2 = if (false) 1 end  # nil
 ```
 
 ## Switch

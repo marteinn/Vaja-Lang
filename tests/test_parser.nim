@@ -22,6 +22,16 @@ suite "parser tests":
     check program.statements[0].expression.nodeType == NodeType.NTIntegerLiteral
     check program.statements[0].toCode() == "1"
 
+  test "test nil literal":
+    var
+      source: string = "nil"
+      program: Node = parseSource(source)
+
+    check len(program.statements) == 1
+    check program.statements[0].nodeType == NodeType.NTExpressionStatement
+    check program.statements[0].expression.nodeType == NodeType.NTNil
+    check program.statements[0].toCode() == "nil"
+
   test "test float literal":
     var
       source: string = "2.2"
@@ -227,7 +237,7 @@ end
     check len(program.statements) == 1
     check program.statements[0].expression.toCode() == """fn hello(a, b) 1 end"""
 
-  test "right associative piping":
+  test "left to right argument piping":
     type
       ExpectedParsing = (string, string)
       ExpectedTokens = seq[ExpectedParsing]
@@ -235,6 +245,30 @@ end
       tests: ExpectedTokens = @[
         ("1 |> a()", "a(1)"),
         ("1 |> a() |> b()", "b(a(1))"),
+      ]
+    for testPair in tests:
+      var program: Node = parseSource(testPair[0])
+      check program.statements[0].toCode() == testPair[1]
+
+  test "if/else statement":
+    var
+      source: string = """if (true) 1 else 2 end"""
+      program: Node = parseSource(source)
+
+    check program.statements[0].nodeType == NodeType.NTExpressionStatement
+    check program.statements[0].expression.nodeType == NodeType.NTIfExpression
+    check program.statements[0].expression.toCode() == """if (true) 1 else 2 end"""
+
+  test "variations of if statements":
+    type
+      ExpectedParsing = (string, string)
+      ExpectedTokens = seq[ExpectedParsing]
+    var
+      tests: ExpectedTokens = @[
+        ("if (true) 1 end", "if (true) 1 end"),
+        ("if (val()) 1 end", "if (val()) 1 end"),
+        ("if (1 |> fun()) 1 end", "if (fun(1)) 1 end"),
+        ("let a = if (true) 1 else 2 end", "let a = if (true) 1 else 2 end"),
       ]
     for testPair in tests:
       var program: Node = parseSource(testPair[0])
