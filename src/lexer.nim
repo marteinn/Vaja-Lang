@@ -45,7 +45,7 @@ method readNumber(lexer: var Lexer): string {.base.} =
 
 method readIdentifier(lexer: var Lexer): string {.base.} =
   var startPos = lexer.pos
-  while isLetter(lexer.ch) and not lexer.eof:
+  while (isLetter(lexer.ch) or isInt(lexer.ch)) and not lexer.eof:
     lexer.readCharacter()
   return lexer.source[startPos ..< lexer.pos]
 

@@ -90,8 +90,9 @@ let value2 = if (false) 1 end  # nil
 
 ```
 case (1 > 2)
-    true -> 1
-    _ -> 2
+    of (true) -> "It was true"
+    of (false) -> "It was false"
+    of _ -> "Anything does"
 end
 ```
 

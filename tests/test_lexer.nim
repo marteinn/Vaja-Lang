@@ -23,6 +23,7 @@ return false
 $
 |>
 nil
+add5
 """
       lexer: Lexer = newLexer(source)
     type
@@ -87,6 +88,8 @@ nil
         (TokenType.PIPERARROW, "|>"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.NIL, "nil"),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.IDENT, "add5"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.EOF, "")
       ]
