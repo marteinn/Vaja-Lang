@@ -121,6 +121,7 @@ suite "eval tests":
         ("1 & 1; 5", "Unknown infix operator &"),
         ("\"a\" + \"b\"", "Unknown infix operator +"),
         ("-true", "Prefix operator - does not support type OTBoolean"),
+        ("(fn(x, y) -> x)(1, 2, 3)", "Function with arity 2 called with 3 arguments"),
       ]
 
     for testPair in tests:

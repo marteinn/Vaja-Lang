@@ -289,6 +289,12 @@ proc eval*(node: Node, env: var Env): Obj =
         fn: Obj = eval(node.callFunction, env)
         arguments: seq[Obj] = evalExpressions(node.callArguments, env)
 
+      if len(arguments) > len(fn.functionParams):
+        return newError(
+          errorMsg="Function with arity " & $len(fn.functionParams) &
+            " called with " & $len(arguments) & " arguments"
+        )
+
       if len(arguments) < len(fn.functionParams):
         curryFunction(fn, arguments, env)
       else:
