@@ -61,6 +61,15 @@ end
 adder(1)(2)  # 3
 ```
 
+### Currying
+
+Functions are autoatically curried
+
+```
+fn add(x, y) -> x + y
+add(1)(2)  # 3
+```
+
 ## If/else
 
 ```

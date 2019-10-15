@@ -290,6 +290,7 @@ fn c(x) -> x + 3
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.objType == ObjType.OTInteger
       check evaluated.inspect() == testPair[1]
+
   test "if statements":
     type
       ExpectedEval = (string, string)
@@ -305,3 +306,17 @@ fn c(x) -> x + 3
     for testPair in tests:
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
+
+  test "function currying":
+    type
+      ExpectedEval = (string, string)
+      ExpectedEvals = seq[ExpectedEval]
+    var
+      tests: ExpectedEvals = @[
+        ("fn a(x, y, z) -> x * y + z; a(1)(2)(3)", "5"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+      check evaluated.objType == ObjType.OTInteger

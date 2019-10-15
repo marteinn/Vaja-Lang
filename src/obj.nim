@@ -114,6 +114,14 @@ proc newReturn*(returnValue: Obj): Obj =
 proc newNil*(): Obj =
   return Obj(objType: ObjType.OTNil)
 
+# TODO: Move this to env declarations
+method inspectEnv*(env: Env): string {.base.} =
+  var ret = "{"
+  for key, obj in env.store:
+    ret = ret & " - " & key & ": " & obj.inspect() & ", "
+  ret = ret & "}"
+  return ret
+
 var
   TRUE*: Obj = newBoolean(boolValue=true)
   FALSE*: Obj = newBoolean(boolValue=false)

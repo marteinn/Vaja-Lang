@@ -1,11 +1,13 @@
 import math
 
-from ast import Node, NodeType
+from ast import Node, NodeType, toCode
 from obj import
   Obj,
   Env,
   setVar,
   getVar,
+  inspectEnv,
+  inspectEnv,
   containsVar,
   newInteger,
   newFloat,
@@ -189,9 +191,15 @@ proc evalExpressions(expressions: seq[Node], env: var Env): seq[Obj] =
 
   return res
 
-proc extendFunctionEnv(fn: Obj, arguments: seq[Obj]): Env =
-  var enclosedEnv: Env = newEnclosedEnv(fn.functionEnv)
-  for index, param in fn.functionParams:
+proc extendEnv(env: var Env, functionParams: seq[Node], arguments: seq[Obj]): Env =
+  for index, param in functionParams:
+    env = setVar(env, param.identValue, arguments[index])
+
+  return env
+
+proc extendFunctionEnv(env: Env, functionParams: seq[Node], arguments: seq[Obj]): Env =
+  var enclosedEnv: Env = newEnclosedEnv(env)
+  for index, param in functionParams:
     enclosedEnv = setVar(enclosedEnv, param.identValue, arguments[index])
 
   return enclosedEnv
@@ -202,8 +210,20 @@ proc unwrapReturnValue(obj: Obj): Obj =
   return obj
 
 proc applyFunction(fn: Obj, arguments: seq[Obj], env: var Env): Obj =
-  var extendedEnv: Env = extendFunctionEnv(fn, arguments)
-  var res: Obj = eval(fn.functionBody, extendedEnv)
+  #if len(arguments) < len(fn.functionParams):
+    #echo "MISSING ARGS!"
+    #echo fn.functionBody.toCode()
+    #return newFunction(
+      #functionBody=fn.functionBody,
+      #functionEnv=env,
+      #functionParams=fn.functionParams
+    #)
+
+  var
+    extendedEnv: Env = extendFunctionEnv(
+      fn.functionEnv, fn.functionParams, arguments
+    )
+    res: Obj = eval(fn.functionBody, extendedEnv)
 
   # TODO: Add builtin call
   return unwrapReturnValue(res)
@@ -215,6 +235,19 @@ proc evalIfExpression(node: Node, env: var Env): Obj =
   if node.ifAlternative != nil:
     return eval(node.ifAlternative, env)
   return NIL
+
+proc curryFunction(fn: Obj, arguments: seq[Obj], env: var Env): Obj =
+  var
+    remainingParams: seq[Node] =
+      fn.functionParams[len(arguments)..len(fn.functionParams)-1]
+    functionParams = fn.functionParams[0..len(arguments)-1]
+    enclosedEnv = extendEnv(fn.functionEnv, functionParams, arguments)
+
+  return newFunction(
+    functionBody=fn.functionBody,
+    functionEnv=enclosedEnv,
+    functionParams=remainingParams,
+  )
 
 proc eval*(node: Node, env: var Env): Obj =
   case node.nodeType:
@@ -252,9 +285,14 @@ proc eval*(node: Node, env: var Env): Obj =
       else:
         fn
     of NTCallExpression:
-      var fn: Obj = eval(node.callFunction, env)
-      var arguments: seq[Obj] = evalExpressions(node.callArguments, env)
-      applyFunction(fn, arguments, env)
+      var
+        fn: Obj = eval(node.callFunction, env)
+        arguments: seq[Obj] = evalExpressions(node.callArguments, env)
+
+      if len(arguments) < len(fn.functionParams):
+        curryFunction(fn, arguments, env)
+      else:
+        applyFunction(fn, arguments, env)
     of NTReturnStatement:
       var returnValue: Obj = eval(node.returnValue, env)
       # TODO: Add error check
