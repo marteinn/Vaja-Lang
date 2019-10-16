@@ -61,7 +61,7 @@ end
 adder(1)(2)  # 3
 ```
 
-functions are pattern matched
+Named functions are pattern matched
 
 ```
 fn hello("john") -> "john sings"
@@ -69,14 +69,14 @@ fn hello("ringo") -> "ringo drums"
 hello("john")  # "john sings"
 
 fn hello(name, "whispers") -> name & " whispers"
-fn hello(name, "sings") -> "name & " sings"
-hello(m"martin", "sings")  # "martin sings"
+fn hello(name, "sings") -> name & " sings"
+hello("martin", "sings")  # "martin sings"
 ```
 
-IN PROGTESS: Anonymous functions can be curried
+IN PROGRESS: Anonymous functions can be curried
 
 ```
-fn add(x, y) -> x + y
+let add = fn'curry (x, y) -> x + y
 add(1)(2)  # 3
 ```
 

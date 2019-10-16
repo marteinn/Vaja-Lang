@@ -1,0 +1,5 @@
+fn say_hello("bob") -> "Hi Bob!"
+fn say_hello("jane") -> "Hello Jane!"
+fn say_hello(name) -> "Well hello " & name
+
+say_hello("martin")
