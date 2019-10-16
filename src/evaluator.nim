@@ -14,18 +14,29 @@ from obj import
   newStr,
   newError,
   newFunction,
+  newFunctionGroup,
   newEnclosedEnv,
   newReturn,
+  addFunctionToArityGroup,
+  getFunctionsByArity,
   ObjType,
   hasNumberType,
   promoteToFloatValue,
   inspect,
   TRUE,
   FALSE,
-  NIL
+  NIL,
+  compareObj
+
 
 
 proc eval*(node: Node, env: var Env): Obj # Forward declaration
+
+proc isError(obj: Obj): bool =
+  if obj == NIL:
+    return false
+
+  return obj.objType == ObjType.OTError
 
 proc toBoolObj(boolValue: bool): Obj =
   if boolValue: TRUE else: FALSE
@@ -44,6 +55,7 @@ proc evalProgram(node: Node, env: var Env): Obj =
     if resultValue.objType == ObjType.OTError:
       return resultValue
   return resultValue
+
 
 proc evalInfixIntegerExpression(operator: string, left: Obj, right: Obj): Obj =
   case operator:
@@ -200,6 +212,8 @@ proc extendEnv(env: var Env, functionParams: seq[Node], arguments: seq[Obj]): En
 proc extendFunctionEnv(env: Env, functionParams: seq[Node], arguments: seq[Obj]): Env =
   var enclosedEnv: Env = newEnclosedEnv(env)
   for index, param in functionParams:
+    if param.nodeType != NTIdentifier:
+      continue
     enclosedEnv = setVar(enclosedEnv, param.identValue, arguments[index])
 
   return enclosedEnv
@@ -210,15 +224,6 @@ proc unwrapReturnValue(obj: Obj): Obj =
   return obj
 
 proc applyFunction(fn: Obj, arguments: seq[Obj], env: var Env): Obj =
-  #if len(arguments) < len(fn.functionParams):
-    #echo "MISSING ARGS!"
-    #echo fn.functionBody.toCode()
-    #return newFunction(
-      #functionBody=fn.functionBody,
-      #functionEnv=env,
-      #functionParams=fn.functionParams
-    #)
-
   var
     extendedEnv: Env = extendFunctionEnv(
       fn.functionEnv, fn.functionParams, arguments
@@ -248,6 +253,36 @@ proc curryFunction(fn: Obj, arguments: seq[Obj], env: var Env): Obj =
     functionEnv=enclosedEnv,
     functionParams=remainingParams,
   )
+
+# TODO: Optimize pattern matching signature comparison
+proc getMatchingFunction*(
+  fnGroup: var Obj, arguments: seq[Obj], env: var Env
+): Obj =
+  var
+    arity: int = len(arguments)
+    fnList: seq[Obj] = getFunctionsByArity(fnGroup, arity)
+
+  for fn in fnList:
+    var
+      functionParams: seq[Node] = fn.functionParams
+      match: bool = true
+
+    for index, param in functionParams:
+      if param.nodeType == NTIdentifier:
+        continue
+
+      var
+        paramObj: Obj = eval(param, env)
+        argument: Obj = arguments[index]
+
+      if not compareObj(paramObj, argument):
+        match = false
+        break
+
+    if match:
+      return fn
+
+  return newError(errorMsg="Function is undefined")
 
 proc eval*(node: Node, env: var Env): Obj =
   case node.nodeType:
@@ -279,26 +314,51 @@ proc eval*(node: Node, env: var Env): Obj =
           functionEnv=env,
           functionParams=node.functionParams
         )
+
+      # Store named function into a arity based function group
       if node.functionName != nil:
-        discard setVar(env, node.functionName.identValue, fn)
+        var
+          functionGroup: Obj = nil
+          functionName: string = node.functionName.identValue
+
+        functionGroup =
+          if containsVar(env, functionName):
+            getVar(env, functionName)
+          else:
+            newFunctionGroup()
+
+        functionGroup = addFunctionToArityGroup(functionGroup, fn)
+        discard setVar(env, node.functionName.identValue, functionGroup)
         nil
       else:
         fn
     of NTCallExpression:
       var
-        fn: Obj = eval(node.callFunction, env)
+        fnBase: Obj = eval(node.callFunction, env)
         arguments: seq[Obj] = evalExpressions(node.callArguments, env)
+        callerArity: int = len(arguments)
+        fn: Obj = nil
 
-      if len(arguments) > len(fn.functionParams):
-        return newError(
-          errorMsg="Function with arity " & $len(fn.functionParams) &
-            " called with " & $len(arguments) & " arguments"
-        )
+      if fnBase.objType == OTFunctionGroup:
+        fn = getMatchingFunction(fnBase, arguments, env)
 
-      if len(arguments) < len(fn.functionParams):
-        curryFunction(fn, arguments, env)
+        if isError(fn):
+          return fn
       else:
-        applyFunction(fn, arguments, env)
+        fn = fnBase
+
+        if len(arguments) > len(fn.functionParams):
+          return newError(
+            errorMsg="Function with arity " & $len(fn.functionParams) &
+              " called with " & $len(arguments) & " arguments"
+          )
+
+      applyFunction(fn, arguments, env)
+      # Apply currying
+      #if len(arguments) < len(fn.functionParams):
+        #curryFunction(fn, arguments, env)
+      #else:
+        #applyFunction(fn, arguments, env)
     of NTReturnStatement:
       var returnValue: Obj = eval(node.returnValue, env)
       # TODO: Add error check

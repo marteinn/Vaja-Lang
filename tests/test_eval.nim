@@ -167,13 +167,26 @@ suite "eval tests":
       check evaluated.objType == ObjType.OTBoolean
       check evaluated.inspect() == testPair[1]
 
+  test "named function declaration":
+    type
+      ExpectedEval = (string, string)
+      ExpectedEvals = seq[ExpectedEval]
+    var
+      tests: ExpectedEvals = @[
+        ("fn hello(a, b) 1 end; hello", "<function group>"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.objType == ObjType.OTFunctionGroup
+      check evaluated.inspect() == testPair[1]
+
   test "function declaration":
     type
       ExpectedEval = (string, string)
       ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
-        ("fn hello(a, b) 1 end; hello", "fn (a, b) 1 end"),
         ("fn (a, b) 1 end", "fn (a, b) 1 end"),
         ("let a = fn () 1 end; a", "fn () 1 end"),
         ("let a = fn(x) -> x; a", "fn (x) x end"),
@@ -308,16 +321,59 @@ fn c(x) -> x + 3
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
 
-  test "function currying":
+  test "pattern matching":
     type
       ExpectedEval = (string, string)
       ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
-        ("fn a(x, y, z) -> x * y + z; a(1)(2)(3)", "5"),
+        ("""
+fn hello(1) -> 11
+fn hello(2) -> 12
+fn hello(name, 1) -> 13
+fn hello(name, 2) -> 13
+hello(1)""", "11"),
+        ("""
+fn hello(1) -> 21
+fn hello(2) -> 22
+hello(2)""", "22"),
+      ("""
+fn hello(name, 1) -> 31
+fn hello(name, 2) -> 32
+hello("tom", 1)""", "31"),
       ]
 
     for testPair in tests:
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
-      check evaluated.objType == ObjType.OTInteger
+
+  test "non matching function pattern matching":
+    type
+      ExpectedEval = (string, string)
+      ExpectedEvals = seq[ExpectedEval]
+    var
+      tests: ExpectedEvals = @[
+        ("""
+fn hello("tom waits") -> 1
+fn hello("lou reed") -> 2
+hello("john bolton")""", "Function is undefined"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.objType == ObjType.OTError
+      check evaluated.inspect() == testPair[1]
+
+  #test "function currying":
+    #type
+      #ExpectedEval = (string, string)
+      #ExpectedEvals = seq[ExpectedEval]
+    #var
+      #tests: ExpectedEvals = @[
+        #("fn a(x, y, z) -> x * y + z; a(1)(2)(3)", "5"),
+      #]
+
+    #for testPair in tests:
+      #var evaluated: Obj = evalSource(testPair[0])
+      #check evaluated.inspect() == testPair[1]
+      #check evaluated.objType == ObjType.OTInteger

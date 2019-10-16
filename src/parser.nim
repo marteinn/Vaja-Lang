@@ -134,19 +134,16 @@ proc parseFunctionParameters(parser: var Parser): seq[Node] =
 
   discard parser.nextParserToken()
 
-  var parameters: seq[Node] = @[newIdentifier(
-    token=parser.curToken, identValue=parser.curToken.literal
-  )]
+  var
+    parameters: seq[Node] = @[
+      parser.parseExpression(Precedence.LOWEST)
+    ]
 
   while parser.peekToken.tokenType == TokenType.COMMA:
     discard parser.nextParserToken()
     discard parser.nextParserToken()
 
-    parameters.add(
-      newIdentifier(
-        token=parser.curToken, identValue=parser.curToken.literal
-      )
-    )
+    parameters.add(parser.parseExpression(Precedence.LOWEST))
 
   if not parser.expectPeek(TokenType.RPAREN):
     return @[]

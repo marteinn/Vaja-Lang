@@ -61,9 +61,19 @@ end
 adder(1)(2)  # 3
 ```
 
-### Currying
+functions are pattern matched
 
-Functions are autoatically curried
+```
+fn hello("john") -> "john sings"
+fn hello("ringo") -> "ringo drums"
+hello("john")  # "john sings"
+
+fn hello(name, "whispers") -> name & " whispers"
+fn hello(name, "sings") -> "name & " sings"
+hello(m"martin", "sings")  # "martin sings"
+```
+
+IN PROGTESS: Anonymous functions can be curried
 
 ```
 fn add(x, y) -> x + y

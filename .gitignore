@@ -2,5 +2,6 @@ src/vaja
 tests/test_parser
 tests/test_lexer
 tests/test_eval
+tests/test_obj
 bin/*
 !bin/.gitkeep

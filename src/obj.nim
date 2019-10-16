@@ -11,6 +11,7 @@ type
     OTBoolean
     OTError
     OTFunction
+    OTFunctionGroup
     OTReturn
     OTNil
   Obj* = ref object
@@ -24,6 +25,8 @@ type
         functionBody*: Node
         functionEnv*: Env
         functionParams*: seq[Node]
+      of OTFunctionGroup:
+        arityGroup*: Table[int, seq[Obj]]
       of OTReturn: returnValue*: Obj
       of OTNil: discard
 
@@ -31,6 +34,23 @@ type
     store*: Table[string, Obj]
     outer*: Env
 
+proc compareObj*(a: Obj, b: Obj): bool =
+  if a.objType != b.objType:
+    false
+  else:
+    case a.objType:
+      of OTInteger:
+        a.intValue == b.intValue
+      of OTFloat:
+        a.floatValue == b.floatValue
+      of OTString:
+        a.strValue == b.strValue
+      of OTBoolean:
+        a.boolValue == b.boolValue
+      of OTNil:
+        true
+      else:
+        false
 
 proc newEnv*(): Env =
   return Env(store: initTable[string, Obj]())
@@ -76,6 +96,7 @@ method inspect*(obj: Obj): string {.base.} =
     of OTBoolean:
       if obj.boolValue: "true" else: "false"
     of OTError: obj.errorMsg
+    of OTFunctionGroup: "<function group>"
     of OTFunction:
       let
         paramsCode: seq[string] = map(obj.functionParams, proc (x: Node): string = toCode(x))
@@ -113,6 +134,25 @@ proc newReturn*(returnValue: Obj): Obj =
 
 proc newNil*(): Obj =
   return Obj(objType: ObjType.OTNil)
+
+proc newFunctionGroup*(): Obj =
+  return Obj(
+    objType: ObjType.OTFunctionGroup,
+    arityGroup: initTable[
+      int, seq[Obj]
+    ](),
+  )
+
+proc addFunctionToArityGroup*(fnGroup: var Obj, fn: Obj): Obj =
+  var arity: int = len(fn.functionParams)
+  if not contains(fnGroup.arityGroup, arity):
+    fnGroup.arityGroup[arity] = @[fn]
+  else:
+    fnGroup.arityGroup[arity].add(fn)
+  fnGroup
+
+proc getFunctionsByArity*(fnGroup: var Obj, arity: int): seq[Obj] =
+  fnGroup.arityGroup[arity]
 
 # TODO: Move this to env declarations
 method inspectEnv*(env: Env): string {.base.} =

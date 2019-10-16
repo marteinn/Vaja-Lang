@@ -194,6 +194,20 @@ let c = "hello"
     check len(program.statements) == 1
     check program.statements[0].expression.toCode() == "fn(x) x end"
 
+  test "function parameter parsing":
+    var
+      source: string = """fn hello(1, "mystr", b) -> x"""
+      program: Node = parseSource(source)
+
+    check program.statements[0].nodeType == NodeType.NTExpressionStatement
+    check program.statements[0].expression.nodeType == NodeType.NTFunctionLiteral
+    check len(program.statements[0].expression.functionParams) == 3
+
+    check program.statements[0].expression.functionParams[0].nodeType == NTIntegerLiteral
+    check program.statements[0].expression.functionParams[1].nodeType == NTStringLiteral
+    check len(program.statements) == 1
+    check program.statements[0].expression.toCode() == "fn hello(1, mystr, b) x end"
+
   test "function call parsing":
     var
       source: string = "hello(1, 2)"
