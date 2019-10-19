@@ -253,9 +253,9 @@ false
   test "lexing case statement":
     var
       source: string = """case (true)
-  true -> "hi"
-  false -> "do"
-  _ -> "anything"
+  of true -> "hi"
+  of false -> "do"
+  of _ -> "anything"
 end
 """
       lexer: Lexer = newLexer(source)
@@ -265,14 +265,17 @@ end
     check(lexer.nextToken().tokenType == TokenType.TRUE)
     check(lexer.nextToken().tokenType == TokenType.RPAREN)
     check(lexer.nextToken().tokenType == TokenType.NEWLINE)
+    check(lexer.nextToken().tokenType == TokenType.OF)
     check(lexer.nextToken().tokenType == TokenType.TRUE)
     check(lexer.nextToken().tokenType == TokenType.RARROW)
     check(lexer.nextToken().tokenType == TokenType.STRING)
     check(lexer.nextToken().tokenType == TokenType.NEWLINE)
+    check(lexer.nextToken().tokenType == TokenType.OF)
     check(lexer.nextToken().tokenType == TokenType.FALSE)
     check(lexer.nextToken().tokenType == TokenType.RARROW)
     check(lexer.nextToken().tokenType == TokenType.STRING)
     check(lexer.nextToken().tokenType == TokenType.NEWLINE)
+    check(lexer.nextToken().tokenType == TokenType.OF)
     check(lexer.nextToken().tokenType == TokenType.IDENT)
     check(lexer.nextToken().tokenType == TokenType.RARROW)
     check(lexer.nextToken().tokenType == TokenType.STRING)

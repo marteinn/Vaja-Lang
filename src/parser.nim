@@ -162,6 +162,7 @@ proc parseBlockStatement(parser: var Parser): Node =
   while (
     parser.curToken.tokenType != TokenType.END and
     parser.curToken.tokenType != TokenType.ELSE and
+    parser.curToken.tokenType != TokenType.OF and
     parser.curToken.tokenType != TokenType.EOF
   ):
     if parser.curToken.tokenType == TokenType.NEWLINE:
@@ -250,16 +251,20 @@ proc parseCaseExpression(parser: var Parser): Node =
       discard parser.nextParserToken()
       continue
 
+    if parser.curToken.tokenType != TokenType.OF:
+      parser.errors.add("Missing of in case expression")
+      return nil
+
+    discard parser.nextParserToken()
+
     let conditionPattern: Node = parser.parseExpression(Precedence.LOWEST)
     if not parser.expectPeek(TokenType.RARROW):
       return nil
-    discard parser.nextParserToken()
 
-    let consequencePattern: Node = parser.parseStatement()
+    let consequencePattern: Node = parser.parseBlockStatement()
     casePatterns.add(
       (condition: conditionPattern, consequence: consequencePattern)
     )
-    discard parser.nextParserToken()
 
   return newCaseExpression(
     token=token, caseCondition=condition, casePatterns=casePatterns

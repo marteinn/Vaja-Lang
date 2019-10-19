@@ -31,6 +31,7 @@ type
     IF,
     ELSE,
     CASE,
+    OF,
     # Operators
     LET,
     FUNCTION,

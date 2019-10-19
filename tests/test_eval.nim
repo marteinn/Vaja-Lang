@@ -122,7 +122,7 @@ suite "eval tests":
         ("\"a\" + \"b\"", "Unknown infix operator +"),
         ("-true", "Prefix operator - does not support type OTBoolean"),
         ("(fn(x, y) -> x)(1, 2, 3)", "Function with arity 2 called with 3 arguments"),
-        ("case (2) 1 -> 2 end", "No clause matching"),
+        ("case (2) of 1 -> 2 end", "No clause matching"),
       ]
 
     for testPair in tests:
@@ -414,33 +414,40 @@ greet("jane", "doe")""", "myval"),
       tests: ExpectedEvals = @[
         ("""
 case ("hello")
-  "hello" -> 1
+  of "hello" -> 1
 end
 """, "1"),
         ("""
 let a = "hi"
 case (a)
-  "hello" -> 1
-  "hi" -> 2
-  "howdy" -> 3
+  of "hello" -> 1
+  of "hi" -> 2
+  of "howdy" -> 3
 end
 """, "2"),
         ("""
 let a = "hello sir"
 case (a)
-  "hello" -> 1
-  "hi" -> 2
-  "howdy" -> 3
-  _ -> 4
+  of "hello" -> 1
+  of "hi" -> 2
+  of "howdy" -> 3
+  of _ -> 4
 end
 """, "4"),
+        ("""
+let a = "hello"
+case (a)
+  of "hello" ->
+    let value = 1
+    value
+  of "hi" -> 2
+end
+""", "1"),
       ]
 
     for testPair in tests:
       var evaluated: Obj = evalSource(testPair[0])
-      #check evaluated.objType == ObjType.OTInteger
       check evaluated.inspect() == testPair[1]
-
 
   #test "function currying":
     #type

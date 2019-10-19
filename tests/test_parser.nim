@@ -295,13 +295,21 @@ end
     var
       tests: ExpectedTokens = @[
         ("""case (true)
-true -> 2
-false -> 1
-_ -> 0
+  of true -> 2
+  of false -> 1
+  of _ -> 0
 end""", """case (true)
-true -> 2
-false -> 1
-_ -> 0
+of true -> 2
+of false -> 1
+of _ -> 0
+end"""),
+        ("""case (false)
+  of true -> 2
+  of false ->
+    11
+end""", """case (false)
+of true -> 2
+of false -> 11
 end""")]
 
     for testPair in tests:

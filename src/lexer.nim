@@ -174,6 +174,8 @@ method nextToken*(lexer: var Lexer): Token {.base.} =
           tok = newToken(tokenType=TokenType.CASE, literal=identifier)
         of "nil":
           tok = newToken(tokenType=TokenType.NIL, literal=identifier)
+        of "of":
+          tok = newToken(tokenType=TokenType.OF, literal=identifier)
         else:
           tok = newToken(tokenType=TokenType.IDENT, literal=identifier)
       return tok

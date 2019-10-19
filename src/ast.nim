@@ -124,10 +124,12 @@ method toCode*(node: Node): string {.base.} =
     of NTCaseExpression:
       let nodeCode: seq[string] = map(
         node.casePatterns,
-        proc (x: CasePattern): string = toCode(x.condition) & " -> " & toCode(x.consequence)
+        proc (x: CasePattern): string = "of " &
+          toCode(x.condition) &
+          " -> " &
+          toCode(x.consequence)
       )
       "case (" & node.caseCondition.toCode() & ")\n" & join(nodeCode, "\n") & "\nend"
-
 
 proc newIntegerLiteral*(token: Token, intValue: int): Node =
   return Node(nodeType: NodeType.NTIntegerLiteral, intValue: intValue)
