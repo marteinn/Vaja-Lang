@@ -1,6 +1,6 @@
 ## General
 
-## Types
+## Supported types
 
 ```
 true
@@ -61,7 +61,7 @@ end
 adder(1)(2)  # 3
 ```
 
-Named functions are pattern matched
+Named functions can be pattern matched
 
 ```
 fn hello("john") -> "john sings"
