@@ -30,6 +30,7 @@ type
     PIPERARROW,
     IF,
     ELSE,
+    CASE,
     # Operators
     LET,
     FUNCTION,

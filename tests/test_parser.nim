@@ -287,3 +287,24 @@ end
     for testPair in tests:
       var program: Node = parseSource(testPair[0])
       check program.statements[0].toCode() == testPair[1]
+
+  test "case statement":
+    type
+      ExpectedParsing = (string, string)
+      ExpectedTokens = seq[ExpectedParsing]
+    var
+      tests: ExpectedTokens = @[
+        ("""case (true)
+true -> 2
+false -> 1
+_ -> 0
+end""", """case (true)
+true -> 2
+false -> 1
+_ -> 0
+end""")]
+
+    for testPair in tests:
+      var program: Node = parseSource(testPair[0])
+      check program.statements[0].expression.nodeType == NodeType.NTCaseExpression
+      check program.statements[0].toCode() == testPair[1]

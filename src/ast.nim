@@ -21,6 +21,7 @@ type
     NTReturnStatement,
     NTPipeLR,
     NTIfExpression,
+    NTCaseExpression,
   Node* = ref object
     token*: Token
     case nodeType*: NodeType
@@ -59,6 +60,10 @@ type
         ifCondition*: Node
         ifConsequence*: Node
         ifAlternative*: Node
+      of NTCaseExpression:
+        caseCondition*: Node
+        casePatterns*: seq[CasePattern]
+  CasePattern* = tuple[condition: Node, consequence: Node]
 
 method toCode*(node: Node): string {.base.} =
   return case node.nodeType:
@@ -116,6 +121,12 @@ method toCode*(node: Node): string {.base.} =
         "if (" & node.ifCondition.toCode() & ") " & node.ifConsequence.toCode() & " else " & node.ifAlternative.toCode() & " end"
       else:
         "if (" & node.ifCondition.toCode() & ") " & node.ifConsequence.toCode() & " end"
+    of NTCaseExpression:
+      let nodeCode: seq[string] = map(
+        node.casePatterns,
+        proc (x: CasePattern): string = toCode(x.condition) & " -> " & toCode(x.consequence)
+      )
+      "case (" & node.caseCondition.toCode() & ")\n" & join(nodeCode, "\n") & "\nend"
 
 
 proc newIntegerLiteral*(token: Token, intValue: int): Node =
@@ -219,6 +230,18 @@ proc newIfExpression*(
     ifCondition: ifCondition,
     ifConsequence: ifConsequence,
     ifAlternative: ifAlternative
+  )
+
+proc newCaseExpression*(
+  token: Token,
+  caseCondition: Node,
+  casePatterns: seq[CasePattern]
+): Node =
+  return Node(
+    nodeType: NodeType.NTCaseExpression,
+    token: token,
+    caseCondition: caseCondition,
+    casePatterns: casePatterns
   )
 
 proc newProgram*(statements: seq[Node]): Node =

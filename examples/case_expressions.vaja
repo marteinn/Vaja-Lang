@@ -1,0 +1,9 @@
+let a = 5
+
+let value = case a
+  1 -> "One"
+  2 -> "Two"
+  3 -> "Threee"
+end
+
+value

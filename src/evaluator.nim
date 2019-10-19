@@ -2,7 +2,7 @@ import math
 import tables
 from strutils import startsWith
 
-from ast import Node, NodeType, toCode
+from ast import Node, NodeType, toCode, CasePattern
 from obj import
   Obj,
   Env,
@@ -29,8 +29,6 @@ from obj import
   NIL,
   compareObj
 
-
-
 proc eval*(node: Node, env: var Env): Obj # Forward declaration
 
 proc isError(obj: Obj): bool =
@@ -56,7 +54,6 @@ proc evalProgram(node: Node, env: var Env): Obj =
     if resultValue.objType == ObjType.OTError:
       return resultValue
   return resultValue
-
 
 proc evalInfixIntegerExpression(operator: string, left: Obj, right: Obj): Obj =
   case operator:
@@ -247,6 +244,18 @@ proc evalIfExpression(node: Node, env: var Env): Obj =
     return eval(node.ifAlternative, env)
   return NIL
 
+proc evalCaseExpression(node: Node, env: var Env): Obj =
+  var condition: Obj = eval(node.caseCondition, env)
+  for casePattern in node.casePatterns:
+    if casePattern.condition.nodeType == NTIdentifier:
+      return eval(casePattern.consequence, env)
+
+    var patternCondition: Obj = eval(casePattern.condition, env)
+    if compareObj(condition, patternCondition):
+      return eval(casePattern.consequence, env)
+
+  return newError(errorMsg="No clause matching")
+
 proc curryFunction(fn: Obj, arguments: seq[Obj], env: var Env): Obj =
   var
     remainingParams: seq[Node] =
@@ -369,4 +378,5 @@ proc eval*(node: Node, env: var Env): Obj =
       node.pipeRight.callArguments.add(node.pipeLeft)
       eval(node.pipeRight, env)
     of NTIfExpression: evalIfExpression(node, env)
+    of NTCaseExpression: evalCaseExpression(node, env)
     of NTNil: NIL

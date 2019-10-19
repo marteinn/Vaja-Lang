@@ -104,13 +104,13 @@ let value = if (1 > 2) true else false end
 let value2 = if (false) 1 end  # nil
 ```
 
-## Switch
+## Case
 
 ```
 case (1 > 2)
-    of (true) -> "It was true"
-    of (false) -> "It was false"
-    of _ -> "Anything does"
+    true -> "It was true"
+    false -> "It was false"
+    _ -> "Anything does"
 end
 ```
 

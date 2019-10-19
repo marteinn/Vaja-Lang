@@ -21,8 +21,10 @@ from ast import
   newReturnStatement,
   newPipeLR,
   newIfExpression,
+  newCaseExpression,
   Node,
-  toCode
+  toCode,
+  CasePattern
 
 type
   Parser* = object
@@ -213,8 +215,8 @@ proc parseFunctionLiteral(parser: var Parser): Node =
     functionName=fnName,
   )
 
-proc parseIfExpression(parser: var Parser): Node  =
-  var token: Token = parser.curToken
+proc parseIfExpression(parser: var Parser): Node =
+  let token: Token = parser.curToken
   discard parser.nextParserToken()
 
   var condition: Node = parser.parseExpression(Precedence.LOWEST)
@@ -230,6 +232,37 @@ proc parseIfExpression(parser: var Parser): Node  =
     ifCondition=condition,
     ifConsequence=consequence,
     ifAlternative=alternative
+  )
+
+proc parseCaseExpression(parser: var Parser): Node =
+  let token: Token = parser.curToken
+  discard parser.nextParserToken()
+
+  let condition: Node = parser.parseExpression(Precedence.LOWEST)
+  discard parser.nextParserToken()  # RPAREN
+
+  var casePatterns: seq[CasePattern] = @[]
+  while (
+    parser.curToken.tokenType != TokenType.END and
+    parser.curToken.tokenType != TokenType.EOF
+  ):
+    if parser.curToken.tokenType == TokenType.NEWLINE:
+      discard parser.nextParserToken()
+      continue
+
+    let conditionPattern: Node = parser.parseExpression(Precedence.LOWEST)
+    if not parser.expectPeek(TokenType.RARROW):
+      return nil
+    discard parser.nextParserToken()
+
+    let consequencePattern: Node = parser.parseStatement()
+    casePatterns.add(
+      (condition: conditionPattern, consequence: consequencePattern)
+    )
+    discard parser.nextParserToken()
+
+  return newCaseExpression(
+    token=token, caseCondition=condition, casePatterns=casePatterns
   )
 
 type PrefixFunction = proc (parser: var Parser): Node
@@ -248,6 +281,7 @@ proc getPrefixFn(tokenType: TokenType): PrefixFunction =
     of LPAREN: parseGroupedExpression
     of FUNCTION: parseFunctionLiteral
     of IF: parseIfExpression
+    of CASE: parseCaseExpression
     else: nil
 
 method currentPrecedence(parser: var Parser): Precedence {.base.} =
