@@ -73,6 +73,14 @@ fn hello(name, "sings") -> name & " sings"
 hello("martin", "sings")  # "martin sings"
 ```
 
+Parameters named `_` or with a `_` prefix will be ignored
+
+```
+fn hello(_) -> 1
+fn greet(_name) -> 1
+fn welcome(_, _, _) -> 1
+```
+
 IN PROGRESS: Anonymous functions can be curried
 
 ```

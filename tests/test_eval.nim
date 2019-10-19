@@ -364,6 +364,47 @@ hello("john bolton")""", "Function is undefined"),
       check evaluated.objType == ObjType.OTError
       check evaluated.inspect() == testPair[1]
 
+  test "using _ or _ prefix will raise error":
+    type
+      ExpectedEval = (string, string)
+      ExpectedEvals = seq[ExpectedEval]
+    var
+      tests: ExpectedEvals = @[
+        ("""
+fn greet(_) -> _
+greet("jane")""", "Invalid use of _, it represents a value to be ignored"),
+      ("""
+fn greet(_name) -> _name
+greet("jane")""", "Invalid use of _name, it represents a value to be ignored"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.objType == ObjType.OTError
+      check evaluated.inspect() == testPair[1]
+
+  test "_ and _ prefix will be ignored":
+    type
+      ExpectedEval = (string, string)
+      ExpectedEvals = seq[ExpectedEval]
+    var
+      tests: ExpectedEvals = @[
+        ("""
+fn greet(_) -> "myval"
+greet("jane")""", "myval"),
+      ("""
+fn greet(_name) -> "anotherval"
+greet("jane")""", "anotherval"),
+      ("""
+fn greet(_, _) -> "myval"
+greet("jane", "doe")""", "myval"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.objType == ObjType.OTString
+      check evaluated.inspect() == testPair[1]
+
   #test "function currying":
     #type
       #ExpectedEval = (string, string)

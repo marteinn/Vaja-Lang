@@ -1,5 +1,6 @@
 import math
 import tables
+from strutils import startsWith
 
 from ast import Node, NodeType, toCode
 from obj import
@@ -187,7 +188,10 @@ proc evalBlockStatement(node: Node, env: var Env): Obj =
   return res
 
 proc evalIdentifier(node: Node, env: var Env) : Obj =
-  var exists: bool = env.containsVar(node.identValue)
+  if node.identValue.startsWith("_"):
+    return newError(errorMsg="Invalid use of " & node.identValue & ", it represents a value to be ignored")
+
+  let exists: bool = env.containsVar(node.identValue)
 
   if not exists:
     return newError(errorMsg="Name " & node.identValue & " is not defined")
@@ -205,6 +209,8 @@ proc evalExpressions(expressions: seq[Node], env: var Env): seq[Obj] =
 
 proc extendEnv(env: var Env, functionParams: seq[Node], arguments: seq[Obj]): Env =
   for index, param in functionParams:
+    if param.identValue.startsWith("_"):
+      continue
     env = setVar(env, param.identValue, arguments[index])
 
   return env

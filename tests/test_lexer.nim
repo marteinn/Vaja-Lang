@@ -24,6 +24,8 @@ $
 |>
 nil
 add5
+_
+_ignored
 """
       lexer: Lexer = newLexer(source)
     type
@@ -90,6 +92,10 @@ add5
         (TokenType.NIL, "nil"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.IDENT, "add5"),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.IDENT, "_"),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.IDENT, "_ignored"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.EOF, "")
       ]
