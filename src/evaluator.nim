@@ -1,4 +1,5 @@
 import math
+import tables
 
 from ast import Node, NodeType, toCode
 from obj import
@@ -17,8 +18,7 @@ from obj import
   newFunctionGroup,
   newEnclosedEnv,
   newReturn,
-  addFunctionToArityGroup,
-  getFunctionsByArity,
+  addFunctionToGroup,
   ObjType,
   hasNumberType,
   promoteToFloatValue,
@@ -260,7 +260,7 @@ proc getMatchingFunction*(
 ): Obj =
   var
     arity: int = len(arguments)
-    fnList: seq[Obj] = getFunctionsByArity(fnGroup, arity)
+    fnList: seq[Obj] = fnGroup.arityGroup[arity]
 
   for fn in fnList:
     var
@@ -318,17 +318,15 @@ proc eval*(node: Node, env: var Env): Obj =
       # Store named function into a arity based function group
       if node.functionName != nil:
         var
-          functionGroup: Obj = nil
           functionName: string = node.functionName.identValue
+          functionGroup =
+            if containsVar(env, functionName):
+              env.getVar(functionName)
+            else:
+              newFunctionGroup()
 
-        functionGroup =
-          if containsVar(env, functionName):
-            getVar(env, functionName)
-          else:
-            newFunctionGroup()
-
-        functionGroup = addFunctionToArityGroup(functionGroup, fn)
-        discard setVar(env, node.functionName.identValue, functionGroup)
+        functionGroup = functionGroup.addFunctionToGroup(fn)
+        discard env.setVar(node.functionName.identValue, functionGroup)
         nil
       else:
         fn
@@ -336,22 +334,20 @@ proc eval*(node: Node, env: var Env): Obj =
       var
         fnBase: Obj = eval(node.callFunction, env)
         arguments: seq[Obj] = evalExpressions(node.callArguments, env)
-        callerArity: int = len(arguments)
-        fn: Obj = nil
+        fn: Obj =
+          if fnBase.objType == OTFunctionGroup:
+            getMatchingFunction(fnBase, arguments, env)
+          else:
+            fnBase
 
-      if fnBase.objType == OTFunctionGroup:
-        fn = getMatchingFunction(fnBase, arguments, env)
+      if isError(fn):
+        return fn
 
-        if isError(fn):
-          return fn
-      else:
-        fn = fnBase
-
-        if len(arguments) > len(fn.functionParams):
-          return newError(
-            errorMsg="Function with arity " & $len(fn.functionParams) &
-              " called with " & $len(arguments) & " arguments"
-          )
+      if len(arguments) > len(fn.functionParams):
+        return newError(
+          errorMsg="Function with arity " & $len(fn.functionParams) &
+            " called with " & $len(arguments) & " arguments"
+        )
 
       applyFunction(fn, arguments, env)
       # Apply currying

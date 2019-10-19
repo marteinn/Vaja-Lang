@@ -143,16 +143,13 @@ proc newFunctionGroup*(): Obj =
     ](),
   )
 
-proc addFunctionToArityGroup*(fnGroup: var Obj, fn: Obj): Obj =
-  var arity: int = len(fn.functionParams)
+method addFunctionToGroup*(fnGroup: var Obj, fn: Obj): Obj {.base.} =
+  let arity: int = len(fn.functionParams)
   if not contains(fnGroup.arityGroup, arity):
     fnGroup.arityGroup[arity] = @[fn]
   else:
     fnGroup.arityGroup[arity].add(fn)
   fnGroup
-
-proc getFunctionsByArity*(fnGroup: var Obj, arity: int): seq[Obj] =
-  fnGroup.arityGroup[arity]
 
 # TODO: Move this to env declarations
 method inspectEnv*(env: Env): string {.base.} =
