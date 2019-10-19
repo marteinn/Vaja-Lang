@@ -1,9 +1,14 @@
-let a = 5
+let a = 2
 
-let value = case a
-  1 -> "One"
-  2 -> "Two"
-  3 -> "Threee"
+let value = case (a)
+  of 1 ->
+    let b = "b"
+    case (b)
+      of "a" -> 1
+      of "b" -> 2
+    end
+  of 2 -> "Two"
+  of 3 -> "Threee"
 end
 
 value
