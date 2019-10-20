@@ -1,5 +1,6 @@
 import tables
-from obj import Obj, ObjType, newBuiltin, newError, newStr, NIL, inspect
+from obj import Obj, ObjType, newBuiltin, newHashMap, newError, newInteger, newStr, NIL, inspect
+from builtins_array import arrayModule
 
 proc builtinType(arguments: seq[Obj]): Obj =
   if len(arguments) == 0:
@@ -30,5 +31,6 @@ proc builtinPrint(arguments: seq[Obj]): Obj =
 var
   globals*: Table[string, Obj] = {
     "type": newBuiltin(builtinFn=builtinType),
-    "print": newBuiltin(builtinFn=builtinPrint)
+    "print": newBuiltin(builtinFn=builtinPrint),
+    "Array": arrayModule,
   }.toTable

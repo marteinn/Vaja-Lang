@@ -1,0 +1,4 @@
+let rainDogs = {"recordingYear": 1985}
+let records = {"TomWaits": [rainDogs]}
+
+print(records)
