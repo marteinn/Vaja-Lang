@@ -309,3 +309,13 @@ end
     check(lexer.nextToken().tokenType == TokenType.COLON)
     check(lexer.nextToken().tokenType == TokenType.INT)
     check(lexer.nextToken().tokenType == TokenType.RBRACE)
+
+  test "hashmap property":
+    var
+      source: string = "hashmap.property"
+      lexer: Lexer = newLexer(source)
+
+    check(lexer.nextToken().tokenType == TokenType.IDENT)
+    check(lexer.nextToken().tokenType == TokenType.DOT)
+    check(lexer.nextToken().tokenType == TokenType.IDENT)
+    check(lexer.nextToken().tokenType == TokenType.EOF)

@@ -24,7 +24,9 @@ from ast import
   newCaseExpression,
   newArrayLiteral,
   newHashMapLiteral,
+  newIndexOperation,
   Node,
+  NodeType,
   toCode,
   CasePattern,
   hash
@@ -60,6 +62,7 @@ var
     TokenType.LTE: Precedence.PRODUCT,
     TokenType.LPAREN: Precedence.CALL,
     TokenType.PIPERARROW: Precedence.SUM,
+    TokenType.DOT: Precedence.CALL,
   }.toTable
 
 method nextParserToken(parser: var Parser): Token {.base.} =
@@ -416,6 +419,23 @@ method parsePipeLRInfix(parser: var Parser, left: Node): Node {.base.} =
     token=token, pipeLeft=left, pipeRight=right
   )
 
+method parseIndexOperationInfix(parser: var Parser, left: Node): Node {.base.} =
+  var
+    token: Token = parser.curToken
+    precedence: Precedence = parser.currentPrecedence()
+  discard parser.nextParserToken()
+
+  var right: Node = parser.parseExpression(precedence)
+  # Transform identifier property to string
+  if right.nodeType == NodeType.NTIdentifier:
+    right = newStringLiteral(token=parser.curToken, strValue=right.identValue)
+
+  return newIndexOperation(
+    token=token,
+    indexOpLeft=left,
+    indexOpIndex=right
+  )
+
 type InfixFunction = proc (parser: var Parser, left: Node): Node
 
 proc getInfixFn(tokenType: TokenType): InfixFunction =
@@ -437,6 +457,7 @@ proc getInfixFn(tokenType: TokenType): InfixFunction =
     of LTE: parseInfixExpression
     of LPAREN: parseCallExpression
     of PIPERARROW: parsePipeLRInfix
+    of DOT: parseIndexOperationInfix
     else: nil
 
 method parseExpression(parser: var Parser, precedence: Precedence): Node =

@@ -26,6 +26,7 @@ type
     NTCaseExpression,
     NTArrayLiteral,
     NTHashMapLiteral,
+    NTIndexOperation,
   Node* = ref object
     token*: Token
     case nodeType*: NodeType
@@ -69,6 +70,9 @@ type
         casePatterns*: seq[CasePattern]
       of NTArrayLiteral: arrayElements*: seq[Node]
       of NTHashMapLiteral: hashMapElements*: OrderedTable[Node, Node]
+      of NTIndexOperation:
+        indexOpLeft*: Node
+        indexOpIndex*: Node
   CasePattern* = tuple[condition: Node, consequence: Node]
 
 method toCode*(node: Node): string {.base.} =
@@ -149,6 +153,8 @@ method toCode*(node: Node): string {.base.} =
         elementsCode = elementsCode & key.toCode() & ": " & val.toCode()
 
       "{" & elementsCode & "}"
+    of NTIndexOperation:
+      node.indexOpLeft.toCode() & "." & node.indexOpIndex.toCode()
 
 proc hash*(node: Node): Hash =
   var h: Hash = 0
@@ -293,6 +299,18 @@ proc newHashMapLiteral*(
     nodeType: NodeType.NTHashMapLiteral,
     token: token,
     hashMapElements: hashMapElements
+  )
+
+proc newIndexOperation*(
+  token: Token,
+  indexOpLeft: Node,
+  indexOpIndex: Node
+): Node =
+  return Node(
+    nodeType: NodeType.NTIndexOperation,
+    token: token,
+    indexOpLeft: indexOpLeft,
+    indexOpIndex: indexOpIndex
   )
 
 proc newProgram*(statements: seq[Node]): Node =

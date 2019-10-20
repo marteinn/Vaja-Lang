@@ -35,7 +35,7 @@ type
       of OTNil: discard
       of OTArray: arrayElements*: seq[Obj]
       of OTBuiltin: builtinFn*: proc(arguments: seq[Obj]): Obj
-      of OTHashMap: hashMapElements*: OrderedTable[Obj, Obj]
+      of OTHashMap: hashMapElements*: OrderedTable[string, Obj]
 
   Env* = ref object
     store*: Table[string, Obj]
@@ -43,30 +43,20 @@ type
 
 proc compareObj*(a: Obj, b: Obj): bool =
   if a.objType != b.objType:
-    false
-  else:
-    case a.objType:
-      of OTInteger:
-        a.intValue == b.intValue
-      of OTFloat:
-        a.floatValue == b.floatValue
-      of OTString:
-        a.strValue == b.strValue
-      of OTBoolean:
-        a.boolValue == b.boolValue
-      of OTNil:
-        true
-      else:
-        false
-
-proc hash*(obj: Obj): Hash =
-  var h: Hash = 0
-  h = h !& hash(obj.objType)
-  let objHash = case obj.objType:
-    of OTString: hash(obj.strValue)
-    else: hash("")
-  h = h !& objHash
-  return !$h
+    return false
+  return case a.objType:
+    of OTInteger:
+      a.intValue == b.intValue
+    of OTFloat:
+      a.floatValue == b.floatValue
+    of OTString:
+      a.strValue == b.strValue
+    of OTBoolean:
+      a.boolValue == b.boolValue
+    of OTNil:
+      true
+    else:
+      false
 
 proc newEnv*(): Env =
   return Env(store: initTable[string, Obj]())
@@ -131,7 +121,7 @@ method inspect*(obj: Obj): string {.base.} =
       for key, val in obj.hashMapElements:
         if elementsCode != "":
           elementsCode = elementsCode & ", "
-        elementsCode = elementsCode & key.inspect() & ": " & val.inspect()
+        elementsCode = elementsCode & key & ": " & val.inspect()
 
       "{" & elementsCode & "}"
 
@@ -178,7 +168,7 @@ proc newArray*(arrayElements: seq[Obj]): Obj =
 proc newBuiltin*(builtinFn: proc(arguments: seq[Obj]): Obj): Obj =
   return Obj(objType: ObjType.OTBuiltin, builtinFn: builtinFn)
 
-proc newHashMap*(hashMapElements: OrderedTable[Obj, Obj]): Obj =
+proc newHashMap*(hashMapElements: OrderedTable[string, Obj]): Obj =
   return Obj(objType: ObjType.OTHashMap, hashMapElements: hashMapElements)
 
 method addFunctionToGroup*(fnGroup: var Obj, fn: Obj): Obj {.base.} =

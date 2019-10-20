@@ -29,8 +29,7 @@ from obj import
   TRUE,
   FALSE,
   NIL,
-  compareObj,
-  hash
+  compareObj
 from builtins import globals
 
 proc eval*(node: Node, env: var Env): Obj # Forward declaration
@@ -309,6 +308,15 @@ proc getMatchingFunction*(
 
   return newError(errorMsg="Function is undefined")
 
+proc evalIndexOp(left: Obj, index: Obj): Obj =
+  if left.objType == ObjType.OTHashMap:
+    if contains(left.hashMapElements, index.strValue):
+      return left.hashMapElements[index.strValue]
+    else:
+      return newError(errorMsg="Key " & index.strValue & " not found")
+
+  return newError(errorMsg="Index operation is not supported")
+
 proc eval*(node: Node, env: var Env): Obj =
   case node.nodeType:
     of NTProgram: evalProgram(node, env)
@@ -394,10 +402,21 @@ proc eval*(node: Node, env: var Env): Obj =
       let elements: seq[Obj] = evalExpressions(node.arrayElements, env)
       newArray(arrayElements=elements)
     of NTHashMapLiteral:
-      var elements: OrderedTable[Obj, Obj] = initOrderedTable[Obj, Obj]()
+      var elements: OrderedTable[string, Obj] = initOrderedTable[string, Obj]()
       for key, value in node.hashMapElements:
         let
           keyObj: Obj = eval(key, env)
           valObj: Obj = eval(value, env)
-        elements[keyObj] = valObj
+        if keyObj.objType != ObjType.OTString:
+          return newError(
+            errorMsg="Only string indexes are allowed, found " & $(keyObj.objType)
+          )
+
+        elements[keyObj.strValue] = valObj
       newHashMap(hashMapElements=elements)
+    of NTIndexOperation:
+      var
+        left: Obj = eval(node.indexOpLeft, env)
+        index: Obj = eval(node.indexOpIndex, env)
+      evalIndexOp(left, index)
+

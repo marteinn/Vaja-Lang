@@ -108,6 +108,8 @@ method nextToken*(lexer: var Lexer): Token {.base.} =
       tok = newToken(tokenType=TokenType.COLON, literal=($ch))
     of '$':
       tok = newToken(tokenType=TokenType.DOLLAR, literal=($ch))
+    of '.':
+      tok = newToken(tokenType=TokenType.DOT, literal=($ch))
     of '|':
       if lexer.peekAhead(0) == '>':
         var nextCh: char = lexer.peekAhead(0)

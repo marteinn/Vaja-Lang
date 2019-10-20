@@ -29,6 +29,7 @@ type
     LBRACE,
     RBRACE,
     AMP,
+    DOT,
     RETURN,
     RARROW,
     DOLLAR,

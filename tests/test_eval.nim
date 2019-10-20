@@ -122,6 +122,21 @@ suite "eval tests":
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
 
+  test "hashmap index":
+    type
+      ExpectedEval = (string, string)
+      ExpectedEvals = seq[ExpectedEval]
+    var
+      tests: ExpectedEvals = @[
+        ("""let a = {"monday": 1}; a.monday""", "1"),
+        #("""let a = "today";{a: 1}""", "{today: 1}"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+
+
   test "assignments":
     type
       ExpectedEval = (string, string)
@@ -151,6 +166,9 @@ suite "eval tests":
         ("(fn(x, y) -> x)(1, 2, 3)", "Function with arity 2 called with 3 arguments"),
         ("case (2) of 1 -> 2 end", "No clause matching"),
         ("cat(1)", "Name cat is not defined"),
+        ("cat.name", "Index operation is not supported"),
+        ("""{"b": 1}.name""", "Key name not found"),
+        ("""{a: 1}""", "Only string indexes are allowed, found OTError"),
       ]
 
     for testPair in tests:

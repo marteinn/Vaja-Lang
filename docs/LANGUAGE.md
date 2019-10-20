@@ -46,6 +46,13 @@ print(animals[0])  # bird
 let weather = {"monday": "Rain", "tuesday": "Cloudy"}
 ```
 
+Hashmap keys can be accessed using a dot syntax.
+
+```
+let colors = {"red": "FF0000"}
+colors.red  # FF0000
+```
+
 ## Variable assignment
 
 ```
