@@ -349,7 +349,8 @@ end""")]
         ("""{
 a: 1,
 b: 2,
-c: 3}""", "{a: 1, b: 2, c: 3}"),
+c: 3
+}""", "{a: 1, b: 2, c: 3}"),
       ]
     for testPair in tests:
       var program: Node = parseSource(testPair[0])

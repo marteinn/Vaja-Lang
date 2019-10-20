@@ -1,4 +1,7 @@
-let rainDogs = {"recordingYear": 1985}
+let rainDogs = {
+  "recordingYear": 1985,
+  "length": 53.46
+}
 let records = {"TomWaits": [rainDogs]}
 
 print(records)

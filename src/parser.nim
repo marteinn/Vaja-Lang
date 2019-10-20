@@ -327,6 +327,11 @@ proc parseHashMapLiteral(parser: var Parser): Node =
     let value: Node = parser.parseExpression(Precedence.LOWEST)
     discard parser.nextParserToken()
 
+    # Remove any trailing newlinw
+    while parser.curToken.tokenType == TokenType.NEWLINE:
+      discard parser.nextParserToken()
+      continue
+
     elements[key] = value
 
   return newHashMapLiteral(token=token, hashMapElements=elements)
