@@ -318,7 +318,7 @@ proc parseHashMapLiteral(parser: var Parser): Node =
 
   while parser.curToken.tokenType != TokenType.RBRACE:
     discard parser.nextParserToken()
-    var key: Node = parser.parseExpression(Precedence.LOWEST)
+    let key: Node = parser.parseExpression(Precedence.LOWEST)
 
     if not parser.expectPeek(TokenType.COLON):
       return nil
@@ -461,6 +461,10 @@ proc getInfixFn(tokenType: TokenType): InfixFunction =
     else: nil
 
 method parseExpression(parser: var Parser, precedence: Precedence): Node =
+  while parser.curToken.tokenType == TokenType.NEWLINE:
+    discard parser.nextParserToken()
+    continue
+
   var
     prefixFn = getPrefixFn(parser.curToken.tokenType)
 
@@ -490,7 +494,7 @@ method parseExpression(parser: var Parser, precedence: Precedence): Node =
   return leftExpression
 
 method parseExpressionStatement(parser: var Parser): Node {.base.} =
-  var
+  let
     expression = parser.parseExpression(Precedence.LOWEST)
   return newExpressionStatement(token=parser.curToken, expression=expression)
 
