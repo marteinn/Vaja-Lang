@@ -224,3 +224,20 @@ not 5
 
 - `type()`
 - `print()`
+
+
+## Imports
+
+Full import
+```
+import mylibrary
+
+funcFromMyLibrary()
+```
+
+Import certain objects
+```
+from mylibrary import funcFromMyLibrary
+
+funcFromMyLibrary()
+```
