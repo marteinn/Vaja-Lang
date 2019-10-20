@@ -1,6 +1,6 @@
 # Väja
 
-Väja is a experimental language built in Nim and is primarly inspired by Elixir, Lua, Python, Nim and Monkey.
+Väja is a dynamic interpreted language inspired by Elixir, Lua, Python, Nim and Monkey.
 
 
 ## Features:
