@@ -19,6 +19,7 @@ from obj import
   newFunctionGroup,
   newEnclosedEnv,
   newReturn,
+  newArray,
   addFunctionToGroup,
   ObjType,
   hasNumberType,
@@ -380,3 +381,6 @@ proc eval*(node: Node, env: var Env): Obj =
     of NTIfExpression: evalIfExpression(node, env)
     of NTCaseExpression: evalCaseExpression(node, env)
     of NTNil: NIL
+    of NTArrayLiteral:
+      let elements: seq[Obj] = evalExpressions(node.arrayElements, env)
+      newArray(arrayElements=elements)

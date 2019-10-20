@@ -281,3 +281,16 @@ end
     check(lexer.nextToken().tokenType == TokenType.STRING)
     check(lexer.nextToken().tokenType == TokenType.NEWLINE)
     check(lexer.nextToken().tokenType == TokenType.END)
+
+  test "array tokens":
+    var
+      source: string = "[1, 2, 3]"
+      lexer: Lexer = newLexer(source)
+
+    check(lexer.nextToken().tokenType == TokenType.LBRACKET)
+    check(lexer.nextToken().tokenType == TokenType.INT)
+    check(lexer.nextToken().tokenType == TokenType.COMMA)
+    check(lexer.nextToken().tokenType == TokenType.INT)
+    check(lexer.nextToken().tokenType == TokenType.COMMA)
+    check(lexer.nextToken().tokenType == TokenType.INT)
+    check(lexer.nextToken().tokenType == TokenType.RBRACKET)

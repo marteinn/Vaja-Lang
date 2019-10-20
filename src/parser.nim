@@ -22,6 +22,7 @@ from ast import
   newPipeLR,
   newIfExpression,
   newCaseExpression,
+  newArrayLiteral,
   Node,
   toCode,
   CasePattern
@@ -122,7 +123,7 @@ proc parsePrefixExpression(parser: var Parser): Node =
 proc parseGroupedExpression(parser: var Parser): Node =
   discard parser.nextParserToken()
 
-  var expression: Node = parser.parseExpression(Precedence.LOWEST)
+  let expression: Node = parser.parseExpression(Precedence.LOWEST)
 
   if not expectPeek(parser, TokenType.RPAREN):
       return nil
@@ -270,6 +271,38 @@ proc parseCaseExpression(parser: var Parser): Node =
     token=token, caseCondition=condition, casePatterns=casePatterns
   )
 
+proc parseArrayExpressionList(parser: var Parser): seq[Node] =
+  if parser.peekToken.tokenType == TokenType.RBRACKET:
+    discard parser.nextParserToken()
+    return @[]
+
+  discard parser.nextParserToken()
+
+  var elements: seq[Node] = @[
+    parser.parseExpression(Precedence.LOWEST)
+  ]
+
+  while parser.peekToken.tokenType == TokenType.COMMA:
+    discard parser.nextParserToken()
+    discard parser.nextParserToken()
+
+    elements.add(
+      parser.parseExpression(Precedence.LOWEST)
+    )
+
+  if not parser.expectPeek(TokenType.RBRACKET):
+    return @[]
+
+  return elements
+
+proc parseArrayLiteral(parser: var Parser): Node =
+  let token: Token = parser.curToken
+  let arrayElements: seq[Node] = parseArrayExpressionList(parser)
+  return newArrayLiteral(
+    token=token,
+    arrayElements=arrayElements
+  )
+
 type PrefixFunction = proc (parser: var Parser): Node
 
 proc getPrefixFn(tokenType: TokenType): PrefixFunction =
@@ -287,6 +320,7 @@ proc getPrefixFn(tokenType: TokenType): PrefixFunction =
     of FUNCTION: parseFunctionLiteral
     of IF: parseIfExpression
     of CASE: parseCaseExpression
+    of LBRACKET: parseArrayLiteral
     else: nil
 
 method currentPrecedence(parser: var Parser): Precedence {.base.} =

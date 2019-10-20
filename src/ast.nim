@@ -22,6 +22,7 @@ type
     NTPipeLR,
     NTIfExpression,
     NTCaseExpression,
+    NTArrayLiteral,
   Node* = ref object
     token*: Token
     case nodeType*: NodeType
@@ -63,6 +64,8 @@ type
       of NTCaseExpression:
         caseCondition*: Node
         casePatterns*: seq[CasePattern]
+      of NTArrayLiteral:
+        arrayElements*: seq[Node]
   CasePattern* = tuple[condition: Node, consequence: Node]
 
 method toCode*(node: Node): string {.base.} =
@@ -130,6 +133,11 @@ method toCode*(node: Node): string {.base.} =
           toCode(x.consequence)
       )
       "case (" & node.caseCondition.toCode() & ")\n" & join(nodeCode, "\n") & "\nend"
+    of NTArrayLiteral:
+      let elementsCode = map(
+        node.arrayElements, proc (x: Node): string = toCode(x)
+      )
+      "[" & join(elementsCode, ", ") & "]"
 
 proc newIntegerLiteral*(token: Token, intValue: int): Node =
   return Node(nodeType: NodeType.NTIntegerLiteral, intValue: intValue)
@@ -244,6 +252,16 @@ proc newCaseExpression*(
     token: token,
     caseCondition: caseCondition,
     casePatterns: casePatterns
+  )
+
+proc newArrayLiteral*(
+  token: Token,
+  arrayElements: seq[Node]
+): Node =
+  return Node(
+    nodeType: NodeType.NTArrayLiteral,
+    token: token,
+    arrayElements: arrayElements
   )
 
 proc newProgram*(statements: seq[Node]): Node =

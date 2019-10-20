@@ -95,6 +95,19 @@ suite "eval tests":
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
 
+  test "array expression":
+    type
+      ExpectedEval = (string, string)
+      ExpectedEvals = seq[ExpectedEval]
+    var
+      tests: ExpectedEvals = @[
+        ("[1, 2, 3]", "[1, 2, 3]"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+
   test "assignments":
     type
       ExpectedEval = (string, string)

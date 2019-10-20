@@ -316,3 +316,13 @@ end""")]
       var program: Node = parseSource(testPair[0])
       check program.statements[0].expression.nodeType == NodeType.NTCaseExpression
       check program.statements[0].toCode() == testPair[1]
+
+  test "test array literal":
+    var
+      source: string = "[1, 2, 3, true]"
+      program: Node = parseSource(source)
+
+    check len(program.statements) == 1
+    check program.statements[0].nodeType == NodeType.NTExpressionStatement
+    check program.statements[0].expression.nodeType == NodeType.NTArrayLiteral
+    check program.statements[0].toCode() == "[1, 2, 3, true]"

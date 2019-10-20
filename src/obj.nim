@@ -14,6 +14,7 @@ type
     OTFunctionGroup
     OTReturn
     OTNil
+    OTArray
   Obj* = ref object
     case objType*: ObjType
       of OTInteger: intValue*: int
@@ -29,6 +30,7 @@ type
         arityGroup*: Table[int, seq[Obj]]
       of OTReturn: returnValue*: Obj
       of OTNil: discard
+      of OTArray: arrayElements*: seq[Obj]
 
   Env* = ref object
     store*: Table[string, Obj]
@@ -105,6 +107,10 @@ method inspect*(obj: Obj): string {.base.} =
     of OTReturn:
       obj.returnValue.inspect()
     of OTNil: "nil"
+    of OTArray:
+      let
+        elementsCode: seq[string] = map(obj.arrayElements, proc (x: Obj): string = inspect(x))
+      "[" & join(elementsCode, ", ") & "]"
 
 proc newInteger*(intValue: int): Obj =
   return Obj(objType: ObjType.OTInteger, intValue: intValue)
@@ -142,6 +148,9 @@ proc newFunctionGroup*(): Obj =
       int, seq[Obj]
     ](),
   )
+
+proc newArray*(arrayElements: seq[Obj]): Obj =
+  return Obj(objType: ObjType.OTArray, arrayElements: arrayElements)
 
 method addFunctionToGroup*(fnGroup: var Obj, fn: Obj): Obj {.base.} =
   let arity: int = len(fn.functionParams)

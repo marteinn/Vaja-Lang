@@ -2,12 +2,48 @@
 
 ## Supported types
 
+### Integer
+
+```
+1
+```
+
+### Float
+
+```
+1.1
+```
+
+### Nil/Null
+
+```
+nil
+```
+
+### Strings
+
+```
+"hello"
+```
+
+### Booleans
+
 ```
 true
- "hello"
-1
-1.1
-nil
+false
+```
+
+### Arrays
+
+```
+let animals = ["bird", "horse", cat"]
+print(animals[0])  # bird
+```
+
+### Hashmap
+
+```
+let weather = {"monday": "Rain", "tuesday": "Cloudy"}
 ```
 
 ## Variable assignment
