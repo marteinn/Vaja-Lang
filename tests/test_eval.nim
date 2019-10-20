@@ -108,6 +108,22 @@ suite "eval tests":
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
 
+  test "array index":
+    type
+      ExpectedEval = (string, string)
+      ExpectedEvals = seq[ExpectedEval]
+    var
+      tests: ExpectedEvals = @[
+        ("let a = [1, 2, 3]; a[0]", "1"),
+        ("let a = [1, 2, 3]; let key = 1; a[key]", "2"),
+        ("[1, 2, 3][2]", "3"),
+        ("[1, 2, 3].0", "1"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+
   test "hashmap expression":
     type
       ExpectedEval = (string, string)
@@ -129,13 +145,13 @@ suite "eval tests":
     var
       tests: ExpectedEvals = @[
         ("""let a = {"monday": 1}; a.monday""", "1"),
-        #("""let a = "today";{a: 1}""", "{today: 1}"),
+        ("""let a = {"monday": 1}; a["monday"]""", "1"),
+        ("""let a = {"monday": 1}; let key = "monday"; a[key]""", "1"),
       ]
 
     for testPair in tests:
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
-
 
   test "assignments":
     type

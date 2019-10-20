@@ -43,6 +43,7 @@ type
     PRODUCT = 5
     PREFIX = 6
     CALL = 7
+    INDEX = 8
 var
   precedences: Table[TokenType, Precedence] = {
     TokenType.PLUS: Precedence.SUM,
@@ -62,7 +63,8 @@ var
     TokenType.LTE: Precedence.PRODUCT,
     TokenType.LPAREN: Precedence.CALL,
     TokenType.PIPERARROW: Precedence.SUM,
-    TokenType.DOT: Precedence.CALL,
+    TokenType.DOT: Precedence.INDEX,
+    TokenType.LBRACKET: Precedence.INDEX,
   }.toTable
 
 method nextParserToken(parser: var Parser): Token {.base.} =
@@ -424,7 +426,7 @@ method parsePipeLRInfix(parser: var Parser, left: Node): Node {.base.} =
     token=token, pipeLeft=left, pipeRight=right
   )
 
-method parseIndexOperationInfix(parser: var Parser, left: Node): Node {.base.} =
+method parseIndexPropertyOperationInfix(parser: var Parser, left: Node): Node {.base.} =
   var
     token: Token = parser.curToken
     precedence: Precedence = parser.currentPrecedence()
@@ -434,6 +436,22 @@ method parseIndexOperationInfix(parser: var Parser, left: Node): Node {.base.} =
   # Transform identifier property to string
   if right.nodeType == NodeType.NTIdentifier:
     right = newStringLiteral(token=parser.curToken, strValue=right.identValue)
+
+  return newIndexOperation(
+    token=token,
+    indexOpLeft=left,
+    indexOpIndex=right
+  )
+
+method parseIndexOperationInfix(parser: var Parser, left: Node): Node {.base.} =
+  let
+    token: Token = parser.curToken
+    precedence: Precedence = parser.currentPrecedence()
+  discard parser.nextParserToken()
+
+  let right: Node = parser.parseExpression(Precedence.LOWEST)
+  if not expectPeek(parser, TokenType.RBRACKET):
+    return nil
 
   return newIndexOperation(
     token=token,
@@ -462,7 +480,8 @@ proc getInfixFn(tokenType: TokenType): InfixFunction =
     of LTE: parseInfixExpression
     of LPAREN: parseCallExpression
     of PIPERARROW: parsePipeLRInfix
-    of DOT: parseIndexOperationInfix
+    of DOT: parseIndexPropertyOperationInfix
+    of LBRACKET: parseIndexOperationInfix
     else: nil
 
 method parseExpression(parser: var Parser, precedence: Precedence): Node =

@@ -310,10 +310,16 @@ proc getMatchingFunction*(
 
 proc evalIndexOp(left: Obj, index: Obj): Obj =
   if left.objType == ObjType.OTHashMap:
-    if contains(left.hashMapElements, index.strValue):
+    try:
       return left.hashMapElements[index.strValue]
-    else:
+    except:
       return newError(errorMsg="Key " & index.strValue & " not found")
+
+  if left.objType == ObjType.OTArray and index.objType == ObjType.OTInteger:
+    try:
+      return left.arrayElements[index.intValue]
+    except:
+      return newError(errorMsg="Key " & $index.intValue & " not found")
 
   return newError(errorMsg="Index operation is not supported")
 

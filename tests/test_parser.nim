@@ -362,7 +362,21 @@ c: 3
       ExpectedTokens = seq[ExpectedParsing]
     var
       tests: ExpectedTokens = @[
-        ("random.a", "random.a"),
+        ("random.a", "random[a]"),
+        ("random[a]", "random[a]"),
+      ]
+    for testPair in tests:
+      var program: Node = parseSource(testPair[0])
+      check program.statements[0].expression.nodeType == NodeType.NTIndexOperation
+      check program.statements[0].toCode() == testPair[1]
+
+  test "array dynamic index":
+    type
+      ExpectedParsing = (string, string)
+      ExpectedTokens = seq[ExpectedParsing]
+    var
+      tests: ExpectedTokens = @[
+        ("random[0]", "random[0]"),
       ]
     for testPair in tests:
       var program: Node = parseSource(testPair[0])

@@ -154,7 +154,7 @@ method toCode*(node: Node): string {.base.} =
 
       "{" & elementsCode & "}"
     of NTIndexOperation:
-      node.indexOpLeft.toCode() & "." & node.indexOpIndex.toCode()
+      node.indexOpLeft.toCode() & "[" & node.indexOpIndex.toCode() & "]"
 
 proc hash*(node: Node): Hash =
   var h: Hash = 0
