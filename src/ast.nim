@@ -27,6 +27,7 @@ type
     NTArrayLiteral,
     NTHashMapLiteral,
     NTIndexOperation,
+    NTModule
   Node* = ref object
     token*: Token
     case nodeType*: NodeType
@@ -73,6 +74,7 @@ type
       of NTIndexOperation:
         indexOpLeft*: Node
         indexOpIndex*: Node
+      of NTModule: moduleStatements*: seq[Node]
   CasePattern* = tuple[condition: Node, consequence: Node]
 
 method toCode*(node: Node): string {.base.} =
@@ -155,6 +157,7 @@ method toCode*(node: Node): string {.base.} =
       "{" & elementsCode & "}"
     of NTIndexOperation:
       node.indexOpLeft.toCode() & "[" & node.indexOpIndex.toCode() & "]"
+    of NTModule: "<module>"
 
 proc hash*(node: Node): Hash =
   var h: Hash = 0
@@ -312,6 +315,9 @@ proc newIndexOperation*(
     indexOpLeft: indexOpLeft,
     indexOpIndex: indexOpIndex
   )
+
+proc newModule*(moduleStatements: seq[Node]): Node =
+  return Node(nodeType: NodeType.NTModule, moduleStatements: moduleStatements)
 
 proc newProgram*(statements: seq[Node]): Node =
   return Node(nodeType: NodeType.NTProgram, statements: statements)

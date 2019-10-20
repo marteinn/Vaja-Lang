@@ -188,6 +188,8 @@ method nextToken*(lexer: var Lexer): Token {.base.} =
           tok = newToken(tokenType=TokenType.NIL, literal=identifier)
         of "of":
           tok = newToken(tokenType=TokenType.OF, literal=identifier)
+        of "import":
+          tok = newToken(tokenType=TokenType.IMPORT, literal=identifier)
         else:
           tok = newToken(tokenType=TokenType.IDENT, literal=identifier)
       return tok

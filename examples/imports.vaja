@@ -1,0 +1,3 @@
+import external_module
+
+myFunc("martin")

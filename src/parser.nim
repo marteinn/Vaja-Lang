@@ -1,7 +1,8 @@
+import os
 import tables
 from strutils import parseInt, parseFloat
 
-from lexer import Lexer, nextToken
+from lexer import Lexer, nextToken, newLexer
 from token import Token, TokenType
 from ast import
   newProgram,
@@ -25,6 +26,7 @@ from ast import
   newArrayLiteral,
   newHashMapLiteral,
   newIndexOperation,
+  newModule,
   Node,
   NodeType,
   toCode,
@@ -66,6 +68,8 @@ var
     TokenType.DOT: Precedence.INDEX,
     TokenType.LBRACKET: Precedence.INDEX,
   }.toTable
+
+proc newParser*(lexer: Lexer): Parser  # Forward declaration
 
 method nextParserToken(parser: var Parser): Token {.base.} =
   parser.curToken = parser.peekToken
@@ -338,6 +342,34 @@ proc parseHashMapLiteral(parser: var Parser): Node =
 
   return newHashMapLiteral(token=token, hashMapElements=elements)
 
+method parseModule*(parser: var Parser): Node {.base.} # Forward declaration
+
+proc parseImport(parser: var Parser): Node =
+  discard parser.nextParserToken()
+
+  # TODO: Create parser function
+  let
+    filePath: string = parser.curToken.literal & ".vaja"
+    source = readFile(filePath)
+  var
+    lexer: Lexer = newLexer(source=source)
+    parser: Parser = newParser(lexer=lexer)
+
+  return parser.parseModule()
+
+proc parseFromImport(parser: var Parser): Node =
+  discard parser.nextParserToken()
+
+  # TODO: Add support for importing/exposing partial imports
+  let
+    filePath: string = parser.curToken.literal & ".vaja"
+    source = readFile(filePath)
+  var
+    lexer: Lexer = newLexer(source=source)
+    parser: Parser = newParser(lexer=lexer)
+
+  return parser.parseModule()
+
 type PrefixFunction = proc (parser: var Parser): Node
 
 proc getPrefixFn(tokenType: TokenType): PrefixFunction =
@@ -357,6 +389,8 @@ proc getPrefixFn(tokenType: TokenType): PrefixFunction =
     of CASE: parseCaseExpression
     of LBRACKET: parseArrayLiteral
     of LBRACE: parseHashMapLiteral
+    of IMPORT: parseImport
+    of FROM: parseFromImport
     else: nil
 
 method currentPrecedence(parser: var Parser): Precedence {.base.} =
@@ -560,6 +594,22 @@ method parseStatement(parser: var Parser): Node {.base.} =
     return parser.parseReturnStatement()
   return parser.parseExpressionStatement()
 
+method parseModule*(parser: var Parser): Node {.base.} =
+  var statements: seq[Node] = @[]
+  while parser.curToken.tokenType != TokenType.EOF:
+    if parser.curToken.tokenType in [
+      TokenType.SEMICOLON, TokenType.NEWLINE
+    ]:
+      discard parser.nextParserToken()
+      continue
+
+    var statement: Node = parser.parseStatement()
+    statements.add(statement)
+
+    discard parser.nextParserToken()
+
+  return newModule(moduleStatements=statements)
+
 method parseProgram*(parser: var Parser): Node {.base.} =
   var statements: seq[Node] = @[]
   while parser.curToken.tokenType != TokenType.EOF:
@@ -574,7 +624,7 @@ method parseProgram*(parser: var Parser): Node {.base.} =
 
     discard parser.nextParserToken()
 
-  return newProgram(statements = statements)
+  return newProgram(statements=statements)
 
 proc newParser*(lexer: Lexer): Parser =
   var parser: Parser = Parser(lexer: lexer)

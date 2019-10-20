@@ -38,6 +38,9 @@ type
     ELSE,
     CASE,
     OF,
+    # Loading
+    IMPORT,
+    FROM,
     # Operators
     LET,
     FUNCTION,

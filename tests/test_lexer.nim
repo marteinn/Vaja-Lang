@@ -27,6 +27,7 @@ add5
 _
 _ignored
 case
+import
 """
       lexer: Lexer = newLexer(source)
     type
@@ -99,6 +100,8 @@ case
         (TokenType.IDENT, "_ignored"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.CASE, "case"),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.IMPORT, "import"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.EOF, "")
       ]

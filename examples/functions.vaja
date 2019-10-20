@@ -2,7 +2,7 @@ fn hello(name)
   "hello " & name
 end
 
-hello("martin")
+hello("martin") |> print()
 
 
 fn multiply(x, y)
@@ -10,7 +10,7 @@ fn multiply(x, y)
   return res
 end
 
-multiply(5, 7)
+multiply(5, 7) |> print()
 
 
 fn addFive(x) -> x + 5

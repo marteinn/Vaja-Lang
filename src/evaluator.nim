@@ -6,6 +6,8 @@ from ast import Node, NodeType, toCode, CasePattern
 from obj import
   Obj,
   Env,
+  newEnv,
+  mergeEnvs,
   setVar,
   getVar,
   inspectEnv,
@@ -56,6 +58,25 @@ proc evalProgram(node: Node, env: var Env): Obj =
 
     if resultValue.objType == ObjType.OTError:
       return resultValue
+  return resultValue
+
+proc evalModule(node: Node, env: var Env): Obj =
+  var
+    resultValue: Obj = nil
+    moduleEnv: Env = newEnv()
+  for statement in node.moduleStatements:
+    resultValue = eval(statement, moduleEnv)
+
+    if resultValue == nil:
+      continue
+
+    if resultValue.objType == ObjType.OTReturn:
+      return resultValue
+
+    if resultValue.objType == ObjType.OTError:
+      return resultValue
+
+  env = mergeEnvs(env, moduleEnv)
   return resultValue
 
 proc evalInfixIntegerExpression(operator: string, left: Obj, right: Obj): Obj =
@@ -326,6 +347,7 @@ proc evalIndexOp(left: Obj, index: Obj): Obj =
 proc eval*(node: Node, env: var Env): Obj =
   case node.nodeType:
     of NTProgram: evalProgram(node, env)
+    of NTModule: evalModule(node, env)
     of NTExpressionStatement: eval(node.expression, env)
     of NTIntegerLiteral: newInteger(intValue=node.intValue)
     of NTFloatLiteral: newFloat(floatValue=node.floatValue)

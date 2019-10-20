@@ -36,10 +36,12 @@ if mode == RMRepl:
 
 if mode == RMFile:
   let fileContent = readFile(filePath)
+  setCurrentDir(parentDir(filePath))
+
   var
     source: string = fileContent
-    lexer: Lexer = newLexer(source = source)
-    parser: Parser = newParser(lexer = lexer)
+    lexer: Lexer = newLexer(source=source)
+    parser: Parser = newParser(lexer=lexer)
     program: Node = parser.parseProgram()
     evaluated: Obj = eval(program, env)
   echo evaluated.inspect()

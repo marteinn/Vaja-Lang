@@ -64,6 +64,11 @@ proc newEnv*(): Env =
 proc newEnclosedEnv*(env: Env): Env =
   return Env(outer: env, store: initTable[string, Obj]())
 
+method mergeEnvs*(env: var Env, fromEnv: var Env): Env {.base.} =
+  for key, value in fromEnv.store:
+    env.store[key] = value
+  return env
+
 method setVar*(env: Env, name: string, value: Obj): Env {.base.} =
   env.store[name] = value
   return env
