@@ -29,6 +29,7 @@ from obj import
   FALSE,
   NIL,
   compareObj
+from builtins import globals
 
 proc eval*(node: Node, env: var Env): Obj # Forward declaration
 
@@ -190,11 +191,13 @@ proc evalIdentifier(node: Node, env: var Env) : Obj =
     return newError(errorMsg="Invalid use of " & node.identValue & ", it represents a value to be ignored")
 
   let exists: bool = env.containsVar(node.identValue)
+  if exists:
+    return env.getVar(node.identValue)
 
-  if not exists:
-    return newError(errorMsg="Name " & node.identValue & " is not defined")
+  if contains(globals, node.identValue):
+    return globals[node.identValue]
 
-  return env.getVar(node.identValue)
+  return newError(errorMsg="Name " & node.identValue & " is not defined")
 
 proc evalExpressions(expressions: seq[Node], env: var Env): seq[Obj] =
   var res: seq[Obj] = @[]
@@ -228,14 +231,18 @@ proc unwrapReturnValue(obj: Obj): Obj =
   return obj
 
 proc applyFunction(fn: Obj, arguments: seq[Obj], env: var Env): Obj =
-  var
-    extendedEnv: Env = extendFunctionEnv(
-      fn.functionEnv, fn.functionParams, arguments
-    )
-    res: Obj = eval(fn.functionBody, extendedEnv)
+  if fn.objType == OTFunction:
+    var
+      extendedEnv: Env = extendFunctionEnv(
+        fn.functionEnv, fn.functionParams, arguments
+      )
+      res: Obj = eval(fn.functionBody, extendedEnv)
 
-  # TODO: Add builtin call
-  return unwrapReturnValue(res)
+    return unwrapReturnValue(res)
+
+  if fn.objType == OTBuiltin:
+    return fn.builtinFn(arguments)
+
 
 proc evalIfExpression(node: Node, env: var Env): Obj =
   var condition: Obj = eval(node.ifCondition, env)
@@ -359,7 +366,7 @@ proc eval*(node: Node, env: var Env): Obj =
       if isError(fn):
         return fn
 
-      if len(arguments) > len(fn.functionParams):
+      if fn.objType == ObjType.OTFunction and len(arguments) > len(fn.functionParams):
         return newError(
           errorMsg="Function with arity " & $len(fn.functionParams) &
             " called with " & $len(arguments) & " arguments"

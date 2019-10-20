@@ -136,6 +136,7 @@ suite "eval tests":
         ("-true", "Prefix operator - does not support type OTBoolean"),
         ("(fn(x, y) -> x)(1, 2, 3)", "Function with arity 2 called with 3 arguments"),
         ("case (2) of 1 -> 2 end", "No clause matching"),
+        ("cat(1)", "Name cat is not defined"),
       ]
 
     for testPair in tests:
@@ -475,3 +476,34 @@ end
       #var evaluated: Obj = evalSource(testPair[0])
       #check evaluated.inspect() == testPair[1]
       #check evaluated.objType == ObjType.OTInteger
+
+  test "builtin: type":
+    type
+      ExpectedEval = (string, string)
+      ExpectedEvals = seq[ExpectedEval]
+    var
+      tests: ExpectedEvals = @[
+        ("type(1)", "integer"),
+        ("type(1.1)", "float"),
+        ("""type("hello")""", "string"),
+        ("type(true)", "boolean"),
+        ("type(nil)", "nil"),
+        ("type([1, 2])", "array"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+
+  test "builtin: print":
+    type
+      ExpectedEval = (string, string)
+      ExpectedEvals = seq[ExpectedEval]
+    var
+      tests: ExpectedEvals = @[
+        ("print(1)", "nil"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]

@@ -157,12 +157,6 @@ end
 1 |> print()  # 1
 ```
 
-## Array
-
-```
-let a = [1, 2, 3]
-```
-
 ## Iterators
 
 ```
@@ -217,3 +211,9 @@ not 5
 ```
 "a" & "b" >> "ab"
 ```
+
+
+## Builtins
+
+- `type()`
+- `print()`

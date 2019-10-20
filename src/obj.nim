@@ -15,6 +15,7 @@ type
     OTReturn
     OTNil
     OTArray
+    OTBuiltin
   Obj* = ref object
     case objType*: ObjType
       of OTInteger: intValue*: int
@@ -31,6 +32,7 @@ type
       of OTReturn: returnValue*: Obj
       of OTNil: discard
       of OTArray: arrayElements*: seq[Obj]
+      of OTBuiltin: builtinFn*: proc(arguments: seq[Obj]): Obj
 
   Env* = ref object
     store*: Table[string, Obj]
@@ -111,6 +113,7 @@ method inspect*(obj: Obj): string {.base.} =
       let
         elementsCode: seq[string] = map(obj.arrayElements, proc (x: Obj): string = inspect(x))
       "[" & join(elementsCode, ", ") & "]"
+    of OTBuiltin: "<builtin>"
 
 proc newInteger*(intValue: int): Obj =
   return Obj(objType: ObjType.OTInteger, intValue: intValue)
@@ -151,6 +154,9 @@ proc newFunctionGroup*(): Obj =
 
 proc newArray*(arrayElements: seq[Obj]): Obj =
   return Obj(objType: ObjType.OTArray, arrayElements: arrayElements)
+
+proc newBuiltin*(builtinFn: proc(arguments: seq[Obj]): Obj): Obj =
+  return Obj(objType: ObjType.OTBuiltin, builtinFn: builtinFn)
 
 method addFunctionToGroup*(fnGroup: var Obj, fn: Obj): Obj {.base.} =
   let arity: int = len(fn.functionParams)
