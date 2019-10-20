@@ -23,9 +23,11 @@ from ast import
   newIfExpression,
   newCaseExpression,
   newArrayLiteral,
+  newHashMapLiteral,
   Node,
   toCode,
-  CasePattern
+  CasePattern,
+  hash
 
 type
   Parser* = object
@@ -303,6 +305,29 @@ proc parseArrayLiteral(parser: var Parser): Node =
     arrayElements=arrayElements
   )
 
+proc parseHashMapLiteral(parser: var Parser): Node =
+  let token: Token = parser.curToken
+  var elements: OrderedTable[Node, Node] = initOrderedTable[Node, Node]()
+
+  if parser.peekToken.tokenType == TokenType.RBRACE:
+    discard parser.nextParserToken()
+    return newHashMapLiteral(token=token, hashMapElements=elements)
+
+  while parser.curToken.tokenType != TokenType.RBRACE:
+    discard parser.nextParserToken()
+    var key: Node = parser.parseExpression(Precedence.LOWEST)
+
+    if not parser.expectPeek(TokenType.COLON):
+      return nil
+
+    discard parser.nextParserToken()
+    let value: Node = parser.parseExpression(Precedence.LOWEST)
+    discard parser.nextParserToken()
+
+    elements[key] = value
+
+  return newHashMapLiteral(token=token, hashMapElements=elements)
+
 type PrefixFunction = proc (parser: var Parser): Node
 
 proc getPrefixFn(tokenType: TokenType): PrefixFunction =
@@ -321,6 +346,7 @@ proc getPrefixFn(tokenType: TokenType): PrefixFunction =
     of IF: parseIfExpression
     of CASE: parseCaseExpression
     of LBRACKET: parseArrayLiteral
+    of LBRACE: parseHashMapLiteral
     else: nil
 
 method currentPrecedence(parser: var Parser): Precedence {.base.} =

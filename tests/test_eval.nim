@@ -108,6 +108,20 @@ suite "eval tests":
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
 
+  test "hashmap expression":
+    type
+      ExpectedEval = (string, string)
+      ExpectedEvals = seq[ExpectedEval]
+    var
+      tests: ExpectedEvals = @[
+        ("""{"monday": 1}""", "{monday: 1}"),
+        ("""let a = "today";{a: 1}""", "{today: 1}"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+
   test "assignments":
     type
       ExpectedEval = (string, string)

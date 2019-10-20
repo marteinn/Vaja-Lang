@@ -96,10 +96,16 @@ method nextToken*(lexer: var Lexer): Token {.base.} =
       tok = newToken(tokenType=TokenType.LBRACKET, literal=($ch))
     of ']':
       tok = newToken(tokenType=TokenType.RBRACKET, literal=($ch))
+    of '{':
+      tok = newToken(tokenType=TokenType.LBRACE, literal=($ch))
+    of '}':
+      tok = newToken(tokenType=TokenType.RBRACE, literal=($ch))
     of '&':
       tok = newToken(tokenType=TokenType.AMP, literal=($ch))
     of ',':
       tok = newToken(tokenType=TokenType.COMMA, literal=($ch))
+    of ':':
+      tok = newToken(tokenType=TokenType.COLON, literal=($ch))
     of '$':
       tok = newToken(tokenType=TokenType.DOLLAR, literal=($ch))
     of '|':

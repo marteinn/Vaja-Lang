@@ -1,6 +1,7 @@
 from sequtils import map
 from strutils import join
 import tables
+import hashes
 from ast import Node, toCode
 
 type
@@ -16,6 +17,7 @@ type
     OTNil
     OTArray
     OTBuiltin
+    OTHashMap
   Obj* = ref object
     case objType*: ObjType
       of OTInteger: intValue*: int
@@ -33,6 +35,7 @@ type
       of OTNil: discard
       of OTArray: arrayElements*: seq[Obj]
       of OTBuiltin: builtinFn*: proc(arguments: seq[Obj]): Obj
+      of OTHashMap: hashMapElements*: OrderedTable[Obj, Obj]
 
   Env* = ref object
     store*: Table[string, Obj]
@@ -55,6 +58,15 @@ proc compareObj*(a: Obj, b: Obj): bool =
         true
       else:
         false
+
+proc hash*(obj: Obj): Hash =
+  var h: Hash = 0
+  h = h !& hash(obj.objType)
+  let objHash = case obj.objType:
+    of OTString: hash(obj.strValue)
+    else: hash("")
+  h = h !& objHash
+  return !$h
 
 proc newEnv*(): Env =
   return Env(store: initTable[string, Obj]())
@@ -114,6 +126,14 @@ method inspect*(obj: Obj): string {.base.} =
         elementsCode: seq[string] = map(obj.arrayElements, proc (x: Obj): string = inspect(x))
       "[" & join(elementsCode, ", ") & "]"
     of OTBuiltin: "<builtin>"
+    of OTHashMap:
+      var elementsCode: string = ""
+      for key, val in obj.hashMapElements:
+        if elementsCode != "":
+          elementsCode = elementsCode & ", "
+        elementsCode = elementsCode & key.inspect() & ": " & val.inspect()
+
+      "{" & elementsCode & "}"
 
 proc newInteger*(intValue: int): Obj =
   return Obj(objType: ObjType.OTInteger, intValue: intValue)
@@ -157,6 +177,9 @@ proc newArray*(arrayElements: seq[Obj]): Obj =
 
 proc newBuiltin*(builtinFn: proc(arguments: seq[Obj]): Obj): Obj =
   return Obj(objType: ObjType.OTBuiltin, builtinFn: builtinFn)
+
+proc newHashMap*(hashMapElements: OrderedTable[Obj, Obj]): Obj =
+  return Obj(objType: ObjType.OTHashMap, hashMapElements: hashMapElements)
 
 method addFunctionToGroup*(fnGroup: var Obj, fn: Obj): Obj {.base.} =
   let arity: int = len(fn.functionParams)

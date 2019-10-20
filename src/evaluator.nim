@@ -20,6 +20,7 @@ from obj import
   newEnclosedEnv,
   newReturn,
   newArray,
+  newHashMap,
   addFunctionToGroup,
   ObjType,
   hasNumberType,
@@ -28,7 +29,8 @@ from obj import
   TRUE,
   FALSE,
   NIL,
-  compareObj
+  compareObj,
+  hash
 from builtins import globals
 
 proc eval*(node: Node, env: var Env): Obj # Forward declaration
@@ -391,3 +393,11 @@ proc eval*(node: Node, env: var Env): Obj =
     of NTArrayLiteral:
       let elements: seq[Obj] = evalExpressions(node.arrayElements, env)
       newArray(arrayElements=elements)
+    of NTHashMapLiteral:
+      var elements: OrderedTable[Obj, Obj] = initOrderedTable[Obj, Obj]()
+      for key, value in node.hashMapElements:
+        let
+          keyObj: Obj = eval(key, env)
+          valObj: Obj = eval(value, env)
+        elements[keyObj] = valObj
+      newHashMap(hashMapElements=elements)

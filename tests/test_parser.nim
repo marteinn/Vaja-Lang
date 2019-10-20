@@ -326,3 +326,27 @@ end""")]
     check program.statements[0].nodeType == NodeType.NTExpressionStatement
     check program.statements[0].expression.nodeType == NodeType.NTArrayLiteral
     check program.statements[0].toCode() == "[1, 2, 3, true]"
+
+  test "hashmap literal":
+    var
+      source: string = """{"monday": 0, "tuesday": 1}"""
+      program: Node = parseSource(source)
+
+    check len(program.statements) == 1
+    check program.statements[0].nodeType == NodeType.NTExpressionStatement
+    check program.statements[0].expression.nodeType == NodeType.NTHashMapLiteral
+    check program.statements[0].toCode() == "{monday: 0, tuesday: 1}"
+
+  test "hashmap constructs":
+    type
+      ExpectedParsing = (string, string)
+      ExpectedTokens = seq[ExpectedParsing]
+    var
+      tests: ExpectedTokens = @[
+        ("{}", "{}"),
+        ("{a: 1}", "{a: 1}"),
+        ("{a: 1, b: 2, c: 3}", "{a: 1, b: 2, c: 3}"),
+      ]
+    for testPair in tests:
+      var program: Node = parseSource(testPair[0])
+      check program.statements[0].toCode() == testPair[1]

@@ -294,3 +294,18 @@ end
     check(lexer.nextToken().tokenType == TokenType.COMMA)
     check(lexer.nextToken().tokenType == TokenType.INT)
     check(lexer.nextToken().tokenType == TokenType.RBRACKET)
+
+  test "hashmap tokens":
+    var
+      source: string = "{monday: 0, tuesday: 1}"
+      lexer: Lexer = newLexer(source)
+
+    check(lexer.nextToken().tokenType == TokenType.LBRACE)
+    check(lexer.nextToken().tokenType == TokenType.IDENT)
+    check(lexer.nextToken().tokenType == TokenType.COLON)
+    check(lexer.nextToken().tokenType == TokenType.INT)
+    check(lexer.nextToken().tokenType == TokenType.COMMA)
+    check(lexer.nextToken().tokenType == TokenType.IDENT)
+    check(lexer.nextToken().tokenType == TokenType.COLON)
+    check(lexer.nextToken().tokenType == TokenType.INT)
+    check(lexer.nextToken().tokenType == TokenType.RBRACE)

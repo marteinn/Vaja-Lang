@@ -1,3 +1,5 @@
+import tables
+import hashes
 from sequtils import map
 from strutils import join
 from token import Token
@@ -23,6 +25,7 @@ type
     NTIfExpression,
     NTCaseExpression,
     NTArrayLiteral,
+    NTHashMapLiteral,
   Node* = ref object
     token*: Token
     case nodeType*: NodeType
@@ -64,8 +67,8 @@ type
       of NTCaseExpression:
         caseCondition*: Node
         casePatterns*: seq[CasePattern]
-      of NTArrayLiteral:
-        arrayElements*: seq[Node]
+      of NTArrayLiteral: arrayElements*: seq[Node]
+      of NTHashMapLiteral: hashMapElements*: OrderedTable[Node, Node]
   CasePattern* = tuple[condition: Node, consequence: Node]
 
 method toCode*(node: Node): string {.base.} =
@@ -138,6 +141,24 @@ method toCode*(node: Node): string {.base.} =
         node.arrayElements, proc (x: Node): string = toCode(x)
       )
       "[" & join(elementsCode, ", ") & "]"
+    of NTHashMapLiteral:
+      var elementsCode: string = ""
+      for key, val in node.hashMapElements:
+        if elementsCode != "":
+          elementsCode = elementsCode & ", "
+        elementsCode = elementsCode & key.toCode() & ": " & val.toCode()
+
+      "{" & elementsCode & "}"
+
+proc hash*(node: Node): Hash =
+  var h: Hash = 0
+  h = h !& hash(node.nodeType)
+  let nodeHash = case node.nodeType:
+    of NTStringLiteral: hash(node.strValue)
+    of NTIdentifier: hash(node.identValue)
+    else: hash("")
+  h = h !& nodeHash
+  return !$h
 
 proc newIntegerLiteral*(token: Token, intValue: int): Node =
   return Node(nodeType: NodeType.NTIntegerLiteral, intValue: intValue)
@@ -262,6 +283,16 @@ proc newArrayLiteral*(
     nodeType: NodeType.NTArrayLiteral,
     token: token,
     arrayElements: arrayElements
+  )
+
+proc newHashMapLiteral*(
+  token: Token,
+  hashMapElements: OrderedTable[Node, Node]
+): Node =
+  return Node(
+    nodeType: NodeType.NTHashMapLiteral,
+    token: token,
+    hashMapElements: hashMapElements
   )
 
 proc newProgram*(statements: seq[Node]): Node =
