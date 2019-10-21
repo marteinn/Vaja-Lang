@@ -9,7 +9,7 @@ type
     ch: char
     eof: bool
 
-method readCharacter*(lexer: var Lexer) {.base.} =
+proc readCharacter*(lexer: var Lexer) =
   var ch: char
 
   if lexer.readPos < len(lexer.source):
@@ -21,7 +21,7 @@ method readCharacter*(lexer: var Lexer) {.base.} =
   lexer.pos = lexer.readPos
   lexer.readPos = lexer.readPos + 1
 
-method peekAhead*(lexer: var Lexer, steps: int): char {.base.} =
+proc peekAhead*(lexer: var Lexer, steps: int): char =
   if lexer.readPos + steps >= len(lexer.source):
     return
   else:
@@ -33,23 +33,23 @@ proc isInt(ch: char): bool =
 proc isLetter(ch: char): bool =
   return ($ch).match(re"[a-zA-Z]|_").isSome()
 
-method skipWhitespace(lexer: var Lexer) {.base.} =
+proc skipWhitespace(lexer: var Lexer) =
   while lexer.ch == ' ':
     lexer.readCharacter()
 
-method readNumber(lexer: var Lexer): string {.base.} =
+proc readNumber(lexer: var Lexer): string =
   var startPos = lexer.pos
   while (isInt(lexer.ch) or lexer.ch == '.') and not lexer.eof:
     lexer.readCharacter()
   return lexer.source[startPos ..< lexer.pos]
 
-method readIdentifier(lexer: var Lexer): string {.base.} =
+proc readIdentifier(lexer: var Lexer): string =
   var startPos = lexer.pos
   while (isLetter(lexer.ch) or isInt(lexer.ch)) and not lexer.eof:
     lexer.readCharacter()
   return lexer.source[startPos ..< lexer.pos]
 
-method readString(lexer: var Lexer): string {.base.} =
+proc readString(lexer: var Lexer): string =
   lexer.readCharacter()
 
   if lexer.ch == '"':
@@ -66,7 +66,7 @@ method readString(lexer: var Lexer): string {.base.} =
 
   return stringOut
 
-method nextToken*(lexer: var Lexer): Token {.base.} =
+proc nextToken*(lexer: var Lexer): Token =
   if lexer.eof:
       return newToken(tokenType=TokenType.EOF, literal="")
 

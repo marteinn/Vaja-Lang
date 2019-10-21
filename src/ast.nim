@@ -77,7 +77,7 @@ type
       of NTModule: moduleStatements*: seq[Node]
   CasePattern* = tuple[condition: Node, consequence: Node]
 
-method toCode*(node: Node): string {.base.} =
+proc toCode*(node: Node): string =
   return case node.nodeType:
     of NTIntegerLiteral: $node.intValue
     of NTFLoatLiteral: $node.floatValue
