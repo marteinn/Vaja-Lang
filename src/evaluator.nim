@@ -252,7 +252,39 @@ proc unwrapReturnValue(obj: Obj): Obj =
     return obj.returnValue
   return obj
 
-proc applyFunction(fn: Obj, arguments: seq[Obj], env: var Env): Obj =
+# TODO: Optimize pattern matching signature comparison
+proc getMatchingFunction*(
+  fnGroup: Obj, arguments: seq[Obj], env: var Env
+): Obj =
+  var
+    arity: int = len(arguments)
+    fnList: seq[Obj] = fnGroup.arityGroup[arity]
+
+  for fn in fnList:
+    var
+      functionParams: seq[Node] = fn.functionParams
+      match: bool = true
+
+    for index, param in functionParams:
+      if param.nodeType == NTIdentifier:
+        continue
+
+      var
+        paramObj: Obj = eval(param, env)
+        argument: Obj = arguments[index]
+
+      if not compareObj(paramObj, argument):
+        match = false
+        break
+
+    if match:
+      return fn
+
+  return newError(errorMsg="Function is undefined")
+
+proc resolveAndApplyFunction*(fn: Obj, arguments: seq[Obj], env: var Env): Obj # Forward declaration
+
+proc applyFunction*(fn: Obj, arguments: seq[Obj], env: var Env): Obj =
   if fn.objType == OTFunction:
     var
       extendedEnv: Env = extendFunctionEnv(
@@ -263,7 +295,26 @@ proc applyFunction(fn: Obj, arguments: seq[Obj], env: var Env): Obj =
     return unwrapReturnValue(res)
 
   if fn.objType == OTBuiltin:
-    return fn.builtinFn(arguments)
+    return fn.builtinFn(arguments, resolveAndApplyFunction)
+
+proc resolveAndApplyFunction*(fn: Obj, arguments: seq[Obj], env: var Env): Obj =
+  var
+    resolvedFn: Obj =
+      if fn.objType == OTFunctionGroup:
+        getMatchingFunction(fn, arguments, env)
+      else:
+        fn
+
+  if isError(resolvedFn):
+    return resolvedFn
+
+  if fn.objType == ObjType.OTFunction and len(arguments) > len(fn.functionParams):
+    return newError(
+      errorMsg="Function with arity " & $len(fn.functionParams) &
+        " called with " & $len(arguments) & " arguments"
+    )
+
+  applyFunction(resolvedFn, arguments, env)
 
 
 proc evalIfExpression(node: Node, env: var Env): Obj =
@@ -298,36 +349,6 @@ proc curryFunction(fn: Obj, arguments: seq[Obj], env: var Env): Obj =
     functionEnv=enclosedEnv,
     functionParams=remainingParams,
   )
-
-# TODO: Optimize pattern matching signature comparison
-proc getMatchingFunction*(
-  fnGroup: var Obj, arguments: seq[Obj], env: var Env
-): Obj =
-  var
-    arity: int = len(arguments)
-    fnList: seq[Obj] = fnGroup.arityGroup[arity]
-
-  for fn in fnList:
-    var
-      functionParams: seq[Node] = fn.functionParams
-      match: bool = true
-
-    for index, param in functionParams:
-      if param.nodeType == NTIdentifier:
-        continue
-
-      var
-        paramObj: Obj = eval(param, env)
-        argument: Obj = arguments[index]
-
-      if not compareObj(paramObj, argument):
-        match = false
-        break
-
-    if match:
-      return fn
-
-  return newError(errorMsg="Function is undefined")
 
 proc evalIndexOp(left: Obj, index: Obj): Obj =
   if left.objType == ObjType.OTHashMap:
@@ -395,22 +416,9 @@ proc eval*(node: Node, env: var Env): Obj =
       var
         fnBase: Obj = eval(node.callFunction, env)
         arguments: seq[Obj] = evalExpressions(node.callArguments, env)
-        fn: Obj =
-          if fnBase.objType == OTFunctionGroup:
-            getMatchingFunction(fnBase, arguments, env)
-          else:
-            fnBase
 
-      if isError(fn):
-        return fn
+      resolveAndApplyFunction(fnBase, arguments, env)
 
-      if fn.objType == ObjType.OTFunction and len(arguments) > len(fn.functionParams):
-        return newError(
-          errorMsg="Function with arity " & $len(fn.functionParams) &
-            " called with " & $len(arguments) & " arguments"
-        )
-
-      applyFunction(fn, arguments, env)
       # Apply currying
       #if len(arguments) < len(fn.functionParams):
         #curryFunction(fn, arguments, env)

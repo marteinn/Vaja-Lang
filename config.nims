@@ -3,6 +3,7 @@ task tests, "Run all tests":
   exec r"nim c -r tests/test_parser.nim"
   exec r"nim c -r tests/test_eval.nim"
   exec r"nim c -r tests/test_obj.nim"
+  exec r"nim c -r tests/test_builtins_array.nim"
   setCommand "nop"
 
 task test_lexer, "Test lexer":
@@ -19,4 +20,8 @@ task test_eval, "Test eval":
 
 task test_obj, "Test obj":
   exec r"nim c -r tests/test_obj.nim"
+  setCommand "nop"
+
+task test_builtins_array, "Test array module":
+  exec r"nim c -r tests/test_builtins_array.nim"
   setCommand "nop"

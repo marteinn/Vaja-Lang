@@ -34,9 +34,11 @@ type
       of OTReturn: returnValue*: Obj
       of OTNil: discard
       of OTArray: arrayElements*: seq[Obj]
-      of OTBuiltin: builtinFn*: proc(arguments: seq[Obj]): Obj
+      of OTBuiltin: builtinFn*:
+        proc(arguments: seq[Obj], applyFn: ApplyFunction): Obj
       of OTHashMap: hashMapElements*: OrderedTable[string, Obj]
-
+  ApplyFunction* =
+    proc (fn: Obj, arguments: seq[Obj], env: var Env): Obj
   Env* = ref object
     store*: Table[string, Obj]
     outer*: Env
@@ -170,7 +172,7 @@ proc newFunctionGroup*(): Obj =
 proc newArray*(arrayElements: seq[Obj]): Obj =
   return Obj(objType: ObjType.OTArray, arrayElements: arrayElements)
 
-proc newBuiltin*(builtinFn: proc(arguments: seq[Obj]): Obj): Obj =
+proc newBuiltin*(builtinFn: proc(arguments: seq[Obj], applyFn: ApplyFunction): Obj): Obj =
   return Obj(objType: ObjType.OTBuiltin, builtinFn: builtinFn)
 
 proc newHashMap*(hashMapElements: OrderedTable[string, Obj]): Obj =

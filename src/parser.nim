@@ -1,4 +1,3 @@
-import os
 import tables
 from strutils import parseInt, parseFloat
 

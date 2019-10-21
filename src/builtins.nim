@@ -1,8 +1,18 @@
 import tables
-from obj import Obj, ObjType, newBuiltin, newHashMap, newError, newInteger, newStr, NIL, inspect
+from obj import
+  Obj,
+  ObjType,
+  ApplyFunction,
+  newBuiltin,
+  newHashMap,
+  newError,
+  newInteger,
+  newStr,
+  NIL,
+  inspect
 from builtins_array import arrayModule
 
-proc builtinType(arguments: seq[Obj]): Obj =
+proc builtinType(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   if len(arguments) == 0:
     return newError(errorMsg="Missing arguments")
 
@@ -21,7 +31,7 @@ proc builtinType(arguments: seq[Obj]): Obj =
 
   return newStr(strValue=objType)
 
-proc builtinPrint(arguments: seq[Obj]): Obj =
+proc builtinPrint(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   if len(arguments) == 0:
     return newError(errorMsg="Missing arguments")
   let obj = arguments[0]
