@@ -48,8 +48,8 @@ proc arrayMap(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
     arr: Obj = arguments[1]
   if arr.objType != ObjType.OTArray:
     return newError(errorMsg="Argument arr was " & $(fn.objType) & ", want Array")
-  #if fn.objType != ObjType.OTFunction:
-    #return newError(errorMsg="Argument fn was " & $(fn.objType) & ", want Function")
+  if fn.objType != ObjType.OTFunction:
+    return newError(errorMsg="Argument fn was " & $(fn.objType) & ", want Function")
 
   let mapped: seq[Obj] = map(arr.arrayElements, proc (x: Obj): Obj =
     var env: Env = newEnv()
