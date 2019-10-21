@@ -1,27 +1,29 @@
-task tests, "Run all tests":
-  exec r"nim c -r tests/test_lexer.nim"
-  exec r"nim c -r tests/test_parser.nim"
-  exec r"nim c -r tests/test_eval.nim"
-  exec r"nim c -r tests/test_obj.nim"
-  exec r"nim c -r tests/test_builtins_array.nim"
-  setCommand "nop"
+# Package
+
+version       = "0.1.0"
+author        = "marteinn"
+description   = "A dynamic interpreted language inspired by Elixir, Lua, Python, Nim and Monkey."
+license       = "MIT"
+srcDir        = "src"
+bin           = @["vaja"]
+binDir        = "bin"
+
+
+# Dependencies
+
+requires "nim >= 1.0.0"
 
 task test_lexer, "Test lexer":
   exec r"nim c -r tests/test_lexer.nim"
-  setCommand "nop"
 
 task test_parser, "Test parser":
   exec r"nim c -r tests/test_parser.nim"
-  setCommand "nop"
 
 task test_eval, "Test eval":
   exec r"nim c -r tests/test_eval.nim"
-  setCommand "nop"
 
 task test_obj, "Test obj":
   exec r"nim c -r tests/test_obj.nim"
-  setCommand "nop"
 
 task test_builtins_array, "Test array module":
   exec r"nim c -r tests/test_builtins_array.nim"
-  setCommand "nop"
