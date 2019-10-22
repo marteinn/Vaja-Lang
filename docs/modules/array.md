@@ -6,12 +6,18 @@
 - `head`
 - `last`
 - `map`
-- `reduce`
 - `filter`
+- `reduce`
+- `push`
+- `deleteAt`
+- `append`
+- `replaceAt`
+- `tail`
 
 #### Not yet implemented
 
-- `insertAt`
-- `deleteAt`
-- `push`
-- `replaceAt`
+- `take`
+- `drop`
+- `any`
+- `all`
+- `reverse`

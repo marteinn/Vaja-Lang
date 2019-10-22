@@ -69,7 +69,7 @@ proc arrayReduce(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   if fn.objType != ObjType.OTFunction and fn.objType != ObjType.OTFunctionGroup:
     return newError(errorMsg="Argument fn was " & $(fn.objType) & ", want Function")
   if arr.objType != ObjType.OTArray:
-    return newError(errorMsg="Argument arr was " & $(fn.objType) & ", want Array")
+    return newError(errorMsg="Argument arr was " & $(arr.objType) & ", want Array")
 
   result = initial
   for curr in arr.arrayElements:
@@ -84,10 +84,10 @@ proc arrayFilter(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   let
     fn: Obj = arguments[0]
     arr: Obj = arguments[1]
-  if arr.objType != ObjType.OTArray:
-    return newError(errorMsg="Argument arr was " & $(fn.objType) & ", want Array")
   if fn.objType != ObjType.OTFunction and fn.objType != ObjType.OTFunctionGroup:
     return newError(errorMsg="Argument fn was " & $(fn.objType) & ", want Function")
+  if arr.objType != ObjType.OTArray:
+    return newError(errorMsg="Argument arr was " & $(arr.objType) & ", want Array")
 
   let filtered: seq[Obj] = filter(arr.arrayElements, proc (x: Obj): bool =
     var env: Env = newEnv()
@@ -98,6 +98,81 @@ proc arrayFilter(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   )
   return newArray(arrayElements=filtered)
 
+proc arrayPush(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  if len(arguments) < 2:
+    return newError(
+      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 2"
+    )
+  let
+    el: Obj = arguments[0]
+    arr: Obj = arguments[1]
+  if arr.objType != ObjType.OTArray:
+    return newError(errorMsg="Argument arr was " & $(arr.objType) & ", want Array")
+
+  let arrayElements: seq[Obj] = concat(arr.arrayElements, @[el])
+  return newArray(arrayElements=arrayElements)
+
+proc arrayDeleteAt(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  if len(arguments) < 2:
+    return newError(
+      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 2"
+    )
+  let
+    index: Obj = arguments[0]
+    arr: Obj = arguments[1]
+  if index.objType != ObjType.OTInteger:
+    return newError(errorMsg="Argument index was " & $(index.objType) & ", want Integer")
+  if arr.objType != ObjType.OTArray:
+    return newError(errorMsg="Argument arr was " & $(arr.objType) & ", want Array")
+  var arrayElements: seq[Obj] = arr.arrayElements
+  arrayElements.delete(index.intValue, index.intValue)
+  return newArray(arrayElements=arrayElements)
+
+proc arrayAppend(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  if len(arguments) < 2:
+    return newError(
+      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 2"
+    )
+  let
+    elements: Obj = arguments[0]
+    arr: Obj = arguments[1]
+
+  if elements.objType != ObjType.OTArray:
+    return newError(
+      errorMsg="Argument arr was " & $(elements.objType) & ", want Array"
+    )
+  if arr.objType != ObjType.OTArray:
+    return newError(errorMsg="Argument arr was " & $(arr.objType) & ", want Array")
+
+  let arrayElements = concat(elements.arrayElements, arr.arrayElements)
+  return newArray(arrayElements=arrayElements)
+
+proc arrayReplaceAt(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  if len(arguments) < 2:
+    return newError(
+      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 2"
+    )
+  let
+    index: Obj = arguments[0]
+    obj: Obj = arguments[1]
+    arr: Obj = arguments[2]
+  if index.objType != ObjType.OTInteger:
+    return newError(errorMsg="Argument index was " & $(index.objType) & ", want Integer")
+  if arr.objType != ObjType.OTArray:
+    return newError(errorMsg="Argument arr was " & $(arr.objType) & ", want Array")
+  var arrayElements: seq[Obj] = arr.arrayElements
+  arrayElements[index.intValue] = obj
+  return newArray(arrayElements=arrayElements)
+
+proc arrayTail(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  if len(arguments) == 0:
+    return newError(errorMsg="Missing arguments")
+  let arr: Obj = arguments[0]
+  if arr.objType != ObjType.OTArray:
+    return newError(errorMsg="Argument arr was " & $(arr.objType) & ", want Array")
+  let arrayElements = arr.arrayElements[1..high(arr.arrayElements)]
+  return newArray(arrayElements=arrayElements)
+
 let functions*: OrderedTable[string, Obj] = {
   "len": newBuiltin(builtinFn=arrayLen),
   "head": newBuiltin(builtinFn=arrayHead),
@@ -105,6 +180,11 @@ let functions*: OrderedTable[string, Obj] = {
   "map": newBuiltin(builtinFn=arrayMap),
   "filter": newBuiltin(builtinFn=arrayFilter),
   "reduce": newBuiltin(builtinFn=arrayReduce),
+  "push": newBuiltin(builtinFn=arrayPush),
+  "deleteAt": newBuiltin(builtinFn=arrayDeleteAt),
+  "append": newBuiltin(builtinFn=arrayAppend),
+  "replaceAt": newBuiltin(builtinFn=arrayReplaceAt),
+  "tail": newBuiltin(builtinFn=arrayTail),
 }.toOrderedTable
 
 let arrayModule*: Obj = newHashMap(hashMapElements=functions)
