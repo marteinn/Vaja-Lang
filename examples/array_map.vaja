@@ -1,7 +1,7 @@
 let a = [1, 2, 3, 4]
 
 fn multiplyByTwo(x) -> x*2
-let multiplyByTwo2222 = fn (x) -> x*2
-
 let list = Array.map(multiplyByTwo, a)
 print(list)
+
+[2, 4, 6, 8] |> Array.map(fn (x) -> x * 2) |> print()

@@ -5,6 +5,9 @@
 - `len`
 - `head`
 - `last`
+- `map`
+- `reduce`
+- `filter`
 
 #### Not yet implemented
 
