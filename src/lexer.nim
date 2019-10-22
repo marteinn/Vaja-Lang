@@ -52,12 +52,14 @@ method readIdentifier(lexer: var Lexer): string {.base.} =
 method readString(lexer: var Lexer): string {.base.} =
   lexer.readCharacter()
 
-  var stringOut: string = $lexer.ch
+  if lexer.ch == '"':
+    return ""
 
+  var stringOut: string = $lexer.ch
   while true:
     lexer.readCharacter()
 
-    if lexer.ch == '"':
+    if lexer.ch == '"' or lexer.eof:
       break
 
     stringOut = stringOut & lexer.ch

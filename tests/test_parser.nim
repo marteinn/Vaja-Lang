@@ -139,6 +139,9 @@ suite "parser tests":
     check program.statements[0].expression.nodeType == NodeType.NTStringLiteral
     check program.statements[0].toCode() == "hello"
 
+  test "empty strings returns emoty":
+    check parseSource("\"\"").toCode() == ""
+
   test "variable assignment struct test":
     var
       source: string = "let a = 1"

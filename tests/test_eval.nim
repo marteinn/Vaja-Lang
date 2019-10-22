@@ -13,11 +13,12 @@ proc evalSource(source:string): Obj =
     env: Env = newEnv()
   return eval(program, env)
 
+type
+  ExpectedEval = (string, string)
+  ExpectedEvals = seq[ExpectedEval]
+
 suite "eval tests":
   test "nil expression":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("nil", "nil"),
@@ -28,9 +29,6 @@ suite "eval tests":
       check evaluated.inspect() == testPair[1]
 
   test "int expressions":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("1", "1"),
@@ -55,9 +53,6 @@ suite "eval tests":
       check evaluated.inspect() == testPair[1]
 
   test "float expressions":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("2.2", "2.2"),
@@ -80,15 +75,14 @@ suite "eval tests":
       check evaluated.inspect() == testPair[1]
 
   test "string expressions":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("\"hello\"", "hello"),
         ("\"hi\" & \"again\"", "hiagain"),
         ("\"hi\" == \"hi\"", "true"),
         ("\"hi\" != \"hi\"", "false"),
+        ("\"hi\" != \"hi\"", "false"),
+        ("\"\"", ""),
       ]
 
     for testPair in tests:
@@ -96,9 +90,6 @@ suite "eval tests":
       check evaluated.inspect() == testPair[1]
 
   test "array expression":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("[1, 2, 3]", "[1, 2, 3]"),
@@ -109,9 +100,6 @@ suite "eval tests":
       check evaluated.inspect() == testPair[1]
 
   test "array index":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("let a = [1, 2, 3]; a[0]", "1"),
@@ -125,9 +113,6 @@ suite "eval tests":
       check evaluated.inspect() == testPair[1]
 
   test "hashmap expression":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("""{"monday": 1}""", "{monday: 1}"),
@@ -139,9 +124,6 @@ suite "eval tests":
       check evaluated.inspect() == testPair[1]
 
   test "hashmap index":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("""let a = {"monday": 1}; a.monday""", "1"),
@@ -154,9 +136,6 @@ suite "eval tests":
       check evaluated.inspect() == testPair[1]
 
   test "assignments":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("let a = 1", ""),
@@ -169,9 +148,6 @@ suite "eval tests":
       check evaluated.inspect() == testPair[1]
 
   test "error handling":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("a", "Name a is not defined"),
@@ -193,9 +169,6 @@ suite "eval tests":
       check evaluated.inspect() == testPair[1]
 
   test "bool prefix operations":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("not true", "false"),
@@ -208,9 +181,6 @@ suite "eval tests":
       check evaluated.inspect() == testPair[1]
 
   test "bool infix operations":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("true and true", "true"),
@@ -231,9 +201,6 @@ suite "eval tests":
       check evaluated.inspect() == testPair[1]
 
   test "named function declaration":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("fn hello(a, b) 1 end; hello", "<function group>"),
@@ -245,9 +212,6 @@ suite "eval tests":
       check evaluated.inspect() == testPair[1]
 
   test "function declaration":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("fn (a, b) 1 end", "fn (a, b) 1 end"),
@@ -261,9 +225,6 @@ suite "eval tests":
       check evaluated.inspect() == testPair[1]
 
   test "passing function as a argument":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("""let calc = fn(sum) -> sum(5)
@@ -276,9 +237,6 @@ calc(fn(x) -> x*2)
       check evaluated.inspect() == testPair[1]
 
   test "call expression":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("fn hello() 1 end; hello()", "1"),
@@ -299,9 +257,6 @@ end; a()""", "5"),
       check evaluated.inspect() == testPair[1]
 
   test "return statements":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("return 1", "1"),
@@ -315,9 +270,6 @@ end; a()""", "5"),
       check evaluated.inspect() == testPair[1]
 
   test "return statement unwrap":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("fn a() return 1 end; a()", "1"),
@@ -329,9 +281,6 @@ end; a()""", "5"),
       check evaluated.inspect() == testPair[1]
 
   test "closure behaves":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("""fn myFunc(x)
@@ -345,9 +294,6 @@ end; myFunc(1)(2)""", "3"),
       check evaluated.inspect() == testPair[1]
 
   test "piping values to function call":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("""fn a(x) -> x + 1
@@ -369,9 +315,6 @@ fn c(x) -> x + 3
       check evaluated.inspect() == testPair[1]
 
   test "if statements":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("if (true) 1 else 2 end", "1"),
@@ -385,9 +328,6 @@ fn c(x) -> x + 3
       check evaluated.inspect() == testPair[1]
 
   test "pattern matching":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("""
@@ -411,9 +351,6 @@ hello("tom", 1)""", "31"),
       check evaluated.inspect() == testPair[1]
 
   test "non matching function pattern matching":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("""
@@ -428,9 +365,6 @@ hello("john bolton")""", "Function is undefined"),
       check evaluated.inspect() == testPair[1]
 
   test "using _ or _ prefix will raise error":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("""
@@ -447,9 +381,6 @@ greet("jane")""", "Invalid use of _name, it represents a value to be ignored"),
       check evaluated.inspect() == testPair[1]
 
   test "_ and _ prefix will be ignored":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("""
@@ -469,9 +400,6 @@ greet("jane", "doe")""", "myval"),
       check evaluated.inspect() == testPair[1]
 
   test "case expression":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("""
@@ -512,9 +440,6 @@ end
       check evaluated.inspect() == testPair[1]
 
   #test "function currying":
-    #type
-      #ExpectedEval = (string, string)
-      #ExpectedEvals = seq[ExpectedEval]
     #var
       #tests: ExpectedEvals = @[
         #("fn a(x, y, z) -> x * y + z; a(1)(2)(3)", "5"),
@@ -526,9 +451,6 @@ end
       #check evaluated.objType == ObjType.OTInteger
 
   test "builtin: type":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("type(1)", "integer"),
@@ -544,9 +466,6 @@ end
       check evaluated.inspect() == testPair[1]
 
   test "builtin: print":
-    type
-      ExpectedEval = (string, string)
-      ExpectedEvals = seq[ExpectedEval]
     var
       tests: ExpectedEvals = @[
         ("print(1)", "nil"),

@@ -28,6 +28,8 @@ _
 _ignored
 case
 import
+""
+"a"
 """
       lexer: Lexer = newLexer(source)
     type
@@ -102,6 +104,10 @@ import
         (TokenType.CASE, "case"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.IMPORT, "import"),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.STRING, ""),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.STRING, "a"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.EOF, "")
       ]
