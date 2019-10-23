@@ -11,6 +11,7 @@ from obj import
   NIL,
   inspect
 from builtins_array import arrayModule
+from builtins_string import stringModule
 
 proc builtinType(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   if len(arguments) == 0:
@@ -43,4 +44,5 @@ var
     "type": newBuiltin(builtinFn=builtinType),
     "print": newBuiltin(builtinFn=builtinPrint),
     "Array": arrayModule,
+    "String": stringModule,
   }.toTable

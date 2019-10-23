@@ -4,5 +4,6 @@ tests/test_lexer
 tests/test_eval
 tests/test_obj
 tests/test_builtins_array
+tests/test_builtins_string
 bin/*
 !bin/.gitkeep

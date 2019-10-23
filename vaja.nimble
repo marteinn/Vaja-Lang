@@ -27,3 +27,6 @@ task test_obj, "Test obj":
 
 task test_builtins_array, "Test array module":
   exec r"nim c -r tests/test_builtins_array.nim"
+
+task test_builtins_string, "Test string module":
+  exec r"nim c -r tests/test_builtins_string.nim"

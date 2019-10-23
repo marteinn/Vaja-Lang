@@ -181,13 +181,6 @@ end
 | `\|>`     | Pass value left to right to fn |                                 |
 
 
-## Built-in functions
-
-| Signature                                                                    |
-| ---------------------------------------------------------------------------- |
-| `len: id`                                                                    |
-| `print: id`                                                                  |
-| `type: id`                                                                   |
 
 
 ## Imports
@@ -199,9 +192,42 @@ import mylibrary
 funcFromMyLibrary()
 ```
 
-Import certain objects
+IN PROGRESS: Import certain objects
 ```
 from mylibrary import funcFromMyLibrary
 
 funcFromMyLibrary()
 ```
+
+## Builtin modules
+
+### Functions
+
+| Signature                                                                    |
+| ---------------------------------------------------------------------------- |
+| `len: id`                                                                    |
+| `print: id`                                                                  |
+| `type: id`                                                                   |
+
+
+### Array module
+
+| Signature                                                                    |
+| ---------------------------------------------------------------------------- |
+| `len: array`                                                                 |
+| `head: array`                                                                |
+| `last: array`                                                                |
+| `map: fn, array`                                                             |
+| `filter: fn, array`                                                          |
+| `reduce: fn, id, array`                                                      |
+| `push: id, array`                                                            |
+| `deleteAt: id, array`                                                        |
+| `replaceAt: int, id, array`                                                  |
+| `tail: array`                                                                |
+
+
+### String module
+
+| Signature                                                                    |
+| ---------------------------------------------------------------------------- |
+| `split: string string`                                                       |
