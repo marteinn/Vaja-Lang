@@ -183,53 +183,38 @@ type(1)
 ```
 
 
-## Logical operators
 
-```
-1 and 5
-not 5
-1 or 5
-```
+## Operator table
 
-## Comparison operators
-
-```
->
-<
-==
-!=
->=
-<=
-```
-
-## Math operators
-
-```
-*
-/
-+
--
-%
-**
-```
-
-## String operators
-
-```
-"a" & "b" >> "ab"
-```
-
-## Array operators
-
-```
-[1, 2] ++ [3] >> [1, 2, 3]
-```
+| Operator  | Binary                         | Unary                           |
+| --------- | ------------------------------ | ------------------------------- |
+| `=`       | Assignment                     |                                 |
+| `==`      | Equality                       |                                 |
+| `!=`      | Inequality                     |                                 |
+| `<`       | Less than                      |                                 |
+| `>`       | Greater than                   |                                 |
+| `<=`      | Less or eqal than              |                                 |
+| `>=`      | Greater or eqal than           |                                 |
+| `and`     | Logical and                    |                                 |
+| `or`      | Logical or                     |                                 |
+| `not`     |                                | Logical negation                |
+| `+`       | Addition                       |                                 |
+| `/`       | Division                       |                                 |
+| `-`       | Subtraction                    | Arithmetic negation             |
+| `%`       | Modulo                         |                                 |
+| `**`      |                                |                                 |
+| `++`      |                                | Inflix increment                |
+| `&`       |                                | Inflix increment                |
+| `|> `     |                                | Inflix increment                |
 
 
-## Builtins
+## Built-in functions
 
-- `type()`
-- `print()`
+| Signature                                                                    |
+| ---------------------------------------------------------------------------- |
+| `len: id`                                                                    |
+| `print: id`                                                                  |
+| `type: id`                                                                   |
 
 
 ## Imports
