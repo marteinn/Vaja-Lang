@@ -45,7 +45,7 @@ You can find a vim plugin [here](https://github.com/marteinn/Vaja-Vim/).
 
 
 ## Like the Väja syntax?
-Awesome, since Väja is a "playing around" language I recommend that you use Elixir, a great Lua/Ruby functional language built around the BEAM.
+Awesome, since Väja is a "hobby" language I recommend that you use Elixir, a great Lua/Ruby functional language built around the BEAM.
 
 
 ## Väja?
@@ -53,7 +53,7 @@ The name comes from a lumber mill in the northen of Sweden.
 
 
 ## Running tests
-- `nim tests`
+- `nimble test`
 
 
 ## Credits
