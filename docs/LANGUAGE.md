@@ -230,5 +230,6 @@ funcFromMyLibrary()
 
 | Signature                                                                    |
 | ---------------------------------------------------------------------------- |
+| `len: string`                                                                |
 | `split: string string`                                                       |
-| `join: string, array`                                                        |
+| `join: string, array[string]`                                                |

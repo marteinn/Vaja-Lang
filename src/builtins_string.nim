@@ -16,6 +16,16 @@ from obj import
   NIL,
   inspect
 
+proc stringLen(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  if len(arguments) != 1:
+    return newError(
+      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 1"
+    )
+  let obj: Obj = arguments[0]
+  if obj.objType != ObjType.OTString:
+    return newError(errorMsg="Argument arr was " & $(obj.objType) & ", want String")
+  return newInteger(intValue=len(obj.strValue))
+
 proc stringSplit(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   if len(arguments) < 2:
     return newError(
@@ -66,6 +76,7 @@ proc stringJoin(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   )
 
 let functions*: OrderedTable[string, Obj] = {
+  "len": newBuiltin(builtinFn=stringLen),
   "split": newBuiltin(builtinFn=stringSplit),
   "join": newBuiltin(builtinFn=stringJoin),
 }.toOrderedTable

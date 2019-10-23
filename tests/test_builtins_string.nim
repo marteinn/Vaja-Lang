@@ -18,6 +18,16 @@ type
   ExpectedEvals = seq[ExpectedEval]
 
 suite "builtins string tests":
+  test "String.len":
+    var
+      tests: ExpectedEvals = @[
+        ("""String.len("abc")""", "3"),
+        ("""String.len("")""", "0"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
   test "String.split":
     var
       tests: ExpectedEvals = @[
