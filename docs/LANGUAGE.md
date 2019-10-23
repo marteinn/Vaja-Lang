@@ -157,32 +157,6 @@ case (1 > 2)
 end
 ```
 
-## Pipe operator
-
-```
-"hello" |> capitalize()  # HELLO
-1 |> print()  # 1
-```
-
-## Iterators
-
-```
-map(a, fn (x) -> x)
-map(a, fn (x)
-    x
-end)
-```
-
-
-## Builints
-
-```
-print("hello")
-len("hello")
-type(1)
-```
-
-
 
 ## Operator table
 
@@ -203,9 +177,9 @@ type(1)
 | `-`       | Subtraction                    | Arithmetic negation             |
 | `%`       | Modulo                         |                                 |
 | `**`      |                                |                                 |
-| `++`      |                                | Inflix increment                |
-| `&`       |                                | Inflix increment                |
-| `|> `     |                                | Inflix increment                |
+| `++`      | Inflix increment               |                                 |
+| `&`       | Combine string                 |                                 |
+| `\|>`     | Pass value left to right to fn |                                 |
 
 
 ## Built-in functions
