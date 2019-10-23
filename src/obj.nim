@@ -66,39 +66,39 @@ proc newEnv*(): Env =
 proc newEnclosedEnv*(env: Env): Env =
   return Env(outer: env, store: initTable[string, Obj]())
 
-method mergeEnvs*(env: var Env, fromEnv: var Env): Env {.base.} =
+proc mergeEnvs*(env: var Env, fromEnv: var Env): Env =
   for key, value in fromEnv.store:
     env.store[key] = value
   return env
 
-method setVar*(env: Env, name: string, value: Obj): Env {.base.} =
+proc setVar*(env: Env, name: string, value: Obj): Env =
   env.store[name] = value
   return env
 
-method containsVar*(env: Env, name: string): bool {.base.} =
+proc containsVar*(env: Env, name: string): bool =
   if env.outer == nil:
     return contains(env.store, name)
 
   return contains(env.store, name) or contains(env.outer.store, name)
 
-method getVar*(env: Env, name: string): Obj {.base.} =
+proc getVar*(env: Env, name: string): Obj =
   if contains(env.store, name):
     return env.store[name]
 
   if env != nil and contains(env.outer.store, name):
     return env.outer.store[name]
 
-method hasNumberType*(obj: Obj): bool {.base.} =
+proc hasNumberType*(obj: Obj): bool =
   obj.objType == OTInteger or obj.objType == OTFloat
 
-method promoteToFloatValue*(obj: Obj): float {.base.} =
+proc promoteToFloatValue*(obj: Obj): float =
   if obj.objType == OTInteger:
     return float(obj.intValue)
 
   if obj.objType == OTFloat:
     return obj.floatValue
 
-method inspect*(obj: Obj): string {.base.} =
+proc inspect*(obj: Obj): string =
   if obj == nil:
     return ""
 
@@ -178,7 +178,7 @@ proc newBuiltin*(builtinFn: proc(arguments: seq[Obj], applyFn: ApplyFunction): O
 proc newHashMap*(hashMapElements: OrderedTable[string, Obj]): Obj =
   return Obj(objType: ObjType.OTHashMap, hashMapElements: hashMapElements)
 
-method addFunctionToGroup*(fnGroup: var Obj, fn: Obj): Obj {.base.} =
+proc addFunctionToGroup*(fnGroup: var Obj, fn: Obj): Obj =
   let arity: int = len(fn.functionParams)
   if not contains(fnGroup.arityGroup, arity):
     fnGroup.arityGroup[arity] = @[fn]
@@ -187,7 +187,7 @@ method addFunctionToGroup*(fnGroup: var Obj, fn: Obj): Obj {.base.} =
   fnGroup
 
 # TODO: Move this to env declarations
-method inspectEnv*(env: Env): string {.base.} =
+proc inspectEnv*(env: Env): string =
   var ret = "{"
   for key, obj in env.store:
     ret = ret & " - " & key & ": " & obj.inspect() & ", "

@@ -70,7 +70,7 @@ var
 
 proc newParser*(lexer: Lexer): Parser  # Forward declaration
 
-method nextParserToken(parser: var Parser): Token {.base.} =
+proc nextParserToken(parser: var Parser): Token =
   parser.curToken = parser.peekToken
   parser.peekToken = parser.lexer.nextToken()
 
@@ -116,9 +116,9 @@ proc parseStringLiteral(parser: var Parser): Node =
     literal: string = parser.curToken.literal
   return newStringLiteral(token=parser.curToken, strValue=literal)
 
-method parseExpression(parser: var Parser, precedence: Precedence): Node {.base.} # forward declaration
+proc parseExpression(parser: var Parser, precedence: Precedence): Node # forward declaration
 
-method parseStatement(parser: var Parser): Node {.base.} # Forward declaration
+proc parseStatement(parser: var Parser): Node # Forward declaration
 
 proc parsePrefixExpression(parser: var Parser): Node =
   var
@@ -341,7 +341,7 @@ proc parseHashMapLiteral(parser: var Parser): Node =
 
   return newHashMapLiteral(token=token, hashMapElements=elements)
 
-method parseModule*(parser: var Parser): Node {.base.} # Forward declaration
+proc parseModule*(parser: var Parser): Node # Forward declaration
 
 proc parseImport(parser: var Parser): Node =
   discard parser.nextParserToken()
@@ -392,19 +392,19 @@ proc getPrefixFn(tokenType: TokenType): PrefixFunction =
     of FROM: parseFromImport
     else: nil
 
-method currentPrecedence(parser: var Parser): Precedence {.base.} =
+proc currentPrecedence(parser: var Parser): Precedence =
   if not precedences.hasKey(parser.curToken.tokenType):
     return Precedence.LOWEST
 
   return precedences[parser.curToken.tokenType]
 
-method peekPrecedence(parser: var Parser): Precedence {.base.} =
+proc peekPrecedence(parser: var Parser): Precedence =
   if not precedences.hasKey(parser.peekToken.tokenType):
     return Precedence.LOWEST
 
   return precedences[parser.peekToken.tokenType]
 
-method parseInfixExpression(parser: var Parser, left: Node): Node {.base.} =
+proc parseInfixExpression(parser: var Parser, left: Node): Node =
   var
     token: Token = parser.curToken
     precedence: Precedence = parser.currentPrecedence()
@@ -439,7 +439,7 @@ proc parseCallArguments(parser: var Parser): seq[Node] =
 
   return callArguments
 
-method parseCallExpression(parser: var Parser, function: Node): Node {.base.} =
+proc parseCallExpression(parser: var Parser, function: Node): Node =
   var
     token: Token = parser.curToken
     callArguments: seq[Node] = parseCallArguments(parser)
@@ -448,7 +448,7 @@ method parseCallExpression(parser: var Parser, function: Node): Node {.base.} =
     token=token, callFunction=function, callArguments=callArguments
   )
 
-method parsePipeLRInfix(parser: var Parser, left: Node): Node {.base.} =
+proc parsePipeLRInfix(parser: var Parser, left: Node): Node =
   var
     token: Token = parser.curToken
     precedence: Precedence = parser.currentPrecedence()
@@ -459,7 +459,7 @@ method parsePipeLRInfix(parser: var Parser, left: Node): Node {.base.} =
     token=token, pipeLeft=left, pipeRight=right
   )
 
-method parseIndexPropertyOperationInfix(parser: var Parser, left: Node): Node {.base.} =
+proc parseIndexPropertyOperationInfix(parser: var Parser, left: Node): Node =
   var
     token: Token = parser.curToken
     precedence: Precedence = parser.currentPrecedence()
@@ -476,7 +476,7 @@ method parseIndexPropertyOperationInfix(parser: var Parser, left: Node): Node {.
     indexOpIndex=right
   )
 
-method parseIndexOperationInfix(parser: var Parser, left: Node): Node {.base.} =
+proc parseIndexOperationInfix(parser: var Parser, left: Node): Node =
   let
     token: Token = parser.curToken
     precedence: Precedence = parser.currentPrecedence()
@@ -517,7 +517,7 @@ proc getInfixFn(tokenType: TokenType): InfixFunction =
     of LBRACKET: parseIndexOperationInfix
     else: nil
 
-method parseExpression(parser: var Parser, precedence: Precedence): Node =
+proc parseExpression(parser: var Parser, precedence: Precedence): Node =
   while parser.curToken.tokenType == TokenType.NEWLINE:
     discard parser.nextParserToken()
     continue
@@ -550,12 +550,12 @@ method parseExpression(parser: var Parser, precedence: Precedence): Node =
 
   return leftExpression
 
-method parseExpressionStatement(parser: var Parser): Node {.base.} =
+proc parseExpressionStatement(parser: var Parser): Node =
   let
     expression = parser.parseExpression(Precedence.LOWEST)
   return newExpressionStatement(token=parser.curToken, expression=expression)
 
-method parseAssignmentStatement(parser: var Parser): Node {.base.} =
+proc parseAssignmentStatement(parser: var Parser): Node =
   var
     token: Token = parser.nextParserToken()
     identToken: Token = parser.curToken
@@ -575,7 +575,7 @@ method parseAssignmentStatement(parser: var Parser): Node {.base.} =
     assignValue=assignValue,
   )
 
-method parseReturnStatement(parser: var Parser): Node {.base.} =
+proc parseReturnStatement(parser: var Parser): Node =
   var
     token: Token = parser.curToken
   discard parser.nextParserToken()
@@ -586,14 +586,14 @@ method parseReturnStatement(parser: var Parser): Node {.base.} =
     returnValue=returnValue,
   )
 
-method parseStatement(parser: var Parser): Node {.base.} =
+proc parseStatement(parser: var Parser): Node =
   if parser.curToken.tokenType == TokenType.LET:
     return parser.parseAssignmentStatement()
   if parser.curToken.tokenType == TokenType.RETURN:
     return parser.parseReturnStatement()
   return parser.parseExpressionStatement()
 
-method parseModule*(parser: var Parser): Node {.base.} =
+proc parseModule*(parser: var Parser): Node =
   var statements: seq[Node] = @[]
   while parser.curToken.tokenType != TokenType.EOF:
     if parser.curToken.tokenType in [
@@ -609,7 +609,7 @@ method parseModule*(parser: var Parser): Node {.base.} =
 
   return newModule(moduleStatements=statements)
 
-method parseProgram*(parser: var Parser): Node {.base.} =
+proc parseProgram*(parser: var Parser): Node =
   var statements: seq[Node] = @[]
   while parser.curToken.tokenType != TokenType.EOF:
     if parser.curToken.tokenType in [
