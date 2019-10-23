@@ -1,5 +1,6 @@
 import math
 import tables
+import sequtils
 from strutils import startsWith
 
 from ast import Node, NodeType, toCode, CasePattern
@@ -161,6 +162,14 @@ proc evalInfixBooleanExpression(operator: string, left: Obj, right: Obj): Obj =
 
   return newError(errorMsg="Unknown infix operator " & operator)
 
+proc evalInfixArrayExpression(operator: string, left: Obj, right: Obj): Obj =
+  case operator:
+    of "++":
+      let arrayElements = concat(left.arrayElements, right.arrayElements)
+      return newArray(arrayElements=arrayElements)
+
+  return newError(errorMsg="Unknown infix operator " & operator)
+
 proc evalInfixExpression(operator: string, left: Obj, right: Obj): Obj =
   if left.objType == ObjType.OTInteger and right.objType == ObjType.OTInteger:
     return evalInfixIntegerExpression(operator, left, right)
@@ -170,6 +179,8 @@ proc evalInfixExpression(operator: string, left: Obj, right: Obj): Obj =
     return evalInfixStringExpression(operator, left, right)
   if left.objType == ObjType.OTBoolean and right.objType == ObjType.OTBoolean:
     return evalInfixBooleanExpression(operator, left, right)
+  if left.objType == ObjType.OTArray and right.objType == ObjType.OTArray:
+    return evalInfixArrayExpression(operator, left, right)
 
   return newError(errorMsg="Unknown infix operator " & operator)
 

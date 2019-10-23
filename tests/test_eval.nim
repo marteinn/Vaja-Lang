@@ -112,6 +112,17 @@ suite "eval tests":
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
 
+
+  test "array infix operations":
+    var
+      tests: ExpectedEvals = @[
+        ("[1] ++ [2]", "[1, 2]"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+
   test "hashmap expression":
     var
       tests: ExpectedEvals = @[

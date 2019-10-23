@@ -29,6 +29,7 @@ type
     LBRACE,
     RBRACE,
     AMP,
+    PLUSPLUS,
     DOT,
     RETURN,
     RARROW,

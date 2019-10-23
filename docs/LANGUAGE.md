@@ -219,6 +219,12 @@ not 5
 "a" & "b" >> "ab"
 ```
 
+## Array operators
+
+```
+[1, 2] ++ [3] >> [1, 2, 3]
+```
+
 
 ## Builtins
 

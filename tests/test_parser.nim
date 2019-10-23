@@ -114,6 +114,7 @@ suite "parser tests":
         ("1 >= 2", "(1 >= 2)"),
         ("1 < 2", "(1 < 2)"),
         ("1 <= 2", "(1 <= 2)"),
+        ("[1] ++ [2]", "([1] ++ [2])"),
       ]
     for testPair in tests:
       var program: Node = parseSource(testPair[0])

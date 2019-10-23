@@ -54,6 +54,7 @@ var
     TokenType.MODULO: Precedence.PRODUCT,
     TokenType.EXPONENT: Precedence.PRODUCT,
     TokenType.AMP: Precedence.PRODUCT,
+    TokenType.PLUSPLUS: Precedence.PRODUCT,
     TokenType.AND: Precedence.PRODUCT,
     TokenType.OR: Precedence.PRODUCT,
     TokenType.EQ: Precedence.PRODUCT,
@@ -503,6 +504,7 @@ proc getInfixFn(tokenType: TokenType): InfixFunction =
     of MODULO: parseInfixExpression
     of EXPONENT: parseInfixExpression
     of AMP: parseInfixExpression
+    of PLUSPLUS: parseInfixExpression
     of AND: parseInfixExpression
     of OR: parseInfixExpression
     of EQ: parseInfixExpression

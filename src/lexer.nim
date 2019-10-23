@@ -80,7 +80,12 @@ proc nextToken*(lexer: var Lexer): Token =
     of '\n':
       tok = newToken(tokenType=TokenType.NEWLINE, literal=($ch))
     of '+':
-      tok = newToken(tokenType=TokenType.PLUS, literal=($ch))
+      if lexer.peekAhead(0) == '+':
+        var nextCh: char = lexer.peekAhead(0)
+        lexer.readCharacter()
+        tok = newToken(tokenType=TokenType.PLUSPLUS, literal=($ch & $nextCh))
+      else:
+        tok = newToken(tokenType=TokenType.PLUS, literal=($ch))
     of '-':
       if lexer.peekAhead(0) == '>':
         var nextCh: char = lexer.peekAhead(0)
