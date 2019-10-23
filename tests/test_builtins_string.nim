@@ -27,3 +27,14 @@ suite "builtins string tests":
     for testPair in tests:
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
+
+  test "String.join":
+    var
+      tests: ExpectedEvals = @[
+        ("""let a = ["hello", "world"]; String.join(" ", a)""", "hello world"),
+        ("""let a = [1, 1.1, "world"]; String.join(" ", a)""", "1 1.1 world"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]

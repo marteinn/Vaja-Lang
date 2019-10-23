@@ -36,8 +36,38 @@ proc stringSplit(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
     )
   return newArray(arrayElements=arrayElements)
 
+proc stringJoin(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  if len(arguments) < 2:
+    return newError(
+      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 2"
+    )
+  let
+    delimiter: Obj = arguments[0]
+    source: Obj = arguments[1]
+  if delimiter.objType != ObjType.OTString:
+    return newError(errorMsg="Argument fn was " & $(delimiter.objType) & ", want String")
+  if source.objType != ObjType.OTArray:
+    return newError(errorMsg="Argument arr was " & $(source.objType) & ", want Array")
+  let
+    arrayElements = source.arrayElements.map(proc (x: Obj): string =
+      return case x.objType:
+        of ObjType.OTString:
+          x.strValue
+        of ObjType.OTInteger:
+          $x.intValue
+        of ObjType.OTFloat:
+          $x.floatValue
+        else:
+          ""
+    )
+
+  return newStr(
+    strValue=arrayElements.join(delimiter.strValue)
+  )
+
 let functions*: OrderedTable[string, Obj] = {
   "split": newBuiltin(builtinFn=stringSplit),
+  "join": newBuiltin(builtinFn=stringJoin),
 }.toOrderedTable
 
 let stringModule*: Obj = newHashMap(hashMapElements=functions)
