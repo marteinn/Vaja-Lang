@@ -1,5 +1,5 @@
 fn hello(name)
-  "hello " & name
+  "hello " ++ name
 end
 
 hello("martin") |> print()

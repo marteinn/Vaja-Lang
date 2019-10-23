@@ -140,7 +140,7 @@ proc evalInfixFloatExpression(operator: string, left: Obj, right: Obj): Obj =
 
 proc evalInfixStringExpression(operator: string, left: Obj, right: Obj): Obj =
   case operator:
-    of "&":
+    of "++":
       return newStr(left.strValue & right.strValue)
     of "==":
       return toBoolObj(left.strValue == right.strValue)

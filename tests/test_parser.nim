@@ -105,7 +105,7 @@ suite "parser tests":
         ("a + b * c + d / e - f", "(((a + (b * c)) + (d / e)) - f)"),
         ("5 % 5", "(5 % 5)"),
         ("6 ** 6", "(6 ** 6)"),
-        ("\"hi\" & \"again\"", "(hi & again)"),
+        ("\"hi\" ++ \"again\"", "(hi ++ again)"),
         ("true and false", "(true and false)"),
         ("true or false", "(true or false)"),
         ("1 == 2", "(1 == 2)"),

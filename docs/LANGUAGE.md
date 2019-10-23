@@ -85,7 +85,7 @@ And fn/end syntax, that allows multiline statments, `return` is optional
 ```
 # Named function
 fn hello(name)
-  "hello " & name
+  "hello " ++ name
 end
 hello("Martin")  # "hello Martin"
 
@@ -111,8 +111,8 @@ fn hello("john") -> "john sings"
 fn hello("ringo") -> "ringo drums"
 hello("john")  # "john sings"
 
-fn hello(name, "whispers") -> name & " whispers"
-fn hello(name, "sings") -> name & " sings"
+fn hello(name, "whispers") -> name ++ " whispers"
+fn hello(name, "sings") -> name ++ " sings"
 hello("martin", "sings")  # "martin sings"
 ```
 
@@ -178,7 +178,6 @@ end
 | `%`       | Modulo                         |                                 |
 | `**`      |                                |                                 |
 | `++`      | Inflix increment               |                                 |
-| `&`       | Combine string                 |                                 |
 | `\|>`     | Pass value left to right to fn |                                 |
 
 

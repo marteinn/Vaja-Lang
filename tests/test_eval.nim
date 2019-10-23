@@ -78,7 +78,7 @@ suite "eval tests":
     var
       tests: ExpectedEvals = @[
         ("\"hello\"", "hello"),
-        ("\"hi\" & \"again\"", "hiagain"),
+        ("\"hi\" ++ \"again\"", "hiagain"),
         ("\"hi\" == \"hi\"", "true"),
         ("\"hi\" != \"hi\"", "false"),
         ("\"hi\" != \"hi\"", "false"),

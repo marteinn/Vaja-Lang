@@ -1,2 +1,2 @@
-fn myFunc("martin") -> "hej " & "martin"
-fn myFunc(a) -> "hello " & a
+fn myFunc("martin") -> "hej " ++ "martin"
+fn myFunc(a) -> "hello " ++ a
