@@ -1,10 +1,8 @@
-let server = Http.createServer()
-let handler = fn(req)
-  print("CALLED")
-  print(req)
-  return {
-    "status": 200,
-    "body": "HELLO"
-  }
-end
-server |> Http.addRoutes([["/", handler]]) |> Http.listen(8080)
+Http.createServer() \
+|> Http.addRoutes([
+  ["/artists/tomwaits", fn(req) -> {"status": 200, "body": "About page"}],
+  ["/about", fn(req) -> {"status": 200, "body": "About page"}],
+  ["/error", fn(req) -> {"status": 200, "body": "Error page"}],
+  ["/", fn(req) -> {"status": 200, "body": "Index page"}]
+]) \
+|> Http.listen(8080)

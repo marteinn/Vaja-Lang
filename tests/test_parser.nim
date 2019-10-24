@@ -6,7 +6,7 @@ from ast import Node, NodeType, toCode
 proc parseSource(source:string): Node =
   var
     lexer: Lexer = newLexer(source)
-    parser: Parser = newParser(lexer = lexer)
+    parser: Parser = newParser(lexer=lexer)
     program: Node = parser.parseProgram()
 
   return program
@@ -263,6 +263,11 @@ end
       tests: ExpectedTokens = @[
         ("1 |> a()", "a(1)"),
         ("1 |> a() |> b()", "b(a(1))"),
+        ("""
+1 \
+|> a() \
+|> b()
+""", "b(a(1))"),
       ]
     for testPair in tests:
       var program: Node = parseSource(testPair[0])

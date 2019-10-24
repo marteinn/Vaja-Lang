@@ -37,6 +37,11 @@ proc skipWhitespace(lexer: var Lexer) =
   while lexer.ch == ' ':
     lexer.readCharacter()
 
+proc skipEscapedNewlines(lexer: var Lexer) =
+  while lexer.ch == '\\' and lexer.peekAhead(0) == '\n':
+    lexer.readCharacter()
+    lexer.readCharacter()
+
 proc readNumber(lexer: var Lexer): string =
   var startPos = lexer.pos
   while (isInt(lexer.ch) or lexer.ch == '.') and not lexer.eof:
@@ -71,6 +76,7 @@ proc nextToken*(lexer: var Lexer): Token =
       return newToken(tokenType=TokenType.EOF, literal="")
 
   skipWhitespace(lexer)
+  skipEscapedNewlines(lexer)
 
   var
     ch: char = lexer.ch
