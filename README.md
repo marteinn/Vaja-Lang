@@ -12,7 +12,22 @@ Väja is a dynamic interpreted language inspired by Elixir, Lua, Python, Nim and
 - let statements
 - Arithmetic expressions
 - Pipe operator
+- Immutable data
 
+
+## Example syntax
+
+This is a example on how you run a webserver:
+
+```
+Http.createServer() \
+|> Http.addRoutes([
+  ["/about", fn(req) -> {"status": 200, "body": "About page"}],
+  ["/error", fn(req) -> {"status": 500, "body": "Error page"}],
+  ["/", fn(req) -> {"status": 200, "body": "Index page"}]
+]) \
+|> Http.listen(8080)
+```
 
 ## Compiling from source
 - First [install nim](https://nim-lang.org/install.html)
