@@ -2,7 +2,17 @@ Http.createServer() \
 |> Http.addRoutes([
   ["/artists/tomwaits", fn(req) -> {"status": 200, "body": "About page"}],
   ["/about", fn(req) -> {"status": 200, "body": "About page"}],
-  ["/error", fn(req) -> {"status": 200, "body": "Error page"}],
+  ["/json", fn(req)
+    {
+      "status": 200,
+      "body": "About page",
+      "headers": [
+        ["Content-Type", "application/json"],
+        ["Server", "nginx"]
+      ]
+    }
+  end],
+  ["/error", fn(req) -> {"status": 500, "body": "Error page"}],
   ["/", fn(req) -> {"status": 200, "body": "Index page"}]
 ]) \
 |> Http.listen(8080)

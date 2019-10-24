@@ -56,7 +56,46 @@ server |> Http.addRoutes([["/", handler]]); server""", "<native object>")
       tests: ExpectedEvals = @[
         ("""
 let handler = fn(req) -> {"status": 200, "body": "Hello world"}
-Http.createServer() |> Http.addRoutes([["/", handler]]) |> Http.call("/", {}, {})""", "{status: 200, body: Hello world}")
+Http.createServer() \
+|> Http.addRoutes([["/", handler]]) \
+|> Http.call("/", {}, {})""", "{status: 200, body: Hello world}")
+      ]
+
+    for testPair in tests:
+      let evaluated: Obj = evalSource(testPair[0])
+      check evaluated.objType == ObjType.OTHashMap
+      check evaluated.inspect() == testPair[1]
+
+  test "That that proper status code are returned":
+    var
+      tests: ExpectedEvals = @[
+        ("""
+Http.createServer() \
+|> Http.addRoutes([["/", fn(req) -> {"status": 201, "body": "Hello world"}]]) \
+|> Http.call("/", {}, {})""", "{status: 201, body: Hello world}")
+      ]
+
+    for testPair in tests:
+      let evaluated: Obj = evalSource(testPair[0])
+      check evaluated.objType == ObjType.OTHashMap
+      check evaluated.inspect() == testPair[1]
+
+  test "That that headers are returned":
+    var
+      tests: ExpectedEvals = @[
+        ("""
+let handler = fn(req)
+  {
+    "status": 201,
+    "body": "Hello world",
+    "headers": [
+      ["Content-Type", "application/json"]
+    ]
+  }
+end
+Http.createServer() \
+|> Http.addRoutes([["/", handler]]) \
+|> Http.call("/", {}, {})""", "{status: 201, body: Hello world, headers: [[Content-Type, application/json]]}")
       ]
 
     for testPair in tests:

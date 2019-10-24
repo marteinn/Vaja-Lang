@@ -50,7 +50,55 @@ proc httpAddRoutes(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return server
 
 proc intCodeToHttpCode(code: int): HttpCode =
-  Http200
+  case code:
+    of 100: Http100
+    of 101: Http101
+    of 200: Http200
+    of 201: Http201
+    of 202: Http202
+    of 203: Http203
+    of 204: Http204
+    of 205: Http205
+    of 206: Http206
+    of 300: Http300
+    of 301: Http301
+    of 302: Http302
+    of 303: Http303
+    of 304: Http304
+    of 305: Http305
+    of 307: Http307
+    of 400: Http400
+    of 401: Http401
+    of 403: Http403
+    of 404: Http404
+    of 405: Http405
+    of 406: Http406
+    of 407: Http407
+    of 408: Http408
+    of 409: Http409
+    of 410: Http410
+    of 411: Http411
+    of 412: Http412
+    of 413: Http413
+    of 414: Http414
+    of 415: Http415
+    of 416: Http416
+    of 417: Http417
+    of 418: Http418
+    of 421: Http421
+    of 422: Http422
+    of 426: Http426
+    of 428: Http428
+    of 429: Http429
+    of 431: Http431
+    of 451: Http451
+    of 500: Http500
+    of 501: Http501
+    of 502: Http502
+    of 503: Http503
+    of 504: Http504
+    of 505: Http505
+    else: Http418  # I'm a teapot
 
 proc getMatchingPattern(req: Request, routes: seq[(Obj, Obj)]): seq[Obj] =
   for route in routes:
@@ -61,6 +109,17 @@ proc getMatchingPattern(req: Request, routes: seq[(Obj, Obj)]): seq[Obj] =
     if req.url.path == pattern.strValue:
       return @[handler]
   return @[]
+
+proc headersToResponseHeaders(headers: Obj): seq[(string, string)] =
+  headers.arrayElements
+    .filter(proc (x: Obj): bool = x.objType == ObjType.OTArray)
+    .map(proc (x: Obj): seq[string] =
+      x.arrayElements
+        .filter(proc(y: Obj): bool = y.objType == ObjType.OTString)
+        .map(proc(y: Obj): string = y.strValue)
+    )
+    .filter(proc (x: seq[string]): bool = len(x) == 2)
+    .map(proc (x: seq[string]): (string, string) = (x[0], x[1]))
 
 proc responseHandlerResponse(req: Request, response: Obj): Future[void] =
   if response.objType != ObjType.OTHashMap:
@@ -76,6 +135,10 @@ proc responseHandlerResponse(req: Request, response: Obj): Future[void] =
     unpackedResponse["status"].objType != ObjType.OTInteger:
     return req.respond(Http500, "Internal error, response body must be integer")
 
+  if "headers" in unpackedResponse and
+    unpackedResponse["headers"].objType != ObjType.OTArray:
+    return req.respond(Http500, "Internal error, response headers must be array")
+
   let
     body: string =
       if "body" in unpackedResponse:
@@ -87,8 +150,13 @@ proc responseHandlerResponse(req: Request, response: Obj): Future[void] =
         unpackedResponse["status"].intValue
       else:
         200
+    headers: seq[(string, string)] =
+      if "headers" in unpackedResponse:
+        headersToResponseHeaders(unpackedResponse["headers"])
+      else:
+        @[]
 
-  req.respond(intCodeToHttpCode(code), body)
+  req.respond(intCodeToHttpCode(code), body, newHttpHeaders(headers))
 
 proc reqToHandlerArgs(req: Request): seq[Obj] =
   let
