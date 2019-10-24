@@ -5,6 +5,7 @@ import hashes
 from ast import Node, toCode
 
 type
+  NativeValue* = ref object of RootObj
   ObjType* = enum
     OTInteger
     OTFloat
@@ -18,6 +19,7 @@ type
     OTArray
     OTBuiltin
     OTHashMap
+    OTNativeObject
   Obj* = ref object
     case objType*: ObjType
       of OTInteger: intValue*: int
@@ -37,6 +39,7 @@ type
       of OTBuiltin: builtinFn*:
         proc(arguments: seq[Obj], applyFn: ApplyFunction): Obj
       of OTHashMap: hashMapElements*: OrderedTable[string, Obj]
+      of OTNativeObject: nativeValue*: NativeValue
   ApplyFunction* =
     proc (fn: Obj, arguments: seq[Obj], env: var Env): Obj
   Env* = ref object
@@ -131,6 +134,7 @@ proc inspect*(obj: Obj): string =
         elementsCode = elementsCode & key & ": " & val.inspect()
 
       "{" & elementsCode & "}"
+    of OTNativeObject: "<native object>"
 
 proc newInteger*(intValue: int): Obj =
   return Obj(objType: ObjType.OTInteger, intValue: intValue)
@@ -177,6 +181,9 @@ proc newBuiltin*(builtinFn: proc(arguments: seq[Obj], applyFn: ApplyFunction): O
 
 proc newHashMap*(hashMapElements: OrderedTable[string, Obj]): Obj =
   return Obj(objType: ObjType.OTHashMap, hashMapElements: hashMapElements)
+
+proc newNativeObject*(nativeValue: NativeValue): Obj =
+  return Obj(objType: ObjType.OTNativeObject, nativeValue: nativeValue)
 
 proc addFunctionToGroup*(fnGroup: var Obj, fn: Obj): Obj =
   let arity: int = len(fn.functionParams)

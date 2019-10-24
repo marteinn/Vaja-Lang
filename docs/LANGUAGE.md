@@ -233,3 +233,13 @@ funcFromMyLibrary()
 | `len: string`                                                                |
 | `split: string string`                                                       |
 | `join: string, array[string]`                                                |
+
+
+### Http module
+
+| Signature                                                                    |
+| ---------------------------------------------------------------------------- |
+| `createServer`                                                               |
+| `addRoutes: array[[string, fn]], server`                                     |
+| `listen: port, server`                                                       |
+| `call: string, hashmap, hashmap, server`                                     |
