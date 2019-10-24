@@ -331,6 +331,27 @@ end""")]
     check program.statements[0].expression.nodeType == NodeType.NTArrayLiteral
     check program.statements[0].toCode() == "[1, 2, 3, true]"
 
+  test "test array constructs":
+    type
+      ExpectedParsing = (string, string)
+      ExpectedTokens = seq[ExpectedParsing]
+    var
+      tests: ExpectedTokens = @[
+        ("[]", "[]"),
+        ("""[
+1
+
+]""", "[1]"),
+        ("""[
+1,
+2,
+3
+]""", "[1, 2, 3]"),
+      ]
+    for testPair in tests:
+      var program: Node = parseSource(testPair[0])
+      check program.statements[0].toCode() == testPair[1]
+
   test "hashmap literal":
     var
       source: string = """{"monday": 0, "tuesday": 1}"""
