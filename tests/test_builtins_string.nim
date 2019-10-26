@@ -48,3 +48,77 @@ suite "builtins string tests":
     for testPair in tests:
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
+
+  test "String.map":
+    var
+      tests: ExpectedEvals = @[
+        ("""
+String.map(
+  fn (char)
+    if (char == ".") "_" else char end
+  end,
+  "a.b.c"
+)""", "a_b_c"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+
+  test "String.filter":
+    var
+      tests: ExpectedEvals = @[
+        ("""
+String.filter(
+  fn (char) -> char != ".",
+  "a.b.c"
+)""", "abc"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+
+  test "String.reduce":
+    var
+      tests: ExpectedEvals = @[
+        ("""
+"abcdef" |> String.reduce(
+  fn (acc, curr) -> curr,
+  ""
+)""", "f"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+
+  test "String.append":
+    var
+      tests: ExpectedEvals = @[
+        ("""String.append("abc", "def")""", "abcdef"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+  test "String.split":
+    var
+      tests: ExpectedEvals = @[
+        ("""String.split(" ", "hello world")""", "[hello, world]"),
+      ]
+
+  test "String.slice":
+    var
+      tests: ExpectedEvals = @[
+        ("""String.slice(0, 4, "hello world")""", "hello"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+  test "String.split":
+    var
+      tests: ExpectedEvals = @[
+        ("""String.split(" ", "hello world")""", "[hello, world]"),
+      ]

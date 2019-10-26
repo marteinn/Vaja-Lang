@@ -22,16 +22,7 @@ nil
 
 ### Strings
 
-Strings are declared using `"` character
-```
-"hello"
-```
-
-And can be escaped by appending a \ in front of `"`
-
-```
-"hello \" friend"
-```
+Strings are enclosed in `"double quotes"` and can be escaped by appending a \ before quote, `"like \" this"`.
 
 ### Booleans
 
@@ -240,6 +231,11 @@ funcFromMyLibrary()
 | `len: string`                                                                |
 | `split: string string`                                                       |
 | `join: string, array[string]`                                                |
+| `map: fn, string`                                                            |
+| `filter: fn, string`                                                         |
+| `reduce: fn, id, string`                                                     |
+| `append: string, string`
+| `slice: int, int, string`
 
 
 ### HashMap module

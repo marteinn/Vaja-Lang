@@ -75,10 +75,120 @@ proc stringJoin(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
     strValue=arrayElements.join(delimiter.strValue)
   )
 
+proc stringMap(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  if len(arguments) < 2:
+    return newError(
+      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 2"
+    )
+  let
+    fn: Obj = arguments[0]
+    source: Obj = arguments[1]
+  if fn.objType != ObjType.OTFunction and fn.objType != ObjType.OTFunctionGroup:
+    return newError(errorMsg="Argument fn was " & $(fn.objType) & ", want Function")
+  if source.objType != ObjType.OTString:
+    return newError(errorMsg="Argument arr was " & $(source.objType) & ", want String")
+
+  let sourceString: string = source.strValue
+  var mappedStr: string = ""
+  for ch in sourceString:
+    var env: Env = newEnv()
+    let res: Obj = applyFn(fn, @[newStr($ch)], env)
+    mappedStr = mappedStr & res.strValue
+
+  return newStr(strValue=mappedStr)
+
+proc stringFilter(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  if len(arguments) < 2:
+    return newError(
+      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 2"
+    )
+  let
+    fn: Obj = arguments[0]
+    source: Obj = arguments[1]
+  if fn.objType != ObjType.OTFunction and fn.objType != ObjType.OTFunctionGroup:
+    return newError(errorMsg="Argument fn was " & $(fn.objType) & ", want Function")
+  if source.objType != ObjType.OTString:
+    return newError(errorMsg="Argument arr was " & $(source.objType) & ", want String")
+
+  let sourceString: string = source.strValue
+  var mappedStr: string = ""
+  for ch in sourceString:
+    var env: Env = newEnv()
+    let res: Obj = applyFn(fn, @[newStr($ch)], env)
+    if res.objType != OTBoolean:
+      continue
+
+    if not res.boolValue:
+      continue
+    mappedStr = mappedStr & $ch
+
+  return newStr(strValue=mappedStr)
+
+proc stringReduce(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  if len(arguments) < 3:
+    return newError(
+      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 3"
+    )
+  let
+    fn: Obj = arguments[0]
+    initial: Obj = arguments[1]
+    source: Obj = arguments[2]
+  if fn.objType != ObjType.OTFunction and fn.objType != ObjType.OTFunctionGroup:
+    return newError(errorMsg="Argument fn was " & $(fn.objType) & ", want Function")
+  if source.objType != ObjType.OTString:
+    return newError(errorMsg="Argument arr was " & $(source.objType) & ", want String")
+
+  result = initial
+  let sourceString: string = source.strValue
+  for ch in sourceString:
+    var env: Env = newEnv()
+    let curr: Obj = newStr($ch)
+    result = applyFn(fn, @[result, curr], env)
+
+proc stringAppend(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  if len(arguments) != 2:
+    return newError(
+      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 2"
+    )
+  let
+    string1: Obj = arguments[0]
+    string2: Obj = arguments[1]
+  if string1.objType != ObjType.OTString:
+    return newError(errorMsg="Argument arr was " & $(string1.objType) & ", want String")
+  if string2.objType != ObjType.OTString:
+    return newError(errorMsg="Argument arr was " & $(string2.objType) & ", want String")
+  return newStr(string1.strValue & string2.strValue)
+
+proc stringSlice(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  if len(arguments) < 3:
+    return newError(
+      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 2"
+    )
+  let
+    fromIndex: Obj = arguments[0]
+    toIndex: Obj = arguments[1]
+    source: Obj = arguments[2]
+  if fromIndex.objType != ObjType.OTInteger:
+    return newError(errorMsg="Argument fromIndex was " & $(fromIndex.objType) & ", want Integer")
+  if toIndex.objType != ObjType.OTInteger:
+    return newError(errorMsg="Argument toIndex was " & $(toIndex.objType) & ", want Integer")
+  if source.objType != ObjType.OTString:
+    return newError(errorMsg="Argument fn was " & $(source.objType) & ", want String")
+
+  let
+    slice = source.strValue[fromIndex.intValue .. toIndex.intValue]
+  return newStr(slice)
+
 let functions*: OrderedTable[string, Obj] = {
   "len": newBuiltin(builtinFn=stringLen),
   "split": newBuiltin(builtinFn=stringSplit),
   "join": newBuiltin(builtinFn=stringJoin),
+  "map": newBuiltin(builtinFn=stringMap),
+  "filter": newBuiltin(builtinFn=stringFilter),
+  "reduce": newBuiltin(builtinFn=stringReduce),
+  "append": newBuiltin(builtinFn=stringAppend),
+  "slice": newBuiltin(builtinFn=stringSlice),
+  # TODO: Add isEmpty
 }.toOrderedTable
 
 let stringModule*: Obj = newHashMap(hashMapElements=functions)
