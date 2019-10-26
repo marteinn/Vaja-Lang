@@ -64,6 +64,11 @@ proc readString(lexer: var Lexer): string =
   while true:
     lexer.readCharacter()
 
+    if lexer.ch == '\\' and lexer.peekAhead(0) == '"':
+      lexer.readCharacter()
+      stringOut = stringOut & lexer.ch
+      continue
+
     if lexer.ch == '"' or lexer.eof:
       break
 

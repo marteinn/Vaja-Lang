@@ -331,3 +331,14 @@ end
     check(lexer.nextToken().tokenType == TokenType.DOT)
     check(lexer.nextToken().tokenType == TokenType.IDENT)
     check(lexer.nextToken().tokenType == TokenType.EOF)
+
+  test "string escaping":
+    var
+      source: string = """
+      "a string \" declaration"
+      """
+      lexer: Lexer = newLexer(source)
+
+    let token = lexer.nextToken()
+    check(token.tokenType == TokenType.STRING)
+    check(token.literal == "a string \" declaration")

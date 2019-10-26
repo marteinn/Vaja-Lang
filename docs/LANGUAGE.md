@@ -22,8 +22,15 @@ nil
 
 ### Strings
 
+Strings are declared using `"` character
 ```
 "hello"
+```
+
+And can be escaped by appending a \ in front of `"`
+
+```
+"hello \" friend"
 ```
 
 ### Booleans
