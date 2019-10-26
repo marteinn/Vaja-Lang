@@ -242,6 +242,21 @@ funcFromMyLibrary()
 | `join: string, array[string]`                                                |
 
 
+### HashMap module
+
+| Signature                                                                    |
+| ---------------------------------------------------------------------------- |
+| `len: hashMap`                                                               |
+| `map: fn, hashMap`                                                           |
+| `filter: fn, hashMap`                                                        |
+| `reduce: fn, id, hashMap`                                                    |
+| `toArray: hashMap`                                                           |
+| `insert: string, id, hashMap`                                                |
+| `remove: string, hashMap`                                                    |
+| `update: string, hashMap`                                                    |
+| `empty: void`                                                                |
+
+
 ### Http module
 
 | Signature                                                                    |

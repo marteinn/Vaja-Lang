@@ -12,6 +12,7 @@ from obj import
   inspect
 from builtins_array import arrayModule
 from builtins_string import stringModule
+from builtins_hashmap import hashMapModule
 from builtins_http import httpModule
 
 proc builtinType(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
@@ -46,5 +47,6 @@ var
     "print": newBuiltin(builtinFn=builtinPrint),
     "Array": arrayModule,
     "String": stringModule,
+    "HashMap": hashMapModule,
     "Http": httpModule,
   }.toTable

@@ -31,5 +31,8 @@ task test_builtins_array, "Test array module":
 task test_builtins_string, "Test string module":
   exec r"nim c -r tests/test_builtins_string.nim"
 
+task test_builtins_hashmap, "Test hashmap module":
+  exec r"nim c -r tests/test_builtins_hashmap.nim"
+
 task test_builtins_http, "Test http module":
   exec r"nim c -r tests/test_builtins_http.nim"
