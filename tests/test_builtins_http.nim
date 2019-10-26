@@ -108,10 +108,16 @@ Http.createServer() \
     var
       tests: ExpectedEvals = @[
         ("""
-let headers = [["user-agent", "curl/7.54.0"], ["host", "localhost:8080"]]
 Http.createServer() \
 |> Http.addRoutes([["/about", fn(req) -> {"status": 201, "body": "Hello world"}]]) \
-|> Http.call("https://example.com:8080/about?s=1", "get", "req body", headers)""",
+|> Http.call(
+  "https://example.com:8080/about?s=1",
+  "get",
+  "req body", [
+    ["user-agent", "curl/7.54.0"],
+    ["host", "localhost:8080"]
+  ]
+)""",
         "{hostname: example.com, scheme: https, path: /about, port: 8080, anchor: , query: s=1, method: get, body: req body, headers: [[user-agent, curl/7.54.0], [host, localhost:8080]], protocol: {protocol: HTTP/1.1, major: 1, minor: 1}}")
       ]
 

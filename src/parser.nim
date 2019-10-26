@@ -440,6 +440,10 @@ proc parseCallArguments(parser: var Parser): seq[Node] =
       parser.parseExpression(Precedence.LOWEST)
     )
 
+  while parser.peekToken.tokenType == TokenType.NEWLINE:
+    discard parser.nextParserToken()
+    continue
+
   if not parser.expectPeek(TokenType.RPAREN):
     return @[]
 

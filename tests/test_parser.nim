@@ -230,6 +230,13 @@ let c = "hello"
     check parseSource("a(true)").toCode() == "a(true)"
     check parseSource("""a("val", "val2")""").toCode() == "a(val, val2)"
     check parseSource("a(fn(x) 1 end)").toCode() == "a(fn(x) 1 end)"
+    check parseSource("""
+a(
+1,
+2,
+3
+)
+""").toCode() == "a(1, 2, 3)"
 
   test "return statements":
     var
