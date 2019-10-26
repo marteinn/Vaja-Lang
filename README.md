@@ -17,7 +17,16 @@ Väja is a dynamic interpreted language inspired by Elixir, Lua, Python, Nim and
 
 ## Example syntax
 
-This is a example on how you run a webserver:
+```
+let myList = [1, 2, 3]
+let myLongerList = myList ++ [4, 5, 6]
+Array.map(fn (x) -> x*2, myLongerList)
+let isTrue = if (2 > 1) true else false end
+print(String.len("my string"))
+1.1 |> type()
+```
+
+This is how you would spin up a webserver serving three routes.
 
 ```
 Http.createServer() \
