@@ -1,4 +1,5 @@
 import unittest
+import tables
 from lexer import newLexer, Lexer
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
@@ -58,13 +59,13 @@ server |> Http.addRoutes([["/", handler]]); server""", "<native object>")
 let handler = fn(req) -> {"status": 200, "body": "Hello world"}
 Http.createServer() \
 |> Http.addRoutes([["/", handler]]) \
-|> Http.call("/", {}, {})""", "{status: 200, body: Hello world}")
+|> Http.call("/", "get", "", [])""", "{status: 200, body: Hello world}")
       ]
 
     for testPair in tests:
       let evaluated: Obj = evalSource(testPair[0])
       check evaluated.objType == ObjType.OTHashMap
-      check evaluated.inspect() == testPair[1]
+      check evaluated.hashMapElements["response"].inspect() == testPair[1]
 
   test "That that proper status code are returned":
     var
@@ -72,13 +73,13 @@ Http.createServer() \
         ("""
 Http.createServer() \
 |> Http.addRoutes([["/", fn(req) -> {"status": 201, "body": "Hello world"}]]) \
-|> Http.call("/", {}, {})""", "{status: 201, body: Hello world}")
+|> Http.call("/", "get", "", [])""", "{status: 201, body: Hello world}")
       ]
 
     for testPair in tests:
       let evaluated: Obj = evalSource(testPair[0])
       check evaluated.objType == ObjType.OTHashMap
-      check evaluated.inspect() == testPair[1]
+      check evaluated.hashMapElements["response"].inspect() == testPair[1]
 
   test "That that headers are returned":
     var
@@ -95,10 +96,26 @@ let handler = fn(req)
 end
 Http.createServer() \
 |> Http.addRoutes([["/", handler]]) \
-|> Http.call("/", {}, {})""", "{status: 201, body: Hello world, headers: [[Content-Type, application/json]]}")
+|> Http.call("/", "get", "", [])""", "{status: 201, body: Hello world, headers: [[Content-Type, application/json]]}")
       ]
 
     for testPair in tests:
       let evaluated: Obj = evalSource(testPair[0])
       check evaluated.objType == ObjType.OTHashMap
-      check evaluated.inspect() == testPair[1]
+      check evaluated.hashMapElements["response"].inspect() == testPair[1]
+
+  test "Mapping request data to handler contains proper data":
+    var
+      tests: ExpectedEvals = @[
+        ("""
+let headers = [["user-agent", "curl/7.54.0"], ["host", "localhost:8080"]]
+Http.createServer() \
+|> Http.addRoutes([["/about", fn(req) -> {"status": 201, "body": "Hello world"}]]) \
+|> Http.call("https://example.com:8080/about?s=1", "get", "req body", headers)""",
+        "{hostname: example.com, scheme: https, path: /about, port: 8080, anchor: , query: s=1, method: get, body: req body, headers: [[user-agent, curl/7.54.0], [host, localhost:8080]], protocol: {protocol: HTTP/1.1, major: 1, minor: 1}}")
+      ]
+
+    for testPair in tests:
+      let evaluated: Obj = evalSource(testPair[0])
+      check evaluated.objType == ObjType.OTHashMap
+      check evaluated.hashMapElements["request"].inspect() == testPair[1]

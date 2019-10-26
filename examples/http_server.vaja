@@ -1,11 +1,13 @@
+print("Starting server...")
+
 Http.createServer() \
 |> Http.addRoutes([
-  ["/artists/tomwaits", fn(req) -> {"status": 200, "body": "About page"}],
+  ["/artists/tomwaits", fn(req) -> {"status": 200, "body": "Artist page"}],
   ["/about", fn(req) -> {"status": 200, "body": "About page"}],
   ["/json", fn(req)
     {
       "status": 200,
-      "body": "About page",
+      "body": "{\"artist\": \"Tom Waits\"}",
       "headers": [
         ["Content-Type", "application/json"],
         ["Server", "nginx"]
@@ -13,6 +15,8 @@ Http.createServer() \
     }
   end],
   ["/error", fn(req) -> {"status": 500, "body": "Error page"}],
-  ["/", fn(req) -> {"status": 200, "body": "Index page"}]
+  ["/", fn(req)
+    {"status": 200, "body": "Index page"}
+  end]
 ]) \
 |> Http.listen(8080)

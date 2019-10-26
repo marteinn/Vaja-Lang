@@ -49,6 +49,31 @@ proc httpAddRoutes(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   httpServer.routes = routes
   return server
 
+proc httpMethodToStr(httpMethod: HttpMethod): string =
+  case httpMethod:
+    of HttpHead: "head"
+    of HttpGet: "get"
+    of HttpPost: "post"
+    of HttpPut: "put"
+    of HttpDelete: "delete"
+    of HttpTrace: "trace"
+    of HttpOptions: "options"
+    of HttpConnect:" connect"
+    of HttpPatch: "patch"
+
+proc httpMethodToEnum(httpMethod: string): HttpMethod =
+  case httpMethod:
+    of "head": HttpHead
+    of "get": HttpGet
+    of "post": HttpPost
+    of "put": HttpPut
+    of "delete": HttpDelete
+    of "trace": HttpTrace
+    of "options": HttpOptions
+    of "connect": HttpConnect
+    of "patch": HttpPatch
+    else: HttpHead
+
 proc intCodeToHttpCode(code: int): HttpCode =
   case code:
     of 100: Http100
@@ -159,7 +184,19 @@ proc responseHandlerResponse(req: Request, response: Obj): Future[void] =
   req.respond(intCodeToHttpCode(code), body, newHttpHeaders(headers))
 
 proc reqToHandlerArgs(req: Request): seq[Obj] =
+  var headerObjs: seq[Obj] = @[]
+  for key, val in req.headers:
+    let obj: Obj = newArray(
+      arrayElements= @[newStr(strValue=key), newStr(strValue=val)]
+    )
+    headerObjs.add(obj)
+
   let
+    protocol: OrderedTable[string, Obj] = {
+      "protocol": newStr(strValue=req.protocol.orig),
+      "major": newStr(strValue= $(req.protocol.major)),
+      "minor": newStr(strValue= $(req.protocol.minor)),
+    }.toOrderedTable
     reqHashMapElements: OrderedTable[string, Obj] = {
       "hostname": newStr(strValue=req.hostname),
       "scheme": newStr(strValue=req.url.scheme),
@@ -167,7 +204,10 @@ proc reqToHandlerArgs(req: Request): seq[Obj] =
       "port": newStr(strValue=req.url.port),
       "anchor": newStr(strValue=req.url.anchor),
       "query": newStr(strValue=req.url.query),
-      # method
+      "method": newStr(strValue=httpMethodToStr(req.reqMethod)),
+      "body": newStr(strValue=req.body),
+      "headers": newArray(arrayElements=headerObjs),
+      "protocol": newHashMap(hashMapElements=protocol),
     }.toOrderedTable
     reqHashMap = newHashMap(hashMapElements=reqHashMapElements)
   return @[reqHashMap]
@@ -175,21 +215,39 @@ proc reqToHandlerArgs(req: Request): seq[Obj] =
 proc httpCall(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   let
     url = arguments[0].strValue
-    # 1 data/body
-    # 2 config
-    server = arguments[3]
+    callMethod = arguments[1].strValue
+    body = arguments[2].strValue
+    callHeaders: seq[(string, string)] = arguments[3].arrayElements.map(
+      proc (x: Obj): (string, string) =
+        (x.arrayElements[0].strValue, x.arrayElements[1].strValue)
+      )
+    server = arguments[4]
     httpServer: HttpServer = cast[HttpServer](server.nativeValue)
     routes: seq[(Obj, Obj)]= httpServer.routes
   var
     uri = initUri()
   parseUri(url, uri)
   let
-    req = Request(hostname: uri.hostname, url: uri)
+    headers = newHttpHeaders(callHeaders)
+    req = Request(
+      hostname: uri.hostname,
+      url: uri,
+      reqMethod: httpMethodToEnum(callMethod),
+      body: body,
+      headers: headers,
+      protocol: ("HTTP/1.1", 1, 1),
+    )
     handlerArgs: seq[Obj] = reqToHandlerArgs(req)
     matchingHandlers: seq[Obj] = getMatchingPattern(req, routes)
 
   var fnEnv: Env = newEnv()
-  return applyFn(matchingHandlers[0], handlerArgs, fnEnv)
+  let
+    repObj = applyFn(matchingHandlers[0], handlerArgs, fnEnv)
+    callResp: OrderedTable[string, Obj] = {
+      "response": repObj,
+      "request": handlerArgs[0],
+    }.toOrderedTable
+  return newHashMap(hashMapElements=callResp)
 
 proc httpListen(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   if len(arguments) != 2:
