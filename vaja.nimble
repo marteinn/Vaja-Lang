@@ -36,3 +36,6 @@ task test_builtins_hashmap, "Test hashmap module":
 
 task test_builtins_http, "Test http module":
   exec r"nim c -r tests/test_builtins_http.nim"
+
+task test_builtins_io, "Test IO module":
+  exec r"nim c -r tests/test_builtins_io.nim"

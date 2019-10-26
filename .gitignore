@@ -1,4 +1,6 @@
 src/vaja
+bin/*
+!bin/.gitkeep
 tests/test_parser
 tests/test_lexer
 tests/test_eval
@@ -6,5 +8,4 @@ tests/test_obj
 tests/test_builtins_array
 tests/test_builtins_string
 tests/test_builtins_http
-bin/*
-!bin/.gitkeep
+tests/test_builtins_io

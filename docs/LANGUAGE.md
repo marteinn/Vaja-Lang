@@ -261,3 +261,9 @@ funcFromMyLibrary()
 | `addRoutes: array[[string, fn]], server`                                     |
 | `listen: port, server`                                                       |
 | `call: string, hashmap, hashmap, server`                                     |
+
+### IO module
+
+| Signature                                                                    |
+| ---------------------------------------------------------------------------- |
+| `readFile: path`                                                             |
