@@ -32,3 +32,15 @@ suite "builtins io tests":
       check evaluated.inspect() == testPair[1]
 
     removeFile("example_read.txt")
+
+  test "IO.writeFile":
+    var
+      tests: ExpectedEvals = @[
+        ("""IO.writeFile("example_write.txt", "example_write.txt")""", "true"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+
+    removeFile("example_write.txt")

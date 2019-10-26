@@ -267,3 +267,4 @@ funcFromMyLibrary()
 | Signature                                                                    |
 | ---------------------------------------------------------------------------- |
 | `readFile: path`                                                             |
+| `writeFile: string, string`                                                  |
