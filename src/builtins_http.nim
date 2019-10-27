@@ -22,7 +22,6 @@ import test_utils
 
 type HttpServer* = ref object of NativeValue
   instance: AsyncHttpServer
-  #routes*: seq[(Obj, Obj)]
   handler*: Obj
 
 proc httpCreateServer(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
