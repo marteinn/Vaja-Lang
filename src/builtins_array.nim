@@ -13,36 +13,35 @@ from obj import
   newEnv,
   NIL,
   inspect
+import test_utils
 
 proc arrayLen(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) == 0:
-    return newError(errorMsg="Missing arguments")
+  requireNumArgs(arguments, 1)
+
   let obj: Obj = arguments[0]
   if obj.objType != ObjType.OTArray:
     return newError(errorMsg="Argument is not an array")
   return newInteger(intValue=len(obj.arrayElements))
 
 proc arrayHead(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) == 0:
-    return newError(errorMsg="Missing arguments")
+  requireNumArgs(arguments, 1)
+
   let obj: Obj = arguments[0]
   if obj.objType != ObjType.OTArray:
     return newError(errorMsg="Argument is not an array")
   return obj.arrayElements[0]
 
 proc arrayLast(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) == 0:
-    return newError(errorMsg="Missing arguments")
+  requireNumArgs(arguments, 1)
+
   let obj: Obj = arguments[0]
   if obj.objType != ObjType.OTArray:
     return newError(errorMsg="Argument is not an array")
   return obj.arrayElements[high(obj.arrayElements)]
 
 proc arrayMap(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) < 2:
-    return newError(
-      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 2"
-    )
+  requireNumArgs(arguments, 2)
+
   let
     fn: Obj = arguments[0]
     arr: Obj = arguments[1]
@@ -58,10 +57,8 @@ proc arrayMap(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newArray(arrayElements=mapped)
 
 proc arrayReduce(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) < 3:
-    return newError(
-      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 3"
-    )
+  requireNumArgs(arguments, 3)
+
   let
     fn: Obj = arguments[0]
     initial: Obj = arguments[1]
@@ -77,10 +74,8 @@ proc arrayReduce(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
     result = applyFn(fn, @[result, curr], env)
 
 proc arrayFilter(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) < 2:
-    return newError(
-      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 2"
-    )
+  requireNumArgs(arguments, 2)
+
   let
     fn: Obj = arguments[0]
     arr: Obj = arguments[1]
@@ -99,10 +94,8 @@ proc arrayFilter(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newArray(arrayElements=filtered)
 
 proc arrayPush(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) < 2:
-    return newError(
-      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 2"
-    )
+  requireNumArgs(arguments, 2)
+
   let
     el: Obj = arguments[0]
     arr: Obj = arguments[1]
@@ -113,10 +106,8 @@ proc arrayPush(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newArray(arrayElements=arrayElements)
 
 proc arrayDeleteAt(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) < 2:
-    return newError(
-      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 2"
-    )
+  requireNumArgs(arguments, 2)
+
   let
     index: Obj = arguments[0]
     arr: Obj = arguments[1]
@@ -129,10 +120,8 @@ proc arrayDeleteAt(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newArray(arrayElements=arrayElements)
 
 proc arrayAppend(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) < 2:
-    return newError(
-      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 2"
-    )
+  requireNumArgs(arguments, 2)
+
   let
     elements: Obj = arguments[0]
     arr: Obj = arguments[1]
@@ -148,10 +137,8 @@ proc arrayAppend(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newArray(arrayElements=arrayElements)
 
 proc arrayReplaceAt(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) < 2:
-    return newError(
-      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 2"
-    )
+  requireNumArgs(arguments, 3)
+
   let
     index: Obj = arguments[0]
     obj: Obj = arguments[1]
@@ -165,8 +152,8 @@ proc arrayReplaceAt(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newArray(arrayElements=arrayElements)
 
 proc arrayTail(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) == 0:
-    return newError(errorMsg="Missing arguments")
+  requireNumArgs(arguments, 1)
+
   let arr: Obj = arguments[0]
   if arr.objType != ObjType.OTArray:
     return newError(errorMsg="Argument arr was " & $(arr.objType) & ", want Array")

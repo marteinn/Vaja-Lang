@@ -15,10 +15,10 @@ from builtins_string import stringModule
 from builtins_hashmap import hashMapModule
 from builtins_http import httpModule
 from builtins_io import ioModule
+import test_utils
 
 proc builtinType(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) == 0:
-    return newError(errorMsg="Missing arguments")
+  requireNumArgs(arguments, 1)
 
   let obj = arguments[0]
   let objType = case obj.objType:
@@ -37,8 +37,8 @@ proc builtinType(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newStr(strValue=objType)
 
 proc builtinPrint(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) == 0:
-    return newError(errorMsg="Missing arguments")
+  requireNumArgs(arguments, 1)
+
   let obj = arguments[0]
   echo obj.inspect()
   return NIL
