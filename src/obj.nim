@@ -79,17 +79,22 @@ proc setVar*(env: Env, name: string, value: Obj): Env =
   return env
 
 proc containsVar*(env: Env, name: string): bool =
-  if env.outer == nil:
-    return contains(env.store, name)
+  if contains(env.store, name):
+    return true
 
-  return contains(env.store, name) or contains(env.outer.store, name)
+  if env.outer != nil:
+    return containsVar(env.outer, name)
+
+  return false
 
 proc getVar*(env: Env, name: string): Obj =
   if contains(env.store, name):
     return env.store[name]
 
-  if env != nil and contains(env.outer.store, name):
-    return env.outer.store[name]
+  if containsVar(env.outer, name):
+    return getVar(env.outer, name)
+
+  return nil
 
 proc hasNumberType*(obj: Obj): bool =
   obj.objType == OTInteger or obj.objType == OTFloat
