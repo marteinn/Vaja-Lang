@@ -18,23 +18,19 @@ import test_utils
 
 proc hashMapLen(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 1)
+  requireArgOfType(arguments, 0, ObjType.OTHashMap)
 
   let obj: Obj = arguments[0]
-  if obj.objType != ObjType.OTHashMap:
-    return newError(errorMsg="Argument arr was " & $(obj.objType) & ", want HashMap")
   return newInteger(intValue=len(obj.hashMapElements))
 
 proc hashMapMap(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 2)
+  requireArgOfTypes(arguments, 0, @[ObjType.OTFunction, ObjType.OTFunctionGroup])
+  requireArgOfType(arguments, 1, ObjType.OTHashMap)
 
   let
     fn: Obj = arguments[0]
     source: Obj = arguments[1]
-  if source.objType != ObjType.OTHashMap:
-    return newError(errorMsg="Argument hashMap was " & $(fn.objType) & ", want HashMap")
-  if fn.objType != ObjType.OTFunction and fn.objType != ObjType.OTFunctionGroup:
-    return newError(errorMsg="Argument fn was " & $(fn.objType) & ", want Function")
-
   var mapped: OrderedTable[string, Obj] = initOrderedTable[string, Obj]()
   for key, val in source.hashMapElements:
     var env: Env = newEnv()
@@ -43,15 +39,12 @@ proc hashMapMap(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
 
 proc hashMapFilter(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 2)
+  requireArgOfTypes(arguments, 0, @[ObjType.OTFunction, ObjType.OTFunctionGroup])
+  requireArgOfType(arguments, 1, ObjType.OTHashMap)
 
   let
     fn: Obj = arguments[0]
     source: Obj = arguments[1]
-  if source.objType != ObjType.OTHashMap:
-    return newError(errorMsg="Argument hashMap was " & $(fn.objType) & ", want HashMap")
-  if fn.objType != ObjType.OTFunction and fn.objType != ObjType.OTFunctionGroup:
-    return newError(errorMsg="Argument fn was " & $(fn.objType) & ", want Function")
-
   var filtered: OrderedTable[string, Obj] = initOrderedTable[string, Obj]()
   for key, val in source.hashMapElements:
     var env: Env = newEnv()
@@ -61,17 +54,13 @@ proc hashMapFilter(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
 
 proc hashMapReduce(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 3)
+  requireArgOfTypes(arguments, 0, @[ObjType.OTFunction, ObjType.OTFunctionGroup])
+  requireArgOfType(arguments, 2, ObjType.OTHashMap)
 
   let
     fn: Obj = arguments[0]
     initial: Obj = arguments[1]
     source: Obj = arguments[2]
-
-  if fn.objType != ObjType.OTFunction and fn.objType != ObjType.OTFunctionGroup:
-    return newError(errorMsg="Argument fn was " & $(fn.objType) & ", want Function")
-  if source.objType != ObjType.OTHashMap:
-    return newError(errorMsg="Argument source was " & $(source.objType) & ", want HashMap")
-
   result = initial
   for key, curr in source.hashMapElements:
     var env: Env = newEnv()
@@ -79,11 +68,9 @@ proc hashMapReduce(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
 
 proc hashMapToArray(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 1)
+  requireArgOfType(arguments, 0, ObjType.OTHashMap)
 
   let source: Obj = arguments[0]
-  if source.objType != ObjType.OTHashMap:
-    return newError(errorMsg="Argument arr was " & $(source.objType) & ", want HashMap")
-
   var arr: seq[Obj] = @[]
   for key, val in source.hashMapElements:
     arr.add(
@@ -94,17 +81,13 @@ proc hashMapToArray(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
 
 proc hashMapInsert(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 3)
+  requireArgOfType(arguments, 0, ObjType.OTString)
+  requireArgOfType(arguments, 2, ObjType.OTHashMap)
 
   let
     keyObj: Obj = arguments[0]
     valObj: Obj = arguments[1]
     source: Obj = arguments[2]
-
-  if keyObj.objType != ObjType.OTFunction and keyObj.objType != ObjType.OTString:
-    return newError(errorMsg="Argument fn was " & $(keyObj.objType) & ", want String")
-  if source.objType != ObjType.OTHashMap:
-    return newError(errorMsg="Argument source was " & $(source.objType) & ", want HashMap")
-
   var
     hashMapElements = source.hashMapElements
   hashMapElements[keyObj.strValue] = valObj
@@ -112,16 +95,12 @@ proc hashMapInsert(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
 
 proc hashMapRemove(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 2)
+  requireArgOfType(arguments, 0, ObjType.OTString)
+  requireArgOfType(arguments, 1, ObjType.OTHashMap)
 
   let
     keyObj: Obj = arguments[0]
     source: Obj = arguments[1]
-
-  if keyObj.objType != ObjType.OTFunction and keyObj.objType != ObjType.OTString:
-    return newError(errorMsg="Argument fn was " & $(keyObj.objType) & ", want String")
-  if source.objType != ObjType.OTHashMap:
-    return newError(errorMsg="Argument source was " & $(source.objType) & ", want HashMap")
-
   var
     hashMapElements = source.hashMapElements
   hashMapElements.del(keyObj.strValue)
@@ -129,17 +108,13 @@ proc hashMapRemove(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
 
 proc hashMapUpdate(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 3)
+  requireArgOfType(arguments, 0, ObjType.OTString)
+  requireArgOfType(arguments, 2, ObjType.OTHashMap)
 
   let
     keyObj: Obj = arguments[0]
     valObj: Obj = arguments[1]
     source: Obj = arguments[2]
-
-  if keyObj.objType != ObjType.OTFunction and keyObj.objType != ObjType.OTString:
-    return newError(errorMsg="Argument fn was " & $(keyObj.objType) & ", want String")
-  if source.objType != ObjType.OTHashMap:
-    return newError(errorMsg="Argument source was " & $(source.objType) & ", want HashMap")
-
   if not contains(source.hashMapElements, keyObj.strValue):
     return newError(errorMsg="Key " & $(keyObj.strValue) & " not found")
 

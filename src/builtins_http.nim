@@ -18,30 +18,31 @@ from obj import
   newEnv,
   NIL,
   inspect
+import test_utils
+
 type HttpServer* = ref object of NativeValue
   instance: AsyncHttpServer
   routes*: seq[(Obj, Obj)]
 
 proc httpCreateServer(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  requireNumArgs(arguments, 0)
+
   var server = newAsyncHttpServer()
   return newNativeObject(
     nativeValue=HttpServer(instance: server, routes: @[])
   )
 
 proc httpAddRoutes(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) != 2:
-    return newError(
-      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 2"
-    )
+  requireNumArgs(arguments, 2)
+  requireArgOfType(arguments, 0, ObjType.OTArray)
+  requireArgOfType(arguments, 1, ObjType.OTNativeObject)
+
   let
     arr: Obj = arguments[0]
   var
     server: Obj = arguments[1]
-  if arr.objType != ObjType.OTArray:
-    return newError(errorMsg="Argument arr was " & $(arr.objType) & ", want Array")
-  if server.objType != ObjType.OTNativeObject:
-    return newError(errorMsg="Argument arr was " & $(server.objType) & ", want NativeObject")
-  let httpServer: HttpServer = cast[HttpServer](server.nativeValue)
+  let
+    httpServer: HttpServer = cast[HttpServer](server.nativeValue)
   let routes: seq[(Obj, Obj)] = map(arr.arrayElements, proc(routeObj: Obj): (Obj, Obj) =
     (routeObj.arrayElements[0], routeObj.arrayElements[1])
   )
@@ -250,19 +251,13 @@ proc httpCall(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newHashMap(hashMapElements=callResp)
 
 proc httpListen(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) != 2:
-    return newError(
-      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 2"
-    )
+  requireNumArgs(arguments, 2)
+  requireArgOfType(arguments, 0, ObjType.OTInteger)
+  requireArgOfType(arguments, 1, ObjType.OTNativeObject)
 
   let
     port: Obj = arguments[0]
     server: Obj = arguments[1]
-  if port.objType != ObjType.OTInteger:
-    return newError(errorMsg="Argument arr was " & $(port.objType) & ", want Integer")
-  if server.objType != ObjType.OTNativeObject:
-    return newError(errorMsg="Argument arr was " & $(server.objType) & ", want NativeObject")
-
   assert(server.nativeValue of HttpServer)
   let
     httpServer: HttpServer = cast[HttpServer](server.nativeValue)

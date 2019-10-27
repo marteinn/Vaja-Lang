@@ -14,33 +14,25 @@ from obj import
   NIL,
   TRUE,
   inspect
+import test_utils
 
 proc ioReadFile(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) != 1:
-    return newError(
-      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 1"
-    )
+  requireNumArgs(arguments, 1)
+  requireArgOfType(arguments, 0, ObjType.OTString)
 
-  let pathObj: Obj = arguments[0]
-  if pathObj.objType != ObjType.OTString:
-    return newError(errorMsg="Argument arr was " & $(pathObj.objType) & ", want String")
-  let fileContent: string = readFile(pathObj.strValue)
+  let
+    pathObj: Obj = arguments[0]
+    fileContent: string = readFile(pathObj.strValue)
   return newStr(fileContent)
 
 proc ioWriteFile(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) != 2:
-    return newError(
-      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 1"
-    )
+  requireNumArgs(arguments, 2)
+  requireArgOfType(arguments, 0, ObjType.OTString)
+  requireArgOfType(arguments, 1, ObjType.OTString)
 
   let
     content: Obj = arguments[0]
     pathObj: Obj = arguments[1]
-  if content.objType != ObjType.OTString:
-    return newError(errorMsg="Argument arr was " & $(content.objType) & ", want String")
-  if pathObj.objType != ObjType.OTString:
-    return newError(errorMsg="Argument arr was " & $(pathObj.objType) & ", want String")
-
   writeFile(pathObj.strValue, content.strValue)
   return TRUE
 
