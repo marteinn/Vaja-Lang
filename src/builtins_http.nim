@@ -22,32 +22,29 @@ import test_utils
 
 type HttpServer* = ref object of NativeValue
   instance: AsyncHttpServer
-  routes*: seq[(Obj, Obj)]
+  #routes*: seq[(Obj, Obj)]
+  handler*: Obj
 
 proc httpCreateServer(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 0)
 
   var server = newAsyncHttpServer()
   return newNativeObject(
-    nativeValue=HttpServer(instance: server, routes: @[])
+    nativeValue=HttpServer(instance: server, handler: nil)
   )
 
-proc httpAddRoutes(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+proc httpAddHandler(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 2)
-  requireArgOfType(arguments, 0, ObjType.OTArray)
+  requireArgOfTypes(arguments, 0, @[ObjType.OTFunction, ObjType.OTFunctionGroup])
   requireArgOfType(arguments, 1, ObjType.OTNativeObject)
 
   let
-    arr: Obj = arguments[0]
+    handler: Obj = arguments[0]
   var
     server: Obj = arguments[1]
   let
     httpServer: HttpServer = cast[HttpServer](server.nativeValue)
-  let routes: seq[(Obj, Obj)] = map(arr.arrayElements, proc(routeObj: Obj): (Obj, Obj) =
-    (routeObj.arrayElements[0], routeObj.arrayElements[1])
-  )
-
-  httpServer.routes = routes
+  httpServer.handler = handler
   return server
 
 proc httpMethodToStr(httpMethod: HttpMethod): string =
@@ -125,16 +122,6 @@ proc intCodeToHttpCode(code: int): HttpCode =
     of 504: Http504
     of 505: Http505
     else: Http418  # I'm a teapot
-
-proc getMatchingPattern(req: Request, routes: seq[(Obj, Obj)]): seq[Obj] =
-  for route in routes:
-    let
-      pattern = route[0]
-      handler = route[1]
-
-    if req.url.path == pattern.strValue:
-      return @[handler]
-  return @[]
 
 proc headersToResponseHeaders(headers: Obj): seq[(string, string)] =
   headers.arrayElements
@@ -224,7 +211,6 @@ proc httpCall(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
       )
     server = arguments[4]
     httpServer: HttpServer = cast[HttpServer](server.nativeValue)
-    routes: seq[(Obj, Obj)]= httpServer.routes
   var
     uri = initUri()
   parseUri(url, uri)
@@ -239,11 +225,9 @@ proc httpCall(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
       protocol: ("HTTP/1.1", 1, 1),
     )
     handlerArgs: seq[Obj] = reqToHandlerArgs(req)
-    matchingHandlers: seq[Obj] = getMatchingPattern(req, routes)
-
   var fnEnv: Env = newEnv()
   let
-    repObj = applyFn(matchingHandlers[0], handlerArgs, fnEnv)
+    repObj = applyFn(httpServer.handler, handlerArgs, fnEnv)
     callResp: OrderedTable[string, Obj] = {
       "response": repObj,
       "request": handlerArgs[0],
@@ -262,28 +246,21 @@ proc httpListen(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   let
     httpServer: HttpServer = cast[HttpServer](server.nativeValue)
     nativeServer = httpServer.instance
-    routes: seq[(Obj, Obj)]= httpServer.routes
-
+    handler: Obj = httpServer.handler
   proc cb(req: Request) {.async.} =
     let
       handlerArgs: seq[Obj] = reqToHandlerArgs(req)
-      matchingHandlers: seq[Obj] = getMatchingPattern(req, routes)
-
-    if len(matchingHandlers) == 0:
-      await req.respond(Http500, "Internal error, no matching route")
-    else:
-      {.gcsafe}:
-        var fnEnv: Env = newEnv()
-        let response: Obj = applyFn(matchingHandlers[0], handlerArgs, fnEnv)
-
-      await responseHandlerResponse(req, response)
+    {.gcsafe}:
+      var fnEnv: Env = newEnv()
+      let response: Obj = applyFn(handler, handlerArgs, fnEnv)
+    await responseHandlerResponse(req, response)
 
   waitFor nativeServer.serve(Port(port.intValue), cb)
   return NIL
 
 let functions*: OrderedTable[string, Obj] = {
   "createServer": newBuiltin(builtinFn=httpCreateServer),
-  "addRoutes": newBuiltin(builtinFn=httpAddRoutes),
+  "addHandler": newBuiltin(builtinFn=httpAddHandler),
   "listen": newBuiltin(builtinFn=httpListen),
   "call": newBuiltin(builtinFn=httpCall),
 }.toOrderedTable

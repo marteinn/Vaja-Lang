@@ -30,7 +30,7 @@ suite "builtins string tests":
       check evaluated.objType == ObjType.OTNativeObject
       check evaluated.inspect() == testPair[1]
 
-  test "Http.addRoutes":
+  test "Http.addHandler":
     var
       tests: ExpectedEvals = @[
         ("""
@@ -41,7 +41,7 @@ let handler = fn(req)
     "body": "Hello world"
   }
 end
-server |> Http.addRoutes([["/", handler]]); server""", "<native object>")
+server |> Http.addHandler(handler); server""", "<native object>")
       ]
 
     for testPair in tests:
@@ -50,15 +50,15 @@ server |> Http.addRoutes([["/", handler]]); server""", "<native object>")
       check evaluated.nativeValue of HttpServer
       let
         httpServer: HttpServer = cast[HttpServer](evaluated.nativeValue)
-      check len(httpServer.routes) == 1
+      check httpServer.handler != nil
 
-  test "That handlers are matched and returns proper response":
+  test "That handler returns proper response":
     var
       tests: ExpectedEvals = @[
         ("""
 let handler = fn(req) -> {"status": 200, "body": "Hello world"}
 Http.createServer() \
-|> Http.addRoutes([["/", handler]]) \
+|> Http.addHandler(handler) \
 |> Http.call("/", "get", "", [])""", "{status: 200, body: Hello world}")
       ]
 
@@ -71,8 +71,9 @@ Http.createServer() \
     var
       tests: ExpectedEvals = @[
         ("""
+let handler = fn(req) -> {"status": 201, "body": "Hello world"}
 Http.createServer() \
-|> Http.addRoutes([["/", fn(req) -> {"status": 201, "body": "Hello world"}]]) \
+|> Http.addHandler(handler) \
 |> Http.call("/", "get", "", [])""", "{status: 201, body: Hello world}")
       ]
 
@@ -95,7 +96,7 @@ let handler = fn(req)
   }
 end
 Http.createServer() \
-|> Http.addRoutes([["/", handler]]) \
+|> Http.addHandler(handler) \
 |> Http.call("/", "get", "", [])""", "{status: 201, body: Hello world, headers: [[Content-Type, application/json]]}")
       ]
 
@@ -108,8 +109,9 @@ Http.createServer() \
     var
       tests: ExpectedEvals = @[
         ("""
+let handler = fn(req) -> {"status": 201, "body": "Hello world"}
 Http.createServer() \
-|> Http.addRoutes([["/about", fn(req) -> {"status": 201, "body": "Hello world"}]]) \
+|> Http.addHandler(handler) \
 |> Http.call(
   "https://example.com:8080/about?s=1",
   "get",
