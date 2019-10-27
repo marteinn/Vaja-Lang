@@ -470,6 +470,7 @@ end
         ("type(true)", "boolean"),
         ("type(nil)", "nil"),
         ("type([1, 2])", "array"),
+        ("type({})", "hashmap"),
       ]
 
     for testPair in tests:

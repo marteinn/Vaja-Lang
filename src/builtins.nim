@@ -28,6 +28,7 @@ proc builtinType(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
     of ObjType.OTArray: "array"
     of ObjType.OTBoolean: "boolean"
     of ObjType.OTNIL: "nil"
+    of ObjType.OTHashMap: "hashmap"
     else: ""
 
   if objType == "":
