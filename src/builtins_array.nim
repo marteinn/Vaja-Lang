@@ -6,7 +6,6 @@ from obj import
   ApplyFunction,
   newBuiltin,
   newHashMap,
-  newError,
   newInteger,
   newArray,
   Env,
@@ -17,39 +16,33 @@ import test_utils
 
 proc arrayLen(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 1)
+  requireArgOfType(arguments, 0, ObjType.OTArray)
 
   let obj: Obj = arguments[0]
-  if obj.objType != ObjType.OTArray:
-    return newError(errorMsg="Argument is not an array")
   return newInteger(intValue=len(obj.arrayElements))
 
 proc arrayHead(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 1)
+  requireArgOfType(arguments, 0, ObjType.OTArray)
 
   let obj: Obj = arguments[0]
-  if obj.objType != ObjType.OTArray:
-    return newError(errorMsg="Argument is not an array")
   return obj.arrayElements[0]
 
 proc arrayLast(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 1)
+  requireArgOfType(arguments, 0, ObjType.OTArray)
 
   let obj: Obj = arguments[0]
-  if obj.objType != ObjType.OTArray:
-    return newError(errorMsg="Argument is not an array")
   return obj.arrayElements[high(obj.arrayElements)]
 
 proc arrayMap(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 2)
+  requireArgOfTypes(arguments, 0, @[ObjType.OTFunction, ObjType.OTFunctionGroup])
+  requireArgOfType(arguments, 1, ObjType.OTArray)
 
   let
     fn: Obj = arguments[0]
     arr: Obj = arguments[1]
-  if arr.objType != ObjType.OTArray:
-    return newError(errorMsg="Argument arr was " & $(fn.objType) & ", want Array")
-  if fn.objType != ObjType.OTFunction and fn.objType != ObjType.OTFunctionGroup:
-    return newError(errorMsg="Argument fn was " & $(fn.objType) & ", want Function")
-
   let mapped: seq[Obj] = map(arr.arrayElements, proc (x: Obj): Obj =
     var env: Env = newEnv()
     return applyFn(fn, @[x], env)
@@ -58,16 +51,13 @@ proc arrayMap(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
 
 proc arrayReduce(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 3)
+  requireArgOfTypes(arguments, 0, @[ObjType.OTFunction, ObjType.OTFunctionGroup])
+  requireArgOfType(arguments, 2, ObjType.OTArray)
 
   let
     fn: Obj = arguments[0]
     initial: Obj = arguments[1]
     arr: Obj = arguments[2]
-  if fn.objType != ObjType.OTFunction and fn.objType != ObjType.OTFunctionGroup:
-    return newError(errorMsg="Argument fn was " & $(fn.objType) & ", want Function")
-  if arr.objType != ObjType.OTArray:
-    return newError(errorMsg="Argument arr was " & $(arr.objType) & ", want Array")
-
   result = initial
   for curr in arr.arrayElements:
     var env: Env = newEnv()
@@ -75,15 +65,12 @@ proc arrayReduce(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
 
 proc arrayFilter(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 2)
+  requireArgOfTypes(arguments, 0, @[ObjType.OTFunction, ObjType.OTFunctionGroup])
+  requireArgOfType(arguments, 1, ObjType.OTArray)
 
   let
     fn: Obj = arguments[0]
     arr: Obj = arguments[1]
-  if fn.objType != ObjType.OTFunction and fn.objType != ObjType.OTFunctionGroup:
-    return newError(errorMsg="Argument fn was " & $(fn.objType) & ", want Function")
-  if arr.objType != ObjType.OTArray:
-    return newError(errorMsg="Argument arr was " & $(arr.objType) & ", want Array")
-
   let filtered: seq[Obj] = filter(arr.arrayElements, proc (x: Obj): bool =
     var env: Env = newEnv()
     let res: Obj = applyFn(fn, @[x], env)
@@ -95,69 +82,57 @@ proc arrayFilter(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
 
 proc arrayPush(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 2)
+  requireArgOfType(arguments, 1, ObjType.OTArray)
 
   let
     el: Obj = arguments[0]
     arr: Obj = arguments[1]
-  if arr.objType != ObjType.OTArray:
-    return newError(errorMsg="Argument arr was " & $(arr.objType) & ", want Array")
-
-  let arrayElements: seq[Obj] = concat(arr.arrayElements, @[el])
+    arrayElements: seq[Obj] = concat(arr.arrayElements, @[el])
   return newArray(arrayElements=arrayElements)
 
 proc arrayDeleteAt(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 2)
+  requireArgOfType(arguments, 0, ObjType.OTInteger)
+  requireArgOfType(arguments, 1, ObjType.OTArray)
 
   let
     index: Obj = arguments[0]
     arr: Obj = arguments[1]
-  if index.objType != ObjType.OTInteger:
-    return newError(errorMsg="Argument index was " & $(index.objType) & ", want Integer")
-  if arr.objType != ObjType.OTArray:
-    return newError(errorMsg="Argument arr was " & $(arr.objType) & ", want Array")
   var arrayElements: seq[Obj] = arr.arrayElements
   arrayElements.delete(index.intValue, index.intValue)
   return newArray(arrayElements=arrayElements)
 
 proc arrayAppend(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 2)
+  requireArgOfType(arguments, 0, ObjType.OTArray)
+  requireArgOfType(arguments, 1, ObjType.OTArray)
 
   let
     elements: Obj = arguments[0]
     arr: Obj = arguments[1]
-
-  if elements.objType != ObjType.OTArray:
-    return newError(
-      errorMsg="Argument arr was " & $(elements.objType) & ", want Array"
-    )
-  if arr.objType != ObjType.OTArray:
-    return newError(errorMsg="Argument arr was " & $(arr.objType) & ", want Array")
-
-  let arrayElements = concat(elements.arrayElements, arr.arrayElements)
+    arrayElements = concat(elements.arrayElements, arr.arrayElements)
   return newArray(arrayElements=arrayElements)
 
 proc arrayReplaceAt(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 3)
+  requireArgOfType(arguments, 0, ObjType.OTInteger)
+  requireArgOfType(arguments, 2, ObjType.OTArray)
 
   let
     index: Obj = arguments[0]
     obj: Obj = arguments[1]
     arr: Obj = arguments[2]
-  if index.objType != ObjType.OTInteger:
-    return newError(errorMsg="Argument index was " & $(index.objType) & ", want Integer")
-  if arr.objType != ObjType.OTArray:
-    return newError(errorMsg="Argument arr was " & $(arr.objType) & ", want Array")
   var arrayElements: seq[Obj] = arr.arrayElements
   arrayElements[index.intValue] = obj
   return newArray(arrayElements=arrayElements)
 
 proc arrayTail(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 1)
+  requireArgOfType(arguments, 0, ObjType.OTArray)
 
-  let arr: Obj = arguments[0]
-  if arr.objType != ObjType.OTArray:
-    return newError(errorMsg="Argument arr was " & $(arr.objType) & ", want Array")
-  let arrayElements = arr.arrayElements[1..high(arr.arrayElements)]
+  let
+    arr: Obj = arguments[0]
+    arrayElements = arr.arrayElements[1..high(arr.arrayElements)]
   return newArray(arrayElements=arrayElements)
 
 let functions*: OrderedTable[string, Obj] = {

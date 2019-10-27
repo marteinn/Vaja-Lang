@@ -14,22 +14,19 @@ from obj import
   NIL,
   inspect,
   inspectEnv
+import test_utils
 
 proc hashMapLen(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) != 1:
-    return newError(
-      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 1"
-    )
+  requireNumArgs(arguments, 1)
+
   let obj: Obj = arguments[0]
   if obj.objType != ObjType.OTHashMap:
     return newError(errorMsg="Argument arr was " & $(obj.objType) & ", want HashMap")
   return newInteger(intValue=len(obj.hashMapElements))
 
 proc hashMapMap(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) < 2:
-    return newError(
-      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 2"
-    )
+  requireNumArgs(arguments, 2)
+
   let
     fn: Obj = arguments[0]
     source: Obj = arguments[1]
@@ -45,10 +42,8 @@ proc hashMapMap(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newHashMap(hashMapElements=mapped)
 
 proc hashMapFilter(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) < 2:
-    return newError(
-      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 2"
-    )
+  requireNumArgs(arguments, 2)
+
   let
     fn: Obj = arguments[0]
     source: Obj = arguments[1]
@@ -65,10 +60,8 @@ proc hashMapFilter(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newHashMap(hashMapElements=filtered)
 
 proc hashMapReduce(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) < 3:
-    return newError(
-      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 3"
-    )
+  requireNumArgs(arguments, 3)
+
   let
     fn: Obj = arguments[0]
     initial: Obj = arguments[1]
@@ -85,10 +78,8 @@ proc hashMapReduce(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
     result = applyFn(fn, @[result, curr, newStr(strValue=key)], env)
 
 proc hashMapToArray(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) != 1:
-    return newError(
-      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 1"
-    )
+  requireNumArgs(arguments, 1)
+
   let source: Obj = arguments[0]
   if source.objType != ObjType.OTHashMap:
     return newError(errorMsg="Argument arr was " & $(source.objType) & ", want HashMap")
@@ -102,10 +93,8 @@ proc hashMapToArray(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newArray(arrayElements=arr)
 
 proc hashMapInsert(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) < 3:
-    return newError(
-      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 3"
-    )
+  requireNumArgs(arguments, 3)
+
   let
     keyObj: Obj = arguments[0]
     valObj: Obj = arguments[1]
@@ -122,10 +111,8 @@ proc hashMapInsert(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newHashMap(hashMapElements=hashMapElements)
 
 proc hashMapRemove(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) < 2:
-    return newError(
-      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 2"
-    )
+  requireNumArgs(arguments, 2)
+
   let
     keyObj: Obj = arguments[0]
     source: Obj = arguments[1]
@@ -141,10 +128,8 @@ proc hashMapRemove(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newHashMap(hashMapElements=hashMapElements)
 
 proc hashMapUpdate(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) < 3:
-    return newError(
-      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 3"
-    )
+  requireNumArgs(arguments, 3)
+
   let
     keyObj: Obj = arguments[0]
     valObj: Obj = arguments[1]
@@ -164,10 +149,7 @@ proc hashMapUpdate(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newHashMap(hashMapElements=hashMapElements)
 
 proc hashMapEmpty(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  if len(arguments) != 0:
-    return newError(
-      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 0"
-    )
+  requireNumArgs(arguments, 0)
 
   return newHashMap(
     hashMapElements=initOrderedTable[string, Obj]()

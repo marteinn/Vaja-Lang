@@ -1,4 +1,5 @@
-from obj import Obj, ObjType, inspect
+from strutils import join
+from obj import Obj, ObjType, inspect, newError
 
 template requireNumArgs*(arguments: seq[Obj], numArgs: int) =
   if len(arguments) != numArgs:
@@ -9,11 +10,12 @@ template requireNumArgs*(arguments: seq[Obj], numArgs: int) =
 template requireArgOfTypes*(arguments: seq[Obj], index: int, reqObjTypes: seq[ObjType]) =
   let arg: Obj = arguments[index]
   if not (arg.objType in reqObjTypes):
-    let reqTypes: string = reqObjTypes.map(proc (x: ObjType): string =
+    let reqTypes: seq[string] = reqObjTypes.map(proc (x: ObjType): string =
       $x
-    ).join(" or ")
+    )
+    let reqTypesStr: string = join(reqTypes, " or ")
     return newError(
-      errorMsg="Argument " & $index & " was " & $(arg.objType) & ", want " & reqTypes
+      errorMsg="Argument " & $index & " was " & $(arg.objType) & ", want " & reqTypesStr
     )
 
 template requireArgOfType*(arguments: seq[Obj], index: int, reqObjType: ObjType) =
