@@ -102,11 +102,16 @@ String.filter(
     for testPair in tests:
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
+
   test "String.split":
     var
       tests: ExpectedEvals = @[
         ("""String.split(" ", "hello world")""", "[hello, world]"),
       ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
 
   test "String.slice":
     var
@@ -117,11 +122,6 @@ String.filter(
     for testPair in tests:
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
-  test "String.split":
-    var
-      tests: ExpectedEvals = @[
-        ("""String.split(" ", "hello world")""", "[hello, world]"),
-      ]
 
   test "String.toUpper":
     var

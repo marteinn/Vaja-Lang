@@ -176,7 +176,7 @@ proc stringSlice(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
     return newError(errorMsg="Argument fn was " & $(source.objType) & ", want String")
 
   let
-    slice = source.strValue[fromIndex.intValue .. <toIndex.intValue]
+    slice = source.strValue[fromIndex.intValue .. (toIndex.intValue-1)]
   return newStr(slice)
 
 proc stringToUpper(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
@@ -227,6 +227,9 @@ let functions*: OrderedTable[string, Obj] = {
   "toLower": newBuiltin(builtinFn=stringToLower),
   "toArray": newBuiltin(builtinFn=stringToArray),
   # TODO: Add isEmpty
+  # TODO: Add left
+  # TODO: Add dropLeft
+  # TODO: Add dropRight
 }.toOrderedTable
 
 let stringModule*: Obj = newHashMap(hashMapElements=functions)

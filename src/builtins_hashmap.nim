@@ -1,6 +1,4 @@
 import tables
-import sequtils
-import strutils
 from obj import
   Obj,
   ObjType,
