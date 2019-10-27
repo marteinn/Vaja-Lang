@@ -24,17 +24,23 @@ Array.map(fn (x) -> x*2, myLongerList)
 let isTrue = if (2 > 1) true else false end
 print(String.len("my string"))
 1.1 |> type()
+let trimAndCapitalize = capitalize << trim
+trimAndCapitalize("   helllo world")
 ```
 
-This is how you would spin up a webserver serving three routes.
+This is how you would spin up the built in web server
 
 ```
 Http.createServer() \
-|> Http.addRoutes([
-  ["/about", fn(req) -> {"status": 200, "body": "About page"}],
-  ["/error", fn(req) -> {"status": 500, "body": "Error page"}],
-  ["/", fn(req) -> {"status": 200, "body": "Index page"}]
-]) \
+|> Http.addHandler(fn (req)
+  {
+    "status": 200,
+    "body": "{\"message\": \"Hello world\"}",
+    "headers": [
+      ["Content-Type", "application/json"],
+    ]
+  }
+end) \
 |> Http.listen(8080)
 ```
 
