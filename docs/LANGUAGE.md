@@ -38,7 +38,7 @@ let animals = ["bird", "horse", cat"]
 print(animals[0])  # bird
 ```
 
-### Hashmap
+### HashMap
 
 ```
 let weather = {"monday": "Rain", "tuesday": "Cloudy"}
@@ -49,6 +49,13 @@ Hashmap keys can be accessed using a dot syntax.
 ```
 let colors = {"red": "FF0000"}
 colors.red  # FF0000
+```
+
+Adding a new key to hashmap is done by using `HashMap.insert`, which will return a new HashMap.
+
+```
+let colors = {}
+let colorsWithBlack = HashMap.insert("black", "000000", colors)
 ```
 
 ## Variable assignment
