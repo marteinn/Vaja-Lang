@@ -7,5 +7,6 @@ tests/test_eval
 tests/test_obj
 tests/test_builtins_array
 tests/test_builtins_string
+tests/test_builtins_hashmap
 tests/test_builtins_http
 tests/test_builtins_io
