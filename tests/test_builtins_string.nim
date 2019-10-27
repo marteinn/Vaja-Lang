@@ -111,7 +111,7 @@ String.filter(
   test "String.slice":
     var
       tests: ExpectedEvals = @[
-        ("""String.slice(0, 4, "hello world")""", "hello"),
+        ("""String.slice(0, 4, "hello world")""", "hell"),
       ]
 
     for testPair in tests:
@@ -122,3 +122,33 @@ String.filter(
       tests: ExpectedEvals = @[
         ("""String.split(" ", "hello world")""", "[hello, world]"),
       ]
+
+  test "String.toUpper":
+    var
+      tests: ExpectedEvals = @[
+        ("""String.toUpper("i am yelling")""", "I AM YELLING"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+
+  test "String.toLower":
+    var
+      tests: ExpectedEvals = @[
+        ("""String.toLower("I AM NOT YELLING")""", "i am not yelling"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+
+  test "String.toArray":
+    var
+      tests: ExpectedEvals = @[
+        ("""String.toArray("A LIST")""", "[A,  , L, I, S, T]"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]

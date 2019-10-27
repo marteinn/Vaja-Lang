@@ -235,8 +235,11 @@ funcFromMyLibrary()
 | `map: fn, string`                                                            |
 | `filter: fn, string`                                                         |
 | `reduce: fn, id, string`                                                     |
-| `append: string, string`
-| `slice: int, int, string`
+| `append: string, string`                                                     |
+| `slice: int, int, string`                                                    |
+| `toUpper: string`                                                            |
+| `toLower: string`                                                            |
+| `toArray: string`                                                            |
 
 
 ### HashMap module

@@ -162,7 +162,7 @@ proc stringAppend(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
 proc stringSlice(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   if len(arguments) < 3:
     return newError(
-      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 2"
+      errorMsg="Wrong number of arguments to String.slice, got " & $len(arguments) & ", want 2"
     )
   let
     fromIndex: Obj = arguments[0]
@@ -176,8 +176,43 @@ proc stringSlice(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
     return newError(errorMsg="Argument fn was " & $(source.objType) & ", want String")
 
   let
-    slice = source.strValue[fromIndex.intValue .. toIndex.intValue]
+    slice = source.strValue[fromIndex.intValue .. <toIndex.intValue]
   return newStr(slice)
+
+proc stringToUpper(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  if len(arguments) != 1:
+    return newError(
+      errorMsg="Wrong number of arguments in String.toUpper, got " & $len(arguments) & ", want 1"
+    )
+  let obj: Obj = arguments[0]
+  if obj.objType != ObjType.OTString:
+    return newError(errorMsg="Argument arr was " & $(obj.objType) & ", want String")
+  return newStr(obj.strValue.toUpper())
+
+proc stringToLower(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  if len(arguments) != 1:
+    return newError(
+      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 1"
+    )
+  let obj: Obj = arguments[0]
+  if obj.objType != ObjType.OTString:
+    return newError(errorMsg="Argument arr was " & $(obj.objType) & ", want String")
+  return newStr(obj.strValue.toLower())
+
+proc stringToArray(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  if len(arguments) != 1:
+    return newError(
+      errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want 1"
+    )
+  let obj: Obj = arguments[0]
+  if obj.objType != ObjType.OTString:
+    return newError(errorMsg="Argument obj was " & $(obj.objType) & ", want String")
+
+  let sourceString: string = obj.strValue
+  var arrayElements: seq[Obj] = @[]
+  for ch in sourceString:
+    arrayElements.add(newStr($ch))
+  return newArray(arrayElements=arrayElements)
 
 let functions*: OrderedTable[string, Obj] = {
   "len": newBuiltin(builtinFn=stringLen),
@@ -188,7 +223,11 @@ let functions*: OrderedTable[string, Obj] = {
   "reduce": newBuiltin(builtinFn=stringReduce),
   "append": newBuiltin(builtinFn=stringAppend),
   "slice": newBuiltin(builtinFn=stringSlice),
+  "toUpper": newBuiltin(builtinFn=stringToUpper),
+  "toLower": newBuiltin(builtinFn=stringToLower),
+  "toArray": newBuiltin(builtinFn=stringToArray),
   # TODO: Add isEmpty
 }.toOrderedTable
 
 let stringModule*: Obj = newHashMap(hashMapElements=functions)
+
