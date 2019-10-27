@@ -193,13 +193,18 @@ proc addFunctionToGroup*(fnGroup: var Obj, fn: Obj): Obj =
     fnGroup.arityGroup[arity].add(fn)
   fnGroup
 
-# TODO: Move this to env declarations
 proc inspectEnv*(env: Env): string =
-  var ret = "{"
+  var ret = ""
   for key, obj in env.store:
-    ret = ret & " - " & key & ": " & obj.inspect() & ", "
-  ret = ret & "}"
-  return ret
+    if len(ret) > 0:
+      ret = ret & ", "
+    ret = ret & key & ": " & obj.inspect()
+
+  if env.outer != nil:
+    if len(ret) > 0:
+      ret = ret & ", "
+    ret = ret & "outer: " & inspectEnv(env.outer)
+  return "{" & ret & "}"
 
 var
   TRUE*: Obj = newBoolean(boolValue=true)
