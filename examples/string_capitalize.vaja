@@ -1,0 +1,12 @@
+let capitalizeWord = fn(x)
+  let firstLetter = x |> String.slice(0, 1) |> String.toUpper()
+  let rest = x |> String.slice(1, String.len(x)) |> String.toLower()
+  firstLetter ++ rest
+end
+
+let capitalizeWordsInArr = fn(words) -> Array.map(capitalizeWord, words)
+let toWords = fn(x) -> String.split(" ", x)
+let fromWords = fn(x) -> String.join(" ", x)
+
+let capitalizeWords = fromWords << capitalizeWordsInArr << toWords
+"the weather can be warmer" |> capitalizeWords()
