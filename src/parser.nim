@@ -2,7 +2,7 @@ import tables
 from strutils import parseInt, parseFloat
 
 from lexer import Lexer, nextToken, newLexer
-from token import Token, TokenType
+from token import Token, TokenType, newEmptyToken
 from ast import
   newProgram,
   newExpressionStatement,
@@ -20,6 +20,7 @@ from ast import
   newCallExpression,
   newReturnStatement,
   newPipeLR,
+  newFNCompositionRL,
   newIfExpression,
   newCaseExpression,
   newArrayLiteral,
@@ -67,6 +68,7 @@ var
     TokenType.PIPERARROW: Precedence.SUM,
     TokenType.DOT: Precedence.INDEX,
     TokenType.LBRACKET: Precedence.INDEX,
+    TokenType.DOUBLELT: Precedence.INDEX,
   }.toTable
 
 proc newParser*(lexer: Lexer): Parser  # Forward declaration
@@ -469,6 +471,17 @@ proc parsePipeLRInfix(parser: var Parser, left: Node): Node =
     token=token, pipeLeft=left, pipeRight=right
   )
 
+proc parseComposeRLInfix(parser: var Parser, left: Node): Node =
+  var
+    token: Token = parser.curToken
+    precedence: Precedence = parser.currentPrecedence()
+  discard parser.nextParserToken()
+
+  var right: Node = parser.parseExpression(precedence)
+  return newFNCompositionRL(
+    token=token, fnCompositionRLLeft=left, fnCompositionRLRight=right
+  )
+
 proc parseIndexPropertyOperationInfix(parser: var Parser, left: Node): Node =
   var
     token: Token = parser.curToken
@@ -524,6 +537,7 @@ proc getInfixFn(tokenType: TokenType): InfixFunction =
     of LTE: parseInfixExpression
     of LPAREN: parseCallExpression
     of PIPERARROW: parsePipeLRInfix
+    of DOUBLELT: parseComposeRLInfix
     of DOT: parseIndexPropertyOperationInfix
     of LBRACKET: parseIndexOperationInfix
     else: nil

@@ -176,7 +176,8 @@ end
 | `%`       | Modulo                         |                                 |
 | `**`      |                                |                                 |
 | `++`      | Inflix increment               |                                 |
-| `\|>`     | Pass value left to right to fn |                                 |
+| `\|>`     | Pass value to fn L -> R        |                                 |
+| `<<`      | Functional compositon R -> L   |                                 |
 
 
 

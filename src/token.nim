@@ -32,9 +32,10 @@ type
     PLUSPLUS,
     DOT,
     RETURN,
-    RARROW,
+    RARROW,       # ->
+    DOUBLELT,     # <<
     DOLLAR,
-    PIPERARROW,
+    PIPERARROW,   # |>
     IF,
     ELSE,
     CASE,
@@ -70,3 +71,6 @@ type
 
 proc newToken*(tokenType: TokenType, literal: string): Token =
   return Token(tokenType: tokenType, literal: literal)
+
+proc newEmptyToken*(): Token =
+  return Token()

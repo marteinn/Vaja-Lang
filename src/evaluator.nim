@@ -3,7 +3,15 @@ import tables
 import sequtils
 from strutils import startsWith
 
-from ast import Node, NodeType, toCode, CasePattern
+from ast import
+  Node,
+  NodeType,
+  toCode,
+  CasePattern,
+  newBlockStatement,
+  newIdentifier,
+  newCallExpression
+from token import newEmptyToken
 from obj import
   Obj,
   Env,
@@ -423,6 +431,38 @@ proc eval*(node: Node, env: var Env): Obj =
         nil
       else:
         fn
+    of NTFNCompositionRL:
+      let
+        left = node.fnCompositionRLLeft
+        right = node.fnCompositionRLRight
+        token = newEmptyToken()
+
+      let functionBody: Node = newBlockStatement(
+          token=token,
+          blockStatements= @[
+            newCallExpression(
+              token=token,
+              callFunction=left,
+              callArguments= @[
+                newCallExpression(
+                  token=token,
+                  callFunction=right,
+                  callArguments= @[
+                    newIdentifier(token=token, identValue="x")
+                  ]
+                )
+              ]
+            )
+          ]
+        )
+
+      newFunction(
+        functionBody=functionBody,
+        functionEnv=env,
+        functionParams= @[
+          newIdentifier(token=token, identValue="x")
+        ]
+      )
     of NTCallExpression:
       var
         fnBase: Obj = eval(node.callFunction, env)

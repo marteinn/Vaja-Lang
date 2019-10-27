@@ -22,6 +22,7 @@ type
     NTCallExpression,
     NTReturnStatement,
     NTPipeLR,
+    NTFNCompositionRL,
     NTIfExpression,
     NTCaseExpression,
     NTArrayLiteral,
@@ -62,6 +63,9 @@ type
       of NTPipeLR:
         pipeLeft*: Node
         pipeRight*: Node
+      of NTFNCompositionRL:
+        fnCompositionRLLeft*: Node
+        fnCompositionRLRight*: Node
       of NTIfExpression:
         ifCondition*: Node
         ifConsequence*: Node
@@ -128,6 +132,8 @@ proc toCode*(node: Node): string =
         pipeLeftCode = node.pipeLeft.toCode()
 
       node.pipeRight.callFunction.toCode() & pipeLeftCode
+    of NTFNCompositionRL:
+      node.fnCompositionRLLeft.toCode() & " << " & node.fnCompositionRLRight.toCode()
     of NTIfExpression:
       if node.ifAlternative != nil:
         "if (" & node.ifCondition.toCode() & ") " & node.ifConsequence.toCode() & " else " & node.ifAlternative.toCode() & " end"
@@ -259,6 +265,16 @@ proc newPipeLR*(token: Token, pipeLeft: Node, pipeRight: Node): Node =
     nodeType: NodeType.NTPipeLR,
     pipeLeft: pipeLeft,
     pipeRight: pipeRight
+  )
+
+proc newFNCompositionRL*(
+  token: Token, fnCompositionRLLeft: Node, fnCompositionRLRight: Node
+): Node =
+  return Node(
+    token: token,
+    nodeType: NodeType.NTFNCompositionRL,
+    fnCompositionRLLeft: fnCompositionRLLeft,
+    fnCompositionRLRight: fnCompositionRLRight
   )
 
 proc newIfExpression*(

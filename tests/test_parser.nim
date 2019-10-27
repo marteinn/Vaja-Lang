@@ -11,6 +11,10 @@ proc parseSource(source:string): Node =
 
   return program
 
+type
+  ExpectedParsing = (string, string)
+  ExpectedTokens = seq[ExpectedParsing]
+
 suite "parser tests":
   test "test integer literal":
     var
@@ -53,9 +57,6 @@ suite "parser tests":
     check program.statements[0].toCode() == "true"
 
   test "prefix parsing":
-    type
-      ExpectedParsing = (string, string)
-      ExpectedTokens = seq[ExpectedParsing]
     var
       tests: ExpectedTokens = @[
         ("-1", "(-1)"),
@@ -78,9 +79,6 @@ suite "parser tests":
     check len(parser.errors) == 1
 
   test "operator precedence":
-    type
-      ExpectedParsing = (string, string)
-      ExpectedTokens = seq[ExpectedParsing]
     var
       tests: ExpectedTokens = @[
         ("true and not false", "(true and (not false))"),
@@ -90,9 +88,6 @@ suite "parser tests":
       check program.statements[0].toCode() == testPair[1]
 
   test "influx parsing":
-    type
-      ExpectedParsing = (string, string)
-      ExpectedTokens = seq[ExpectedParsing]
     var
       tests: ExpectedTokens = @[
         ("1 + 1", "(1 + 1)"),
@@ -263,9 +258,6 @@ end
     check program.statements[0].expression.toCode() == """fn hello(a, b) 1 end"""
 
   test "left to right argument piping":
-    type
-      ExpectedParsing = (string, string)
-      ExpectedTokens = seq[ExpectedParsing]
     var
       tests: ExpectedTokens = @[
         ("1 |> a()", "a(1)"),
@@ -290,9 +282,6 @@ end
     check program.statements[0].expression.toCode() == """if (true) 1 else 2 end"""
 
   test "variations of if statements":
-    type
-      ExpectedParsing = (string, string)
-      ExpectedTokens = seq[ExpectedParsing]
     var
       tests: ExpectedTokens = @[
         ("if (true) 1 end", "if (true) 1 end"),
@@ -305,9 +294,6 @@ end
       check program.statements[0].toCode() == testPair[1]
 
   test "case statement":
-    type
-      ExpectedParsing = (string, string)
-      ExpectedTokens = seq[ExpectedParsing]
     var
       tests: ExpectedTokens = @[
         ("""case (true)
@@ -344,9 +330,6 @@ end""")]
     check program.statements[0].toCode() == "[1, 2, 3, true]"
 
   test "test array constructs":
-    type
-      ExpectedParsing = (string, string)
-      ExpectedTokens = seq[ExpectedParsing]
     var
       tests: ExpectedTokens = @[
         ("[]", "[]"),
@@ -375,9 +358,6 @@ end""")]
     check program.statements[0].toCode() == "{monday: 0, tuesday: 1}"
 
   test "hashmap constructs":
-    type
-      ExpectedParsing = (string, string)
-      ExpectedTokens = seq[ExpectedParsing]
     var
       tests: ExpectedTokens = @[
         ("{}", "{}"),
@@ -394,9 +374,6 @@ c: 3
       check program.statements[0].toCode() == testPair[1]
 
   test "hashmap index":
-    type
-      ExpectedParsing = (string, string)
-      ExpectedTokens = seq[ExpectedParsing]
     var
       tests: ExpectedTokens = @[
         ("random.a", "random[a]"),
@@ -408,9 +385,6 @@ c: 3
       check program.statements[0].toCode() == testPair[1]
 
   test "array dynamic index":
-    type
-      ExpectedParsing = (string, string)
-      ExpectedTokens = seq[ExpectedParsing]
     var
       tests: ExpectedTokens = @[
         ("random[0]", "random[0]"),
@@ -418,4 +392,14 @@ c: 3
     for testPair in tests:
       var program: Node = parseSource(testPair[0])
       check program.statements[0].expression.nodeType == NodeType.NTIndexOperation
+      check program.statements[0].toCode() == testPair[1]
+
+  test "test functional composition R->L":
+    var
+      tests: ExpectedTokens = @[
+        ("a << b", "a << b"),
+        ("a << b << c", "a << b << c"),
+      ]
+    for testPair in tests:
+      var program: Node = parseSource(testPair[0])
       check program.statements[0].toCode() == testPair[1]
