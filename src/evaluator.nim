@@ -480,8 +480,11 @@ proc eval*(node: Node, env: var Env): Obj =
       # TODO: Add error check
       newReturn(returnValue=returnValue)
     of NTPipeLR:
-      node.pipeRight.callArguments.add(node.pipeLeft)
-      eval(node.pipeRight, env)
+      var pipeRight: Node
+      deepCopy(pipeRight, node.pipeRight)
+      pipeRight.callArguments.add(node.pipeLeft)
+
+      eval(pipeRight, env)
     of NTIfExpression: evalIfExpression(node, env)
     of NTCaseExpression: evalCaseExpression(node, env)
     of NTNil: NIL
