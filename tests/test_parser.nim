@@ -403,3 +403,18 @@ c: 3
     for testPair in tests:
       var program: Node = parseSource(testPair[0])
       check program.statements[0].toCode() == testPair[1]
+
+  test "test comment parsing":
+    var
+      tests: ExpectedTokens = @[
+        ("# hello", ""),
+        ("""
+let a = fn(x)
+  # Hello world
+  1
+end
+""", "let a = fn(x) 1 end"),
+      ]
+    for testPair in tests:
+      var program: Node = parseSource(testPair[0])
+      check program.toCode() == testPair[1]

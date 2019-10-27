@@ -54,6 +54,12 @@ proc readIdentifier(lexer: var Lexer): string =
     lexer.readCharacter()
   return lexer.source[startPos ..< lexer.pos]
 
+proc readComment(lexer: var Lexer): string =
+  var startPos = lexer.pos
+  while lexer.ch != '\n' and not lexer.eof:
+    lexer.readCharacter()
+  return lexer.source[startPos ..< lexer.pos]
+
 proc readString(lexer: var Lexer): string =
   lexer.readCharacter()
 
@@ -179,6 +185,10 @@ proc nextToken*(lexer: var Lexer): Token =
     of '"':
       var stringValue = lexer.readString()
       tok = newToken(tokenType=TokenType.STRING, literal=stringValue)
+    of '#':
+      let comment: string = lexer.readComment()
+      tok = newToken(tokenType=TokenType.COMMENT, literal=comment)
+      return tok
     elif isLetter(lexer.ch):
       var identifier = lexer.readIdentifier()
       case identifier:

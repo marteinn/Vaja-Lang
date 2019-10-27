@@ -272,3 +272,8 @@ funcFromMyLibrary()
 | ---------------------------------------------------------------------------- |
 | `readFile: path`                                                             |
 | `writeFile: string, string`                                                  |
+
+
+## Comments
+
+Comments are written like this `# I am a comment` and stops at newline

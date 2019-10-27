@@ -32,6 +32,7 @@ import
 "a"
 ++
 <<
+# hello
 """
       lexer: Lexer = newLexer(source)
     type
@@ -114,6 +115,8 @@ import
         (TokenType.PLUSPLUS, "++"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.DOUBLELT, "<<"),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.COMMENT, "# hello"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.EOF, "")
       ]

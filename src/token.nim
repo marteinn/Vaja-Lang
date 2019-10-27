@@ -40,6 +40,7 @@ type
     ELSE,
     CASE,
     OF,
+    COMMENT,         # #
     # Loading
     IMPORT,
     FROM,

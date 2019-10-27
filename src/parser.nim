@@ -543,7 +543,7 @@ proc getInfixFn(tokenType: TokenType): InfixFunction =
     else: nil
 
 proc parseExpression(parser: var Parser, precedence: Precedence): Node =
-  while parser.curToken.tokenType == TokenType.NEWLINE:
+  while parser.curToken.tokenType in [TokenType.NEWLINE]:
     discard parser.nextParserToken()
     continue
 
@@ -616,6 +616,8 @@ proc parseStatement(parser: var Parser): Node =
     return parser.parseAssignmentStatement()
   if parser.curToken.tokenType == TokenType.RETURN:
     return parser.parseReturnStatement()
+  if parser.curToken.tokenType == TokenType.COMMENT:
+    return nil
   return parser.parseExpressionStatement()
 
 proc parseModule*(parser: var Parser): Node =
@@ -638,7 +640,9 @@ proc parseProgram*(parser: var Parser): Node =
   var statements: seq[Node] = @[]
   while parser.curToken.tokenType != TokenType.EOF:
     if parser.curToken.tokenType in [
-      TokenType.SEMICOLON, TokenType.NEWLINE
+      TokenType.SEMICOLON,
+      TokenType.COMMENT,
+      TokenType.NEWLINE
     ]:
       discard parser.nextParserToken()
       continue

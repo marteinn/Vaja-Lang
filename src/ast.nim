@@ -90,7 +90,9 @@ proc toCode*(node: Node): string =
     of NTExpressionStatement:
       if node.expression != nil: node.expression.toCode() else: ""
     of NTPrefixExpression:
-      if len(node.prefixOperator) == 1:
+      if node.prefixOperator == "#":
+        node.prefixOperator & " " & node.prefixRight.toCode()
+      elif len(node.prefixOperator) == 1:
         "(" & node.prefixOperator & node.prefixRight.toCode() & ")"
       else:
         "(" & node.prefixOperator & " " & node.prefixRight.toCode() & ")"
