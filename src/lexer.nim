@@ -33,14 +33,13 @@ proc isInt(ch: char): bool =
 proc isLetter(ch: char): bool =
   return ($ch).match(re"[a-zA-Z]|_").isSome()
 
-proc skipWhitespace(lexer: var Lexer) =
-  while lexer.ch == ' ':
-    lexer.readCharacter()
-
-proc skipEscapedNewlines(lexer: var Lexer) =
-  while lexer.ch == '\\' and lexer.peekAhead(0) == '\n':
-    lexer.readCharacter()
-    lexer.readCharacter()
+proc skipWhitespaceOrEscapedNewlines(lexer: var Lexer) =
+  while (lexer.ch == '\\' and lexer.peekAhead(0) == '\n') or lexer.ch == ' ':
+    if lexer.ch == ' ':
+      lexer.readCharacter()
+    if lexer.ch == '\\' and lexer.peekAhead(0) == '\n':
+      lexer.readCharacter()
+      lexer.readCharacter()
 
 proc readNumber(lexer: var Lexer): string =
   var startPos = lexer.pos
@@ -86,8 +85,7 @@ proc nextToken*(lexer: var Lexer): Token =
   if lexer.eof:
       return newToken(tokenType=TokenType.EOF, literal="")
 
-  skipWhitespace(lexer)
-  skipEscapedNewlines(lexer)
+  skipWhitespaceOrEscapedNewlines(lexer)
 
   var
     ch: char = lexer.ch
