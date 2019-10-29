@@ -78,7 +78,9 @@ type
       of NTIndexOperation:
         indexOpLeft*: Node
         indexOpIndex*: Node
-      of NTModule: moduleStatements*: seq[Node]
+      of NTModule:
+        moduleName*: string
+        moduleStatements*: seq[Node]
   CasePattern* = tuple[condition: Node, consequence: Node]
 
 proc toCode*(node: Node): string =
@@ -334,8 +336,12 @@ proc newIndexOperation*(
     indexOpIndex: indexOpIndex
   )
 
-proc newModule*(moduleStatements: seq[Node]): Node =
-  return Node(nodeType: NodeType.NTModule, moduleStatements: moduleStatements)
+proc newModule*(moduleName: string, moduleStatements: seq[Node]): Node =
+  return Node(
+    nodeType: NodeType.NTModule,
+    moduleName: moduleName,
+    moduleStatements: moduleStatements
+  )
 
 proc newProgram*(statements: seq[Node]): Node =
   return Node(nodeType: NodeType.NTProgram, statements: statements)

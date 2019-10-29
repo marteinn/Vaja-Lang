@@ -20,6 +20,7 @@ type
     OTBuiltin
     OTHashMap
     OTNativeObject
+    OTModule
   Obj* = ref object
     case objType*: ObjType
       of OTInteger: intValue*: int
@@ -40,6 +41,9 @@ type
         proc(arguments: seq[Obj], applyFn: ApplyFunction): Obj
       of OTHashMap: hashMapElements*: OrderedTable[string, Obj]
       of OTNativeObject: nativeValue*: NativeValue
+      of OTModule:
+        moduleName: string
+        moduleEnv*: Env
   ApplyFunction* =
     proc (fn: Obj, arguments: seq[Obj], env: var Env): Obj
   Env* = ref object
@@ -140,6 +144,7 @@ proc inspect*(obj: Obj): string =
 
       "{" & elementsCode & "}"
     of OTNativeObject: "<native object>"
+    of OTModule: "<module>"
 
 proc newInteger*(intValue: int): Obj =
   return Obj(objType: ObjType.OTInteger, intValue: intValue)
@@ -189,6 +194,11 @@ proc newHashMap*(hashMapElements: OrderedTable[string, Obj]): Obj =
 
 proc newNativeObject*(nativeValue: NativeValue): Obj =
   return Obj(objType: ObjType.OTNativeObject, nativeValue: nativeValue)
+
+proc newModule*(moduleName: string, moduleEnv: Env): Obj =
+  return Obj(
+    objType: ObjType.OTModule, moduleName: moduleName, moduleEnv: moduleEnv
+  )
 
 proc addFunctionToGroup*(fnGroup: var Obj, fn: Obj): Obj =
   let arity: int = len(fn.functionParams)

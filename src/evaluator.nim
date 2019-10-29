@@ -32,6 +32,7 @@ from obj import
   newReturn,
   newArray,
   newHashMap,
+  newModule,
   addFunctionToGroup,
   ObjType,
   hasNumberType,
@@ -85,7 +86,8 @@ proc evalModule(node: Node, env: var Env): Obj =
     if resultValue.objType == ObjType.OTError:
       return resultValue
 
-  env = mergeEnvs(env, moduleEnv)
+  let module = newModule(moduleName=node.moduleName, moduleEnv=moduleEnv)
+  discard env.setVar(node.moduleName, module)
   return resultValue
 
 proc evalInfixIntegerExpression(operator: string, left: Obj, right: Obj): Obj =
@@ -233,6 +235,7 @@ proc evalIdentifier(node: Node, env: var Env) : Obj =
 
   let exists: bool = env.containsVar(node.identValue)
   if exists:
+    let value: Obj = env.getVar(node.identValue)
     return env.getVar(node.identValue)
 
   if contains(globals, node.identValue):
@@ -381,6 +384,9 @@ proc evalIndexOp(left: Obj, index: Obj): Obj =
       return left.arrayElements[index.intValue]
     except:
       return newError(errorMsg="Key " & $index.intValue & " not found")
+
+  if left.objType == ObjType.OTModule:
+    return getVar(left.moduleEnv, index.strValue)
 
   return newError(errorMsg="Index operation is not supported")
 

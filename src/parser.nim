@@ -349,33 +349,22 @@ proc parseHashMapLiteral(parser: var Parser): Node =
 
   return newHashMapLiteral(token=token, hashMapElements=elements)
 
-proc parseModule*(parser: var Parser): Node # Forward declaration
+proc parseModule*(parser: var Parser): seq[Node] # Forward declaration
 
 proc parseImport(parser: var Parser): Node =
   discard parser.nextParserToken()
 
   # TODO: Create parser function
   let
-    filePath: string = parser.curToken.literal & ".vaja"
+    moduleName: string = parser.curToken.literal
+    filePath: string = moduleName & ".vaja"
     source = readFile(filePath)
   var
     lexer: Lexer = newLexer(source=source)
     parser: Parser = newParser(lexer=lexer)
 
-  return parser.parseModule()
-
-proc parseFromImport(parser: var Parser): Node =
-  discard parser.nextParserToken()
-
-  # TODO: Add support for importing/exposing partial imports
-  let
-    filePath: string = parser.curToken.literal & ".vaja"
-    source = readFile(filePath)
-  var
-    lexer: Lexer = newLexer(source=source)
-    parser: Parser = newParser(lexer=lexer)
-
-  return parser.parseModule()
+  let moduleStatements: seq[Node] = parser.parseModule()
+  return newModule(moduleName=moduleName, moduleStatements=moduleStatements)
 
 type PrefixFunction = proc (parser: var Parser): Node
 
@@ -397,7 +386,6 @@ proc getPrefixFn(tokenType: TokenType): PrefixFunction =
     of LBRACKET: parseArrayLiteral
     of LBRACE: parseHashMapLiteral
     of IMPORT: parseImport
-    of FROM: parseFromImport
     else: nil
 
 proc currentPrecedence(parser: var Parser): Precedence =
@@ -620,7 +608,7 @@ proc parseStatement(parser: var Parser): Node =
     return nil
   return parser.parseExpressionStatement()
 
-proc parseModule*(parser: var Parser): Node =
+proc parseModule*(parser: var Parser): seq[Node] =
   var statements: seq[Node] = @[]
   while parser.curToken.tokenType != TokenType.EOF:
     if parser.curToken.tokenType in [
@@ -633,8 +621,7 @@ proc parseModule*(parser: var Parser): Node =
     statements.add(statement)
 
     discard parser.nextParserToken()
-
-  return newModule(moduleStatements=statements)
+  return statements
 
 proc parseProgram*(parser: var Parser): Node =
   var statements: seq[Node] = @[]
