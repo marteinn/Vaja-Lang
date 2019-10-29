@@ -1,14 +1,13 @@
 print("Starting server...")
 
-fn handler(req)
+Http.createServer() \
+|> Http.addHandler(fn (req)
   {
     "status": 200,
-    "body": "{\"artist\": \"Tom Waits\"}",
+    "body": "{\"message\": \"Hello world\"}",
     "headers": [
       ["Content-Type", "application/json"],
-      ["Server", "nginx"]
     ]
   }
-end
-
-Http.createServer() |> Http.addHandler(handler) |> Http.listen(8080)
+end) \
+|> Http.listen(8080)
