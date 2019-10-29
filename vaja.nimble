@@ -39,3 +39,6 @@ task test_builtins_http, "Test http module":
 
 task test_builtins_io, "Test IO module":
   exec r"nim c -r tests/test_builtins_io.nim"
+
+task test_builtins_regex, "Test regex module":
+  exec r"nim c -r tests/test_builtins_regex.nim"

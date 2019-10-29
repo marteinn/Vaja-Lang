@@ -1,5 +1,6 @@
 from sequtils import map
 from strutils import join
+import nre
 import tables
 import hashes
 from ast import Node, toCode
@@ -21,6 +22,7 @@ type
     OTHashMap
     OTNativeObject
     OTModule
+    OTRegex
   Obj* = ref object
     case objType*: ObjType
       of OTInteger: intValue*: int
@@ -44,6 +46,8 @@ type
       of OTModule:
         moduleName: string
         moduleEnv*: Env
+      of OTRegex:
+        regexValue*: Regex
   ApplyFunction* =
     proc (fn: Obj, arguments: seq[Obj], env: var Env): Obj
   Env* = ref object
@@ -145,6 +149,7 @@ proc inspect*(obj: Obj): string =
       "{" & elementsCode & "}"
     of OTNativeObject: "<native object>"
     of OTModule: "<module>"
+    of OTRegex: "<regex>"
 
 proc newInteger*(intValue: int): Obj =
   return Obj(objType: ObjType.OTInteger, intValue: intValue)
@@ -198,6 +203,11 @@ proc newNativeObject*(nativeValue: NativeValue): Obj =
 proc newModule*(moduleName: string, moduleEnv: Env): Obj =
   return Obj(
     objType: ObjType.OTModule, moduleName: moduleName, moduleEnv: moduleEnv
+  )
+
+proc newRegex*(regexValue: Regex): Obj =
+  return Obj(
+    objType: ObjType.OTRegex, regexValue: regexValue
   )
 
 proc addFunctionToGroup*(fnGroup: var Obj, fn: Obj): Obj =

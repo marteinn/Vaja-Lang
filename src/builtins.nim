@@ -15,6 +15,7 @@ from builtins_string import stringModule
 from builtins_hashmap import hashMapModule
 from builtins_http import httpModule
 from builtins_io import ioModule
+from builtins_regex import regexModule
 import test_utils
 
 proc builtinType(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
@@ -29,6 +30,7 @@ proc builtinType(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
     of ObjType.OTBoolean: "boolean"
     of ObjType.OTNIL: "nil"
     of ObjType.OTHashMap: "hashmap"
+    of ObjType.OTRegex: "regex"
     else: ""
 
   if objType == "":
@@ -52,4 +54,5 @@ var
     "HashMap": hashMapModule,
     "Http": httpModule,
     "IO": ioModule,
+    "Regex": regexModule,
   }.toTable

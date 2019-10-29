@@ -58,6 +58,12 @@ let colors = {}
 let colorsWithBlack = HashMap.insert("black", "000000", colors)
 ```
 
+### Regex
+
+```
+let pattern = Regex.fromString("^hello$")
+```
+
 ## Variable assignment
 
 ```
@@ -279,6 +285,14 @@ funcFromMyLibrary()
 | ---------------------------------------------------------------------------- |
 | `readFile: path`                                                             |
 | `writeFile: string, string`                                                  |
+
+### Regexp
+
+| Signature                                                                    |
+| ---------------------------------------------------------------------------- |
+| `fromString: string`                                                         |
+| `contains: Regex, string`                                                    |
+| `find: Regex, string`                                                        |
 
 
 ## Comments

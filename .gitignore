@@ -10,3 +10,4 @@ tests/test_builtins_string
 tests/test_builtins_hashmap
 tests/test_builtins_http
 tests/test_builtins_io
+tests/test_builtins_regex
