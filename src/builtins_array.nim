@@ -37,7 +37,9 @@ proc arrayLast(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
 
 proc arrayMap(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 2)
-  requireArgOfTypes(arguments, 0, @[ObjType.OTFunction, ObjType.OTFunctionGroup])
+  requireArgOfTypes(arguments, 0, @[
+    ObjType.OTFunction, ObjType.OTFunctionGroup, ObjType.OTBuiltin
+  ])
   requireArgOfType(arguments, 1, ObjType.OTArray)
 
   let
@@ -51,7 +53,9 @@ proc arrayMap(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
 
 proc arrayReduce(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 3)
-  requireArgOfTypes(arguments, 0, @[ObjType.OTFunction, ObjType.OTFunctionGroup])
+  requireArgOfTypes(arguments, 0, @[
+    ObjType.OTFunction, ObjType.OTFunctionGroup, ObjType.OTBuiltin
+  ])
   requireArgOfType(arguments, 2, ObjType.OTArray)
 
   let
@@ -65,7 +69,9 @@ proc arrayReduce(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
 
 proc arrayFilter(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 2)
-  requireArgOfTypes(arguments, 0, @[ObjType.OTFunction, ObjType.OTFunctionGroup])
+  requireArgOfTypes(arguments, 0, @[
+    ObjType.OTFunction, ObjType.OTFunctionGroup, ObjType.OTBuiltin
+  ])
   requireArgOfType(arguments, 1, ObjType.OTArray)
 
   let

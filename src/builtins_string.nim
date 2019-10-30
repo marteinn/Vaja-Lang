@@ -64,7 +64,9 @@ proc stringJoin(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
 
 proc stringMap(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 2)
-  requireArgOfTypes(arguments, 0, @[ObjType.OTFunction, ObjType.OTFunctionGroup])
+  requireArgOfTypes(arguments, 0, @[
+    ObjType.OTFunction, ObjType.OTFunctionGroup, ObjType.OTBuiltin
+  ])
   requireArgOfType(arguments, 1, ObjType.OTString)
 
   let
@@ -82,7 +84,9 @@ proc stringMap(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
 
 proc stringFilter(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 2)
-  requireArgOfTypes(arguments, 0, @[ObjType.OTFunction, ObjType.OTFunctionGroup])
+  requireArgOfTypes(arguments, 0, @[
+    ObjType.OTFunction, ObjType.OTFunctionGroup, ObjType.OTBuiltin
+  ])
   requireArgOfType(arguments, 1, ObjType.OTString)
 
   let
@@ -105,7 +109,9 @@ proc stringFilter(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
 
 proc stringReduce(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 3)
-  requireArgOfTypes(arguments, 0, @[ObjType.OTFunction, ObjType.OTFunctionGroup])
+  requireArgOfTypes(arguments, 0, @[
+    ObjType.OTFunction, ObjType.OTFunctionGroup, ObjType.OTBuiltin
+  ])
   requireArgOfType(arguments, 1, ObjType.OTString)
 
   let

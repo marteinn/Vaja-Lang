@@ -25,7 +25,9 @@ proc hashMapLen(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
 
 proc hashMapMap(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 2)
-  requireArgOfTypes(arguments, 0, @[ObjType.OTFunction, ObjType.OTFunctionGroup])
+  requireArgOfTypes(arguments, 0, @[
+    ObjType.OTFunction, ObjType.OTFunctionGroup, ObjType.OTBuiltin
+  ])
   requireArgOfType(arguments, 1, ObjType.OTHashMap)
 
   let
@@ -39,7 +41,9 @@ proc hashMapMap(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
 
 proc hashMapFilter(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 2)
-  requireArgOfTypes(arguments, 0, @[ObjType.OTFunction, ObjType.OTFunctionGroup])
+  requireArgOfTypes(arguments, 0, @[
+    ObjType.OTFunction, ObjType.OTFunctionGroup, ObjType.OTBuiltin
+  ])
   requireArgOfType(arguments, 1, ObjType.OTHashMap)
 
   let
@@ -54,7 +58,9 @@ proc hashMapFilter(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
 
 proc hashMapReduce(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 3)
-  requireArgOfTypes(arguments, 0, @[ObjType.OTFunction, ObjType.OTFunctionGroup])
+  requireArgOfTypes(arguments, 0, @[
+    ObjType.OTFunction, ObjType.OTFunctionGroup, ObjType.OTBuiltin
+  ])
   requireArgOfType(arguments, 2, ObjType.OTHashMap)
 
   let
