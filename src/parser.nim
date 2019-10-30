@@ -143,8 +143,8 @@ proc parseGroupedExpression(parser: var Parser): Node =
 
   return expression
 
-proc parseFunctionParameters(parser: var Parser): seq[Node] =
-  if parser.peekToken.tokenType == TokenType.RPAREN:
+proc parseNodeList(parser: var Parser, endTokenType: TokenType): seq[Node] =
+  if parser.peekToken.tokenType == endTokenType:
     discard parser.nextParserToken()
     return @[]
 
@@ -161,10 +161,13 @@ proc parseFunctionParameters(parser: var Parser): seq[Node] =
 
     parameters.add(parser.parseExpression(Precedence.LOWEST))
 
-  if not parser.expectPeek(TokenType.RPAREN):
+  if not parser.expectPeek(endTokenType):
     return @[]
 
   return parameters
+
+proc parseFunctionParameters(parser: var Parser): seq[Node] =
+  return parseNodeList(parser=parser, endTokenType=TokenType.RPAREN)
 
 proc parseBlockStatement(parser: var Parser): Node =
   var
@@ -568,17 +571,16 @@ proc parseExpressionStatement(parser: var Parser): Node =
     expression = parser.parseExpression(Precedence.LOWEST)
   return newExpressionStatement(token=parser.curToken, expression=expression)
 
-proc parseAssignmentStatement(parser: var Parser): Node =
-  var
+proc parseAssignmentRegularStatement(parser: var Parser): Node =
+  let
     token: Token = parser.nextParserToken()
     identToken: Token = parser.curToken
     assignName: Node = newIdentifier(token=identToken, identValue=token.literal)
 
-  discard parser.nextParserToken()
-  discard parser.nextParserToken()
+  discard parser.nextParserToken()  # ident
+  discard parser.nextParserToken()  # =
 
-  var assignValue: Node = parser.parseExpression(Precedence.LOWEST)
-
+  let assignValue: Node = parser.parseExpression(Precedence.LOWEST)
   if parser.peekToken.tokenType in [TokenType.NEWLINE, TokenType.SEMICOLON]:
     discard parser.nextParserToken()
 
@@ -587,6 +589,49 @@ proc parseAssignmentStatement(parser: var Parser): Node =
     assignName=assignName,
     assignValue=assignValue,
   )
+
+proc parseAssignmentArrayUnpackStatement(parser: var Parser): Node =
+  let
+    token: Token = parser.nextParserToken()
+  let unpackIdentifiers: seq[Node] = parseNodeList(parser, TokenType.RBRACKET)
+
+  discard parser.nextParserToken()  # ]
+  discard parser.nextParserToken()  # =
+
+  let assignValue: Node = parser.parseExpression(Precedence.LOWEST)
+
+  if parser.peekToken.tokenType in [TokenType.NEWLINE, TokenType.SEMICOLON]:
+    discard parser.nextParserToken()
+
+  var assignStatements: seq[Node] = @[]
+  for index, ident in unpackIdentifiers:
+    assignStatements.add(
+      newAssignStatement(
+        token=token,
+        assignName=ident,
+        assignValue=newIndexOperation(
+          token=newEmptyToken(),
+          indexOpLeft=assignValue,
+          indexOpIndex=newIntegerLiteral(
+            token=newEmptyToken(),
+            intValue=index,
+          ),
+        )
+      )
+    )
+
+  return newBlockStatement(
+    token=token, blockStatements=assignStatements
+  )
+
+proc parseAssignmentStatement(parser: var Parser): Node =
+  case parser.peekToken.tokenType:
+    of TokenType.IDENT:
+      return parseAssignmentRegularStatement(parser)
+    of TokenType.LBRACKET:
+      return parseAssignmentArrayUnpackStatement(parser)
+    else:
+      return nil
 
 proc parseReturnStatement(parser: var Parser): Node =
   var

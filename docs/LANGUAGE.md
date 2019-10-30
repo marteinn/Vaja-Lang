@@ -75,6 +75,13 @@ let float = 1.1
 
 Variables named or starting with `_` are discarded.
 
+### Destructing assignment
+
+```
+let [firstColor] = ["red", "blue", "purple"]
+firstColor  # red
+```
+
 
 ## Functions
 

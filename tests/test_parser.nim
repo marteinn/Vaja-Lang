@@ -170,6 +170,18 @@ let c = "hello"
     check len(parseSource("1;2").statements) == 2
     check len(parseSource("let a = 1;2").statements) == 2
 
+  test "destructuring assignment on array":
+    var
+      source: string = "let [a, b] = myArr"
+      program: Node = parseSource(source)
+
+    check len(program.statements) == 1
+    let assignBlockStatement = program.statements[0]
+    check assignBlockStatement.nodeType == NodeType.NTBlockStatement
+    check len(assignBlockStatement.blockStatements) == 2
+    check assignBlockStatement.blockStatements[0].toCode() == "let a = myArr[0]"
+    check assignBlockStatement.blockStatements[1].toCode() == "let b = myArr[1]"
+
   test "function parsing":
     var
       source: string = "fn hello(a, b) 1 end"

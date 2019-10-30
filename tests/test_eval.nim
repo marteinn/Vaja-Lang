@@ -158,6 +158,17 @@ suite "eval tests":
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
 
+  test "destructuring assignment on array":
+    var
+      tests: ExpectedEvals = @[
+        ("let f = [1, 2]; let [a, b] = f; a", "1"),
+        ("let f = [1, 2]; let [_, b] = f; b", "2"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+
   test "error handling":
     var
       tests: ExpectedEvals = @[

@@ -7,13 +7,12 @@ Väja is a dynamic interpreted language inspired by Elixir, Lua, Python, Nim and
 - First class/higher order functions
 - Pattern matching for functions
 - Closures
-- Integers, floats, strings and bools
+- Integers, floats, strings, bools, regex
 - A repl
 - let statements
 - Arithmetic expressions
 - Pipe operator
 - Immutable data
-
 
 ## Example syntax
 
