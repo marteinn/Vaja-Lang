@@ -21,6 +21,7 @@ from obj import
   getVar,
   inspectEnv,
   inspectEnv,
+  containsDirectVar,
   containsVar,
   newInteger,
   newFloat,
@@ -409,7 +410,11 @@ proc eval*(node: Node, env: var Env): Obj =
       evalPrefixExpression(node.prefixOperator, prefixRight)
     of NTAssignStatement:
       var assignmentValue = eval(node.assignValue, env)
-      env = setVar(env, node.assignName.identValue, assignmentValue)
+      let key = node.assignName.identValue
+      if containsDirectVar(env, key):
+        return newError(errorMsg="Variable " & key & " cannot be reassigned")
+
+      env = setVar(env, key, assignmentValue)
       nil
     of NTIdentifier: evalIdentifier(node, env)
     of NTBoolean: toBoolObj(node.boolValue)

@@ -86,6 +86,9 @@ proc setVar*(env: Env, name: string, value: Obj): Env =
   env.store[name] = value
   return env
 
+proc containsDirectVar*(env: Env, name: string): bool =
+  return contains(env.store, name)
+
 proc containsVar*(env: Env, name: string): bool =
   if contains(env.store, name):
     return true

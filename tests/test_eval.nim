@@ -158,6 +158,19 @@ suite "eval tests":
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
 
+  test "re-assigning is not allowed":
+    var
+      tests: ExpectedEvals = @[
+        ("""
+let a = 1
+let a = 2
+a""", "Variable a cannot be reassigned"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+
   test "destructuring assignment on array":
     var
       tests: ExpectedEvals = @[

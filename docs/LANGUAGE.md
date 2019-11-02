@@ -4,7 +4,7 @@
 
 - No OOP or inheritance
 - No self/this
-- (Not implemented) Variables cannot be re-assigned
+- Variables cannot be re-assigned
 - (Not implemented) If statements must have a else
 
 
@@ -235,6 +235,7 @@ funcFromMyLibrary()
 | `len: id`                                                                    |
 | `print: id`                                                                  |
 | `type: id`                                                                   |
+| `identity: a -> a`                                                           |
 
 
 ### Array module
