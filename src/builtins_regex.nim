@@ -27,7 +27,7 @@ proc regexFromString(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   newRegex(re(arguments[0].strvalue))
 
 proc regexContains(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 2)
+  curryIfMissingArgs(arguments, 2, regexContains)
   requireArgOfType(arguments, 0, ObjType.OTRegex)
   requireArgOfType(arguments, 1, ObjType.OTString)
 
@@ -37,7 +37,7 @@ proc regexContains(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   if contains(source, regex): TRUE else: FALSE
 
 proc regexFind(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 2)
+  curryIfMissingArgs(arguments, 2, regexFind)
   requireArgOfType(arguments, 0, ObjType.OTRegex)
   requireArgOfType(arguments, 1, ObjType.OTString)
 

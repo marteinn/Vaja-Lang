@@ -26,7 +26,7 @@ proc ioReadFile(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newStr(fileContent)
 
 proc ioWriteFile(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 2)
+  curryIfMissingArgs(arguments, 2, ioWriteFile)
   requireArgOfType(arguments, 0, ObjType.OTString)
   requireArgOfType(arguments, 1, ObjType.OTString)
 

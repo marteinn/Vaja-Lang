@@ -26,7 +26,7 @@ proc hashMapLen(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newInteger(intValue=len(obj.hashMapElements))
 
 proc hashMapMap(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 2)
+  curryIfMissingArgs(arguments, 2, hashMapMap)
   requireArgOfTypes(arguments, 0, @[
     ObjType.OTFunction, ObjType.OTFunctionGroup, ObjType.OTBuiltin
   ])
@@ -42,7 +42,7 @@ proc hashMapMap(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newHashMap(hashMapElements=mapped)
 
 proc hashMapFilter(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 2)
+  curryIfMissingArgs(arguments, 2, hashMapFilter)
   requireArgOfTypes(arguments, 0, @[
     ObjType.OTFunction, ObjType.OTFunctionGroup, ObjType.OTBuiltin
   ])
@@ -59,6 +59,7 @@ proc hashMapFilter(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newHashMap(hashMapElements=filtered)
 
 proc hashMapReduce(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  curryIfMissingArgs(arguments, 3, hashMapReduce)
   requireNumArgs(arguments, 3)
   requireArgOfTypes(arguments, 0, @[
     ObjType.OTFunction, ObjType.OTFunctionGroup, ObjType.OTBuiltin
@@ -88,7 +89,7 @@ proc hashMapToArray(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newArray(arrayElements=arr)
 
 proc hashMapInsert(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 3)
+  curryIfMissingArgs(arguments, 3, hashMapInsert)
   requireArgOfType(arguments, 0, ObjType.OTString)
   requireArgOfType(arguments, 2, ObjType.OTHashMap)
 
@@ -102,7 +103,7 @@ proc hashMapInsert(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newHashMap(hashMapElements=hashMapElements)
 
 proc hashMapRemove(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 2)
+  curryIfMissingArgs(arguments, 2, hashMapRemove)
   requireArgOfType(arguments, 0, ObjType.OTString)
   requireArgOfType(arguments, 1, ObjType.OTHashMap)
 
@@ -115,7 +116,7 @@ proc hashMapRemove(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newHashMap(hashMapElements=hashMapElements)
 
 proc hashMapUpdate(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 3)
+  curryIfMissingArgs(arguments, 3, hashMapUpdate)
   requireArgOfType(arguments, 0, ObjType.OTString)
   requireArgOfType(arguments, 2, ObjType.OTHashMap)
 
@@ -139,7 +140,7 @@ proc hashMapEmpty(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   )
 
 proc hashMapHasKey(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 2)
+  curryIfMissingArgs(arguments, 2, hashMapHasKey)
   requireArgOfType(arguments, 0, ObjType.OTString)
   requireArgOfType(arguments, 1, ObjType.OTHashMap)
 

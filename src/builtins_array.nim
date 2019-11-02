@@ -36,7 +36,7 @@ proc arrayLast(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return obj.arrayElements[high(obj.arrayElements)]
 
 proc arrayMap(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 2)
+  curryIfMissingArgs(arguments, 2, arrayMap)
   requireArgOfTypes(arguments, 0, @[
     ObjType.OTFunction, ObjType.OTFunctionGroup, ObjType.OTBuiltin
   ])
@@ -52,7 +52,7 @@ proc arrayMap(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newArray(arrayElements=mapped)
 
 proc arrayReduce(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 3)
+  curryIfMissingArgs(arguments, 3, arrayReduce)
   requireArgOfTypes(arguments, 0, @[
     ObjType.OTFunction, ObjType.OTFunctionGroup, ObjType.OTBuiltin
   ])
@@ -68,7 +68,7 @@ proc arrayReduce(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
     result = applyFn(fn, @[result, curr], env)
 
 proc arrayFilter(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 2)
+  curryIfMissingArgs(arguments, 2, arrayFilter)
   requireArgOfTypes(arguments, 0, @[
     ObjType.OTFunction, ObjType.OTFunctionGroup, ObjType.OTBuiltin
   ])
@@ -87,7 +87,7 @@ proc arrayFilter(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newArray(arrayElements=filtered)
 
 proc arrayPush(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 2)
+  curryIfMissingArgs(arguments, 2, arrayPush)
   requireArgOfType(arguments, 1, ObjType.OTArray)
 
   let
@@ -97,7 +97,7 @@ proc arrayPush(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newArray(arrayElements=arrayElements)
 
 proc arrayDeleteAt(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 2)
+  curryIfMissingArgs(arguments, 2, arrayDeleteAt)
   requireArgOfType(arguments, 0, ObjType.OTInteger)
   requireArgOfType(arguments, 1, ObjType.OTArray)
 
@@ -109,7 +109,7 @@ proc arrayDeleteAt(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newArray(arrayElements=arrayElements)
 
 proc arrayAppend(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 2)
+  curryIfMissingArgs(arguments, 2, arrayAppend)
   requireArgOfType(arguments, 0, ObjType.OTArray)
   requireArgOfType(arguments, 1, ObjType.OTArray)
 
@@ -120,7 +120,7 @@ proc arrayAppend(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newArray(arrayElements=arrayElements)
 
 proc arrayReplaceAt(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 3)
+  curryIfMissingArgs(arguments, 3, arrayReplaceAt)
   requireArgOfType(arguments, 0, ObjType.OTInteger)
   requireArgOfType(arguments, 2, ObjType.OTArray)
 

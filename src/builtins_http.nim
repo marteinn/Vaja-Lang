@@ -33,7 +33,7 @@ proc httpCreateServer(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   )
 
 proc httpAddHandler(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 2)
+  curryIfMissingArgs(arguments, 2, httpAddHandler)
   requireArgOfTypes(arguments, 0, @[ObjType.OTFunction, ObjType.OTFunctionGroup])
   requireArgOfType(arguments, 1, ObjType.OTNativeObject)
 
@@ -234,7 +234,7 @@ proc httpCall(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newHashMap(hashMapElements=callResp)
 
 proc httpListen(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 2)
+  curryIfMissingArgs(arguments, 2, httpListen)
   requireArgOfType(arguments, 0, ObjType.OTInteger)
   requireArgOfType(arguments, 1, ObjType.OTNativeObject)
 

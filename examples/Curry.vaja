@@ -1,0 +1,5 @@
+let a = [1, 2, 3, 4]
+
+let multiplyList = Array.map(fn (x) -> x * 2)
+print(multiplyList)
+multiplyList(a)

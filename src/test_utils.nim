@@ -1,13 +1,20 @@
 from strutils import join
 import strutils
-from sequtils import map
-from obj import Obj, ObjType, inspect, newError
+from sequtils import map, concat
+from obj import Obj, ObjType, inspect, newError, ApplyFunction
+
 
 template requireNumArgs*(arguments: seq[Obj], numArgs: int) =
   if len(arguments) != numArgs:
     return newError(
       errorMsg="Wrong number of arguments, got " & $len(arguments) & ", want " & $numArgs
     )
+
+template curryIfMissingArgs*(arguments: seq[Obj], numArgs: int, fn: proc) =
+  if len(arguments) < numArgs:
+    proc curry(args: seq[Obj], applyFn: ApplyFunction): Obj =
+      return fn(concat(arguments, args), applyFn)
+    return newBuiltin(builtinFn=curry)
 
 template requireArgOfTypes*(arguments: seq[Obj], index: int, reqObjTypes: seq[ObjType]) =
   let arg: Obj = arguments[index]
