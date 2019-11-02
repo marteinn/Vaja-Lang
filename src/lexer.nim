@@ -65,7 +65,11 @@ proc readString(lexer: var Lexer): string =
   if lexer.ch == '"':
     return ""
 
+  if lexer.ch == '\\' and lexer.peekAhead(0) == '"':
+    lexer.readCharacter()
+
   var stringOut: string = $lexer.ch
+
   while true:
     lexer.readCharacter()
 

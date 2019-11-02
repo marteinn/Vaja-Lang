@@ -2,6 +2,10 @@ import unittest
 from lexer import newLexer, Lexer, nextToken, readCharacter
 from token import TokenType, Token
 
+type
+  ExpectedTokenPair = (TokenType, string)
+  ExpectedTokens = seq[ExpectedTokenPair]
+
 suite "lexer tests":
   test "common tokens are properly lexed":
     var
@@ -35,9 +39,6 @@ import
 # hello
 """
       lexer: Lexer = newLexer(source)
-    type
-      ExpectedTokenPair = (TokenType, string)
-      ExpectedTokens = seq[ExpectedTokenPair]
     let
       tokens: ExpectedTokens = @[
         (TokenType.INT, "1"),
@@ -342,9 +343,33 @@ end
     var
       source: string = """
       "a string \" declaration"
-      """
+      "\"a string \" declaration"
+      "a string \" declaration\""
+      "\"\""
+      "\" \""
+      "\"\"\""
+"""
       lexer: Lexer = newLexer(source)
+    let
+      tokens: ExpectedTokens = @[
+        (TokenType.STRING, "a string \" declaration"),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.STRING, "\"a string \" declaration"),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.STRING, "a string \" declaration\""),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.STRING, "\"\""),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.STRING, "\" \""),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.STRING, "\"\"\""),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.EOF, "")
+      ]
 
-    let token = lexer.nextToken()
-    check(token.tokenType == TokenType.STRING)
-    check(token.literal == "a string \" declaration")
+    for expectedToken in tokens:
+      var
+        token: Token = lexer.nextToken()
+
+      check(token.tokenType == expectedToken[0])
+      check(token.literal == expectedToken[1])
