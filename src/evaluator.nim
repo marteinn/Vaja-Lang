@@ -76,6 +76,9 @@ proc evalModule(node: Node, env: var Env): Obj =
     resultValue: Obj = nil
     moduleEnv: Env = newEnv()
   for statement in node.moduleStatements:
+    if statement == nil:
+      continue
+
     resultValue = eval(statement, moduleEnv)
 
     if resultValue == nil:
