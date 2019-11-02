@@ -409,8 +409,12 @@ proc eval*(node: Node, env: var Env): Obj =
       var prefixRight: Obj = eval(node.prefixRight, env)
       evalPrefixExpression(node.prefixOperator, prefixRight)
     of NTAssignStatement:
-      var assignmentValue = eval(node.assignValue, env)
       let key = node.assignName.identValue
+      if key.startsWith("_"):
+        return nil
+
+      var assignmentValue = eval(node.assignValue, env)
+
       if containsDirectVar(env, key):
         return newError(errorMsg="Variable " & key & " cannot be reassigned")
 
@@ -421,6 +425,11 @@ proc eval*(node: Node, env: var Env): Obj =
       for item in node.destructAssignNamesAndIndexes:
         let
           key = item[0].identValue
+
+        if key.startsWith("_"):
+          continue
+
+        let
           index = eval(item[1], env)
           indexValue = evalIndexOp(assignmentValue, index)
         if containsDirectVar(env, key):
