@@ -281,7 +281,8 @@ funcFromMyLibrary()
 | `toArray: hashMap`                                                           |
 | `insert: string, id, hashMap`                                                |
 | `remove: string, hashMap`                                                    |
-| `update: string, hashMap`                                                    |
+| `update: string, id, hashMap`                                                |
+| `hasKey: string, hashMap`                                                    |
 | `empty: void`                                                                |
 
 

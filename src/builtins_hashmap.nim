@@ -12,6 +12,8 @@ from obj import
   Env,
   newEnv,
   NIL,
+  TRUE,
+  FALSE,
   inspect,
   inspectEnv
 import test_utils
@@ -136,6 +138,20 @@ proc hashMapEmpty(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
     hashMapElements=initOrderedTable[string, Obj]()
   )
 
+proc hashMapHasKey(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  requireNumArgs(arguments, 2)
+  requireArgOfType(arguments, 0, ObjType.OTString)
+  requireArgOfType(arguments, 1, ObjType.OTHashMap)
+
+  let
+    keyObj: Obj = arguments[0]
+    source: Obj = arguments[1]
+
+  if contains(source.hashMapElements, keyObj.strValue):
+    return TRUE
+  else:
+    return FALSE
+
 let functions*: OrderedTable[string, Obj] = {
   "len": newBuiltin(builtinFn=hashMapLen),
   "map": newBuiltin(builtinFn=hashMapMap),
@@ -146,6 +162,7 @@ let functions*: OrderedTable[string, Obj] = {
   "remove": newBuiltin(builtinFn=hashMapRemove),
   "update": newBuiltin(builtinFn=hashMapUpdate),
   "empty": newBuiltin(builtinFn=hashMapEmpty),
+  "hasKey": newBuiltin(builtinFn=hashMapHasKey),
   # TODO: Implement keys
   # TODO: Implement values
   # TODO: Implement fromArray
