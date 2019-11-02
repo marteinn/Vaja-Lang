@@ -52,11 +52,16 @@ proc builtinIdentity(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   let obj = arguments[0]
   discard
 
+proc builtinExit(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  requireNumArgs(arguments, 0)
+  quit()
+
 var
   globals*: Table[string, Obj] = {
     "type": newBuiltin(builtinFn=builtinType),
     "print": newBuiltin(builtinFn=builtinPrint),
-    "identity": newBuiltin(builtinFn=builtinIdentity),
+    #"identity": newBuiltin(builtinFn=builtinIdentity),
+    "exit": newBuiltin(builtinFn=builtinExit),
     "Array": arrayModule,
     "String": stringModule,
     "HashMap": hashMapModule,

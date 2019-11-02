@@ -236,6 +236,7 @@ funcFromMyLibrary()
 | `len: id`                                                                    |
 | `print: id`                                                                  |
 | `type: id`                                                                   |
+| `exit`                                                                       |
 | `identity: a -> a`                                                           |
 
 

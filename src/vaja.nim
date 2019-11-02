@@ -30,7 +30,7 @@ when declared(commandLineParams):
     showReplExp = true
 
 if mode == RMRepl:
-  echo "Väja"
+  echo "Väja (type exit() to quit)"
 
   while true:
     stdout.write ">> "
