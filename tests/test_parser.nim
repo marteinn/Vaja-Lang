@@ -176,11 +176,8 @@ let c = "hello"
       program: Node = parseSource(source)
 
     check len(program.statements) == 1
-    let assignBlockStatement = program.statements[0]
-    check assignBlockStatement.nodeType == NodeType.NTBlockStatement
-    check len(assignBlockStatement.blockStatements) == 2
-    check assignBlockStatement.blockStatements[0].toCode() == "let a = myArr[0]"
-    check assignBlockStatement.blockStatements[1].toCode() == "let b = myArr[1]"
+    check program.statements[0].nodeType == NodeType.NTDestructAssignStatement
+    check program.statements[0].toCode() == "let [a, b] = myArr"
 
   test "function parsing":
     var

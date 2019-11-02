@@ -17,6 +17,7 @@ type
     NTStringLiteral,
     NTProgram
     NTAssignStatement,
+    NTDestructAssignStatement,
     NTFunctionLiteral,
     NTBlockStatement,
     NTCallExpression,
@@ -50,6 +51,9 @@ type
       of NTAssignStatement:
         assignName*: Node
         assignValue*: Node
+      of NTDestructAssignStatement:
+        destructAssignNamesAndIndexes*: seq[(Node, Node)]
+        destructAssignValue*: Node
       of NTFunctionLiteral:
         functionBody*: Node
         functionParams*: seq[Node]
@@ -108,6 +112,12 @@ proc toCode*(node: Node): string =
       join(nodeCode, "\n")
     of NTAssignStatement:
       "let " & node.assignName.identValue & " = " & toCode(node.assignValue)
+    of NTDestructAssignStatement:
+      let keys: seq[string] = map(
+        node.destructAssignNamesAndIndexes,
+        proc(x: (Node, Node)): string = x[0].identValue
+      )
+      "let [" & join(keys, ", ") & "] = " & toCode(node.destructAssignValue)
     of NTFunctionLiteral:
       let
         paramsCode: seq[string] = map(node.functionParams, proc (x: Node): string = toCode(x))
@@ -227,6 +237,18 @@ proc newAssignStatement*(token: Token, assignName: Node, assignValue: Node): Nod
     token: token,
     assignName: assignName,
     assignValue: assignValue
+  )
+
+proc newDestructAssignStatement*(
+  token: Token,
+  destructAssignNamesAndIndexes: seq[(Node, Node)],
+  destructAssignValue: Node
+): Node =
+  return Node(
+    nodeType: NodeType.NTDestructAssignStatement,
+    token: token,
+    destructAssignNamesAndIndexes: destructAssignNamesAndIndexes,
+    destructAssignValue: destructAssignValue
   )
 
 proc newFuntionLiteral*(

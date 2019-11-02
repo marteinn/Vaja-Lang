@@ -44,12 +44,19 @@ proc builtinPrint(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
 
   let obj = arguments[0]
   echo obj.inspect()
-  return NIL
+  return nil
+
+proc builtinIdentity(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  requireNumArgs(arguments, 1)
+
+  let obj = arguments[0]
+  discard
 
 var
   globals*: Table[string, Obj] = {
     "type": newBuiltin(builtinFn=builtinType),
     "print": newBuiltin(builtinFn=builtinPrint),
+    "identity": newBuiltin(builtinFn=builtinIdentity),
     "Array": arrayModule,
     "String": stringModule,
     "HashMap": hashMapModule,

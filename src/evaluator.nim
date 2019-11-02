@@ -416,6 +416,18 @@ proc eval*(node: Node, env: var Env): Obj =
 
       env = setVar(env, key, assignmentValue)
       nil
+    of NTDestructAssignStatement:
+      var assignmentValue = eval(node.destructAssignValue, env)
+      for item in node.destructAssignNamesAndIndexes:
+        let
+          key = item[0].identValue
+          index = eval(item[1], env)
+          indexValue = evalIndexOp(assignmentValue, index)
+        if containsDirectVar(env, key):
+          return newError(errorMsg="Variable " & key & " cannot be reassigned")
+
+        env = setVar(env, key, indexValue)
+      nil
     of NTIdentifier: evalIdentifier(node, env)
     of NTBoolean: toBoolObj(node.boolValue)
     of NTBlockStatement: evalBlockStatement(node, env)

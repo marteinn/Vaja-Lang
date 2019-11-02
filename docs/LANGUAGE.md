@@ -2,6 +2,7 @@
 
 ## Some principles
 
+- Everything is modules and functions
 - No OOP or inheritance
 - No self/this
 - Variables cannot be re-assigned

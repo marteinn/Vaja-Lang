@@ -15,6 +15,7 @@ from ast import
   newBoolean,
   newStringLiteral,
   newAssignStatement,
+  newDestructAssignStatement,
   newFuntionLiteral,
   newBlockStatement,
   newCallExpression,
@@ -603,25 +604,21 @@ proc parseAssignmentArrayUnpackStatement(parser: var Parser): Node =
   if parser.peekToken.tokenType in [TokenType.NEWLINE, TokenType.SEMICOLON]:
     discard parser.nextParserToken()
 
-  var assignStatements: seq[Node] = @[]
+  var namesAndIndexes: seq[(Node, Node)] = @[]
   for index, ident in unpackIdentifiers:
-    assignStatements.add(
-      newAssignStatement(
-        token=token,
-        assignName=ident,
-        assignValue=newIndexOperation(
+    namesAndIndexes.add(
+      (
+        ident,
+        newIntegerLiteral(
           token=newEmptyToken(),
-          indexOpLeft=assignValue,
-          indexOpIndex=newIntegerLiteral(
-            token=newEmptyToken(),
-            intValue=index,
-          ),
+          intValue=index,
         )
-      )
-    )
+      ))
 
-  return newBlockStatement(
-    token=token, blockStatements=assignStatements
+  return newDestructAssignStatement(
+    token=token,
+    destructAssignNamesAndIndexes=namesAndIndexes,
+    destructAssignValue=assignValue,
   )
 
 proc parseAssignmentStatement(parser: var Parser): Node =
