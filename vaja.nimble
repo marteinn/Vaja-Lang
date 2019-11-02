@@ -42,3 +42,6 @@ task test_builtins_io, "Test IO module":
 
 task test_builtins_regex, "Test regex module":
   exec r"nim c -r tests/test_builtins_regex.nim"
+
+task test_builtins_json, "Test json module":
+  exec r"nim c -r tests/test_builtins_json.nim"

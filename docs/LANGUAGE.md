@@ -301,6 +301,12 @@ funcFromMyLibrary()
 | `contains: Regex, string`                                                    |
 | `find: Regex, string`                                                        |
 
+### JSON
+
+| Signature                                                                    |
+| ---------------------------------------------------------------------------- |
+| `toJSON: id`                                                                 |
+
 
 ## Comments
 

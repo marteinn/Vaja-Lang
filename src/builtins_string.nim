@@ -194,4 +194,3 @@ let functions*: OrderedTable[string, Obj] = {
 }.toOrderedTable
 
 let stringModule*: Obj = newHashMap(hashMapElements=functions)
-

@@ -16,6 +16,7 @@ from builtins_hashmap import hashMapModule
 from builtins_http import httpModule
 from builtins_io import ioModule
 from builtins_regex import regexModule
+from builtins_json import jsonModule
 import test_utils
 
 proc builtinType(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
@@ -55,4 +56,5 @@ var
     "Http": httpModule,
     "IO": ioModule,
     "Regex": regexModule,
+    "JSON": jsonModule,
   }.toTable
