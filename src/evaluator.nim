@@ -249,6 +249,9 @@ proc evalExpressions(expressions: seq[Node], env: var Env): seq[Obj] =
 
   for exp in expressions:
     var evaluated: Obj = eval(exp, env)
+    if isError(evaluated):
+      return @[evaluated]
+
     res.add(evaluated)
 
   return res
@@ -500,6 +503,9 @@ proc eval*(node: Node, env: var Env): Obj =
         fnBase: Obj = eval(node.callFunction, env)
         arguments: seq[Obj] = evalExpressions(node.callArguments, env)
 
+      if len(arguments) > 0 and isError(arguments[0]):
+        return arguments[0]
+
       resolveAndApplyFunction(fnBase, arguments, env)
 
       # Apply currying
@@ -522,6 +528,8 @@ proc eval*(node: Node, env: var Env): Obj =
     of NTNil: NIL
     of NTArrayLiteral:
       let elements: seq[Obj] = evalExpressions(node.arrayElements, env)
+      if len(elements) > 0 and isError(elements[0]):
+        return elements[0]
       newArray(arrayElements=elements)
     of NTHashMapLiteral:
       var elements: OrderedTable[string, Obj] = initOrderedTable[string, Obj]()
