@@ -238,6 +238,12 @@ proc httpListen(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireArgOfType(arguments, 0, ObjType.OTInteger)
   requireArgOfType(arguments, 1, ObjType.OTNativeObject)
 
+  proc ctrlc() {.noconv.} =
+    echo "Keyboard interrupt received, exiting."
+    quit()
+
+  setControlCHook(ctrlc)
+
   let
     port: Obj = arguments[0]
     server: Obj = arguments[1]
@@ -254,6 +260,7 @@ proc httpListen(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
       let response: Obj = applyFn(handler, handlerArgs, fnEnv)
     await responseHandlerResponse(req, response)
 
+  echo "Serving HTTP on 0.0.0.0 port " & $port.intValue & " (http://0.0.0.0:" & $port.intValue & "/)"
   waitFor nativeServer.serve(Port(port.intValue), cb)
   return NIL
 
