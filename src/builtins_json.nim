@@ -9,10 +9,13 @@ from obj import
   newStr,
   newError,
   newInteger,
+  newFloat,
   newArray,
   Env,
   newEnv,
   NIL,
+  TRUE,
+  FALSE,
   inspect
 import test_utils
 
@@ -47,8 +50,37 @@ proc jsonToJSON(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
     jsonObj: JsonNode = objToJSON(obj)
   return newStr(strValue= $jsonObj)
 
+proc jsonNodeToObj(jsonNode: JsonNode): Obj =
+  case jsonNode.kind:
+    of JInt:
+      return newInteger(jsonNode.num.int)
+    of JString:
+      return newStr(jsonNode.str)
+    of JFloat:
+      return newFloat(jsonNode.fnum.float)
+    of JBool:
+      return if jsonNode.bval: TRUE else: FALSE
+    of JArray:
+      var elements: seq[Obj] = @[]
+      for val in jsonNode.elems:
+        elements.add(jsonNodeToObj(val))
+      return newArray(elements)
+    of JObject:
+      var elements: OrderedTable[string, Obj] = initOrderedTable[string, Obj]()
+      for key, val in pairs(jsonNode.fields):
+        elements[key] = jsonNodeToObj(val)
+      return newHashMap(elements)
+    else:
+      return NIL
+
 proc jsonFromJSON(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  discard
+  requireNumArgs(arguments, 1)
+  requireArgOfType(arguments, 0, ObjType.OTString)
+
+  let
+    rawJSON: string = arguments[0].strValue
+    jsonNode: JsonNode = parseJson(rawJSON)
+  return jsonNodeToObj(jsonNode)
 
 let functions*: OrderedTable[string, Obj] = {
   "toJSON": newBuiltin(builtinFn=jsonToJSON),

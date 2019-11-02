@@ -34,3 +34,22 @@ suite "builtins json tests":
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.objType == OTString
       check evaluated.inspect() == testPair[1]
+
+  test "JSON.fromJSON":
+    var
+      tests: ExpectedEvals = @[
+        ("""JSON.fromJSON("1")""", "1"),
+        ("""JSON.fromJSON("true")""", "true"),
+        ("""JSON.fromJSON("false")""", "false"),
+        ("""JSON.fromJSON("1.1")""", "1.1"),
+        ("""JSON.fromJSON("[1, true, 1.1]")""", "[1, true, 1.1]"),
+
+        ("""JSON.fromJSON("\"hej\"")""", "hej"),
+        ("""JSON.fromJSON("[1, [true], 5.5, \"hej\"]")""", """[1, [true], 5.5, hej]"""),
+        ("""JSON.fromJSON("{\"random\": 1}")""", """{random: 1}"""),
+        ("""JSON.fromJSON("null")""", """nil"""),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]

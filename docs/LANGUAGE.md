@@ -1,5 +1,13 @@
 ## General
 
+## Some principles
+
+- No OOP or inheritance
+- No self/this
+- (Not implemented) Variables cannot be re-assigned
+- (Not implemented) If statements must have a else
+
+
 ## Supported types
 
 ### Integer
@@ -306,6 +314,7 @@ funcFromMyLibrary()
 | Signature                                                                    |
 | ---------------------------------------------------------------------------- |
 | `toJSON: id`                                                                 |
+| `fromJSON: string`                                                           |
 
 
 ## Comments
