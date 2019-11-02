@@ -511,6 +511,29 @@ end
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated == nil
 
+  test "builtin: identity":
+    var
+      tests: ExpectedEvals = @[
+        ("""identity(1)""", "1"),
+        ("""identity(true)""", "true"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+
+  test "builtin: always":
+    var
+      tests: ExpectedEvals = @[
+        ("""let a = always(1); a()""", "1"),
+        ("""let a = always([1,2]); a()""", "[1, 2]"),
+        ("""let a = always(false); a()""", "false"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+
   test "function composition R->L":
     var
       tests: ExpectedEvals = @[

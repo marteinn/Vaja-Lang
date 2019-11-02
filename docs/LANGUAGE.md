@@ -238,6 +238,7 @@ funcFromMyLibrary()
 | `type: id`                                                                   |
 | `exit`                                                                       |
 | `identity: a -> a`                                                           |
+| `always: a -> b -> a`                                                        |
 
 
 ### Array module

@@ -3,11 +3,14 @@ from obj import
   Obj,
   ObjType,
   ApplyFunction,
+  newEnv,
   newBuiltin,
   newHashMap,
   newError,
   newInteger,
+  newFunction,
   newStr,
+  setVar,
   NIL,
   inspect
 from builtins_array import arrayModule
@@ -48,9 +51,15 @@ proc builtinPrint(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
 
 proc builtinIdentity(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 1)
+  return arguments[0]
 
-  let obj = arguments[0]
-  discard
+proc builtinAlways(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  requireNumArgs(arguments, 1)
+
+  proc always(ignoredArgs: seq[Obj], ignoredApplyFn: ApplyFunction): Obj =
+    return arguments[0]
+
+  return newBuiltin(builtinFn=always)
 
 proc builtinExit(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 0)
@@ -60,7 +69,8 @@ var
   globals*: Table[string, Obj] = {
     "type": newBuiltin(builtinFn=builtinType),
     "print": newBuiltin(builtinFn=builtinPrint),
-    #"identity": newBuiltin(builtinFn=builtinIdentity),
+    "identity": newBuiltin(builtinFn=builtinIdentity),
+    "always": newBuiltin(builtinFn=builtinAlways),
     "exit": newBuiltin(builtinFn=builtinExit),
     "Array": arrayModule,
     "String": stringModule,

@@ -606,14 +606,13 @@ proc parseAssignmentArrayUnpackStatement(parser: var Parser): Node =
 
   var namesAndIndexes: seq[(Node, Node)] = @[]
   for index, ident in unpackIdentifiers:
-    namesAndIndexes.add(
-      (
-        ident,
-        newIntegerLiteral(
-          token=newEmptyToken(),
-          intValue=index,
-        )
-      ))
+    namesAndIndexes.add((
+      ident,
+      newIntegerLiteral(
+        token=newEmptyToken(),
+        intValue=index,
+      )
+    ))
 
   return newDestructAssignStatement(
     token=token,
