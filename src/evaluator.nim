@@ -236,7 +236,6 @@ proc evalIdentifier(node: Node, env: var Env) : Obj =
 
   let exists: bool = env.containsVar(node.identValue)
   if exists:
-    let value: Obj = env.getVar(node.identValue)
     return env.getVar(node.identValue)
 
   if contains(globals, node.identValue):
@@ -537,6 +536,10 @@ proc eval*(node: Node, env: var Env): Obj =
         let
           keyObj: Obj = eval(key, env)
           valObj: Obj = eval(value, env)
+
+        if isError(valObj):
+          return valObj
+
         if keyObj.objType != ObjType.OTString:
           return newError(
             errorMsg="Only string indexes are allowed, found " & $(keyObj.objType)
