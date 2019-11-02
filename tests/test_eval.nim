@@ -496,7 +496,7 @@ end
 
     for testPair in tests:
       var evaluated: Obj = evalSource(testPair[0])
-      check evaluated.inspect() == testPair[1]
+      check evaluated == nil
 
   test "function composition R->L":
     var
