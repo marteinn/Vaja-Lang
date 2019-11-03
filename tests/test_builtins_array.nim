@@ -59,6 +59,19 @@ suite "builtins array tests":
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
 
+  test "Array.map currying":
+    var
+      tests: ExpectedEvals = @[
+        ("""
+let multiplyByTwo = Array.map(fn (x) -> x*2)
+multiplyByTwo([1, 2, 3])
+""","[2, 4, 6]"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+
   test "Array.reduce":
     var
       tests: ExpectedEvals = @[

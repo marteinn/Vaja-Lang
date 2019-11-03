@@ -3,10 +3,10 @@
 ## Some principles
 
 - Everything is modules and functions
+- All standard library functions are curried
 - No OOP or inheritance
 - No self/this
 - Variables cannot be re-assigned
-- (Not implemented) If statements must have a else
 
 
 ## Supported types
