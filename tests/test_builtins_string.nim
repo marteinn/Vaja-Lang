@@ -152,3 +152,29 @@ String.filter(
     for testPair in tests:
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
+
+  test "String.left":
+    var
+      tests: ExpectedEvals = @[
+        ("""String.left(4, "Future days")""", "Futu"),
+        ("""String.left(2, "Future days")""", "Fu"),
+        ("""String.left(1, "Future days")""", "F"),
+        ("""String.left(0, "Future days")""", ""),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
+
+  test "String.right":
+    var
+      tests: ExpectedEvals = @[
+        ("""String.right(4, "Tago Mago")""", "Mago"),
+        ("""String.right(2, "Tago Mago")""", "go"),
+        ("""String.right(1, "Tago Mago")""", "o"),
+        ("""String.right(0, "Tago Mago")""", ""),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]

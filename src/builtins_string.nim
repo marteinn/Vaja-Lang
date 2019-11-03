@@ -25,7 +25,7 @@ proc stringLen(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newInteger(intValue=len(obj.strValue))
 
 proc stringSplit(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 2)
+  curryIfMissingArgs(arguments, 2, stringSplit)
   requireArgOfType(arguments, 0, ObjType.OTString)
   requireArgOfType(arguments, 1, ObjType.OTString)
 
@@ -39,7 +39,7 @@ proc stringSplit(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newArray(arrayElements=arrayElements)
 
 proc stringJoin(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 2)
+  curryIfMissingArgs(arguments, 2, stringJoin)
   requireArgOfType(arguments, 0, ObjType.OTString)
   requireArgOfType(arguments, 1, ObjType.OTArray)
 
@@ -63,7 +63,7 @@ proc stringJoin(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   )
 
 proc stringMap(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 2)
+  curryIfMissingArgs(arguments, 2, stringMap)
   requireArgOfTypes(arguments, 0, @[
     ObjType.OTFunction, ObjType.OTFunctionGroup, ObjType.OTBuiltin
   ])
@@ -83,7 +83,7 @@ proc stringMap(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newStr(strValue=mappedStr)
 
 proc stringFilter(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 2)
+  curryIfMissingArgs(arguments, 2, stringFilter)
   requireArgOfTypes(arguments, 0, @[
     ObjType.OTFunction, ObjType.OTFunctionGroup, ObjType.OTBuiltin
   ])
@@ -108,7 +108,7 @@ proc stringFilter(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newStr(strValue=mappedStr)
 
 proc stringReduce(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 3)
+  curryIfMissingArgs(arguments, 3, stringReduce)
   requireArgOfTypes(arguments, 0, @[
     ObjType.OTFunction, ObjType.OTFunctionGroup, ObjType.OTBuiltin
   ])
@@ -126,7 +126,7 @@ proc stringReduce(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
     result = applyFn(fn, @[result, curr], env)
 
 proc stringAppend(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 2)
+  curryIfMissingArgs(arguments, 2, stringAppend)
   requireArgOfType(arguments, 0, ObjType.OTString)
   requireArgOfType(arguments, 1, ObjType.OTString)
 
@@ -136,7 +136,7 @@ proc stringAppend(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   return newStr(string1.strValue & string2.strValue)
 
 proc stringSlice(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
-  requireNumArgs(arguments, 3)
+  curryIfMissingArgs(arguments, 3, stringSlice)
   requireArgOfType(arguments, 0, ObjType.OTInteger)
   requireArgOfType(arguments, 1, ObjType.OTInteger)
   requireArgOfType(arguments, 2, ObjType.OTString)
@@ -175,6 +175,29 @@ proc stringToArray(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
     arrayElements.add(newStr($ch))
   return newArray(arrayElements=arrayElements)
 
+proc stringLeft(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  requireNumArgs(arguments, 2)
+  requireArgOfType(arguments, 0, ObjType.OTInteger)
+  requireArgOfType(arguments, 1, ObjType.OTString)
+
+  let
+    length: int = arguments[0].intValue
+    source: Obj = arguments[1]
+    slice = source.strValue[0 .. length-1]
+  return newStr(slice)
+
+proc stringRight(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  requireNumArgs(arguments, 2)
+  requireArgOfType(arguments, 0, ObjType.OTInteger)
+  requireArgOfType(arguments, 1, ObjType.OTString)
+
+  let
+    length: int = arguments[0].intValue
+    source: Obj = arguments[1]
+    strLength: int = len(source.strValue)
+    slice = source.strValue[(strLength-length) .. strLength-1]
+  return newStr(slice)
+
 let functions*: OrderedTable[string, Obj] = {
   "len": newBuiltin(builtinFn=stringLen),
   "split": newBuiltin(builtinFn=stringSplit),
@@ -187,8 +210,9 @@ let functions*: OrderedTable[string, Obj] = {
   "toUpper": newBuiltin(builtinFn=stringToUpper),
   "toLower": newBuiltin(builtinFn=stringToLower),
   "toArray": newBuiltin(builtinFn=stringToArray),
+  "left": newBuiltin(builtinFn=stringLeft),
+  "right": newBuiltin(builtinFn=stringRight),
   # TODO: Add isEmpty
-  # TODO: Add left
   # TODO: Add dropLeft
   # TODO: Add dropRight
 }.toOrderedTable

@@ -272,6 +272,8 @@ funcFromMyLibrary()
 | `toUpper: string`                                                            |
 | `toLower: string`                                                            |
 | `toArray: string`                                                            |
+| `left: int, string`                                                          |
+| `right: int, string`                                                         |
 
 
 ### HashMap module
