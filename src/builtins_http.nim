@@ -258,7 +258,11 @@ proc httpListen(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
     {.gcsafe}:
       var fnEnv: Env = newEnv()
       let response: Obj = applyFn(handler, handlerArgs, fnEnv)
-    await responseHandlerResponse(req, response)
+
+    if response.objType == OTError:
+      echo response.inspect()
+    else:
+      await responseHandlerResponse(req, response)
 
   echo "Serving HTTP on 0.0.0.0 port " & $port.intValue & " (http://0.0.0.0:" & $port.intValue & "/)"
   waitFor nativeServer.serve(Port(port.intValue), cb)
