@@ -12,3 +12,4 @@ tests/test_builtins_http
 tests/test_builtins_io
 tests/test_builtins_regex
 tests/test_builtins_json
+tests/test_builtins_base64

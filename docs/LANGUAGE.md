@@ -325,6 +325,13 @@ funcFromMyLibrary()
 | `toJSON: id`                                                                 |
 | `fromJSON: string`                                                           |
 
+### Base64
+
+| Signature                                                                    |
+| ---------------------------------------------------------------------------- |
+| `encode: string`                                                             |
+| `decode: string`                                                             |
+
 
 ## Comments
 

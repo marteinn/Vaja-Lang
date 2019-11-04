@@ -20,6 +20,7 @@ from builtins_http import httpModule
 from builtins_io import ioModule
 from builtins_regex import regexModule
 from builtins_json import jsonModule
+from builtins_base64 import base64Module
 import test_utils
 
 proc builtinType(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
@@ -79,4 +80,5 @@ var
     "IO": ioModule,
     "Regex": regexModule,
     "JSON": jsonModule,
+    "Base64": base64Module,
   }.toTable
