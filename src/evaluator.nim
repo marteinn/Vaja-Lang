@@ -523,8 +523,12 @@ proc eval*(node: Node, env: var Env): Obj =
       var pipeRight: Node
       deepCopy(pipeRight, node.pipeRight)
       pipeRight.callArguments.add(node.pipeLeft)
-
       eval(pipeRight, env)
+    of NTPipeRL:
+      var pipeLeft: Node
+      deepCopy(pipeLeft, node.pipeRLLeft)
+      pipeLeft.callArguments.add(node.pipeRLRight)
+      eval(pipeLeft, env)
     of NTIfExpression: evalIfExpression(node, env)
     of NTCaseExpression: evalCaseExpression(node, env)
     of NTNil: NIL

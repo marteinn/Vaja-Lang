@@ -328,7 +328,7 @@ end; myFunc(1)(2)""", "3"),
       check evaluated.objType == ObjType.OTInteger
       check evaluated.inspect() == testPair[1]
 
-  test "piping values to function call":
+  test "function application left to right":
     var
       tests: ExpectedEvals = @[
         ("""fn a(x) -> x + 1
@@ -342,6 +342,27 @@ fn c(x) -> x + 3
 fn b(x) -> x + 2
 fn c(x) -> x + 3
 2 |> a(5) |> b() |> c()""", "15"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.objType == ObjType.OTInteger
+      check evaluated.inspect() == testPair[1]
+
+  test "function application right to left":
+    var
+      tests: ExpectedEvals = @[
+        ("""fn a(x) -> x + 1
+fn b(x) -> x + 2
+b() <| a() <| 0""", "3"),
+      ("""fn a(x) -> x + 1
+fn b(x) -> x + 2
+fn c(x) -> x + 3
+c() <| b() <| a() <| 2""", "8"),
+    ("""fn a(x, y) -> x * y
+fn b(x) -> x + 2
+fn c(x) -> x + 3
+c() <| b() <| a(5) <| 2""", "15"),
       ]
 
     for testPair in tests:

@@ -36,6 +36,7 @@ type
     DOUBLELT,     # <<
     DOLLAR,
     PIPERARROW,   # |>
+    PIPELARROW,   # <|
     IF,
     ELSE,
     CASE,

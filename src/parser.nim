@@ -21,6 +21,7 @@ from ast import
   newCallExpression,
   newReturnStatement,
   newPipeLR,
+  newPipeRL,
   newFNCompositionRL,
   newIfExpression,
   newCaseExpression,
@@ -67,6 +68,7 @@ var
     TokenType.LTE: Precedence.PRODUCT,
     TokenType.LPAREN: Precedence.CALL,
     TokenType.PIPERARROW: Precedence.SUM,
+    TokenType.PIPELARROW: Precedence.SUM,
     TokenType.DOT: Precedence.INDEX,
     TokenType.LBRACKET: Precedence.INDEX,
     TokenType.DOUBLELT: Precedence.INDEX,
@@ -120,7 +122,7 @@ proc parseStringLiteral(parser: var Parser): Node =
     literal: string = parser.curToken.literal
   return newStringLiteral(token=parser.curToken, strValue=literal)
 
-proc parseExpression(parser: var Parser, precedence: Precedence): Node # forward declaration
+proc parseExpression(parser: var Parser, precedence: int): Node # forward declaration
 
 proc parseStatement(parser: var Parser): Node # Forward declaration
 
@@ -129,7 +131,7 @@ proc parsePrefixExpression(parser: var Parser): Node =
     token: Token = parser.curToken
   discard parser.nextParserToken()
 
-  var right: Node = parser.parseExpression(Precedence.PREFIX)
+  var right: Node = parser.parseExpression(Precedence.PREFIX.int)
   return newPrefixExpression(
     token=token, prefixRight=right, prefixOperator=token.literal
   )
@@ -137,7 +139,7 @@ proc parsePrefixExpression(parser: var Parser): Node =
 proc parseGroupedExpression(parser: var Parser): Node =
   discard parser.nextParserToken()
 
-  let expression: Node = parser.parseExpression(Precedence.LOWEST)
+  let expression: Node = parser.parseExpression(Precedence.LOWEST.int)
 
   if not expectPeek(parser, TokenType.RPAREN):
       return nil
@@ -153,14 +155,14 @@ proc parseNodeList(parser: var Parser, endTokenType: TokenType): seq[Node] =
 
   var
     parameters: seq[Node] = @[
-      parser.parseExpression(Precedence.LOWEST)
+      parser.parseExpression(Precedence.LOWEST.int)
     ]
 
   while parser.peekToken.tokenType == TokenType.COMMA:
     discard parser.nextParserToken()
     discard parser.nextParserToken()
 
-    parameters.add(parser.parseExpression(Precedence.LOWEST))
+    parameters.add(parser.parseExpression(Precedence.LOWEST.int))
 
   if not parser.expectPeek(endTokenType):
     return @[]
@@ -218,7 +220,7 @@ proc parseFunctionLiteral(parser: var Parser): Node =
     discard parser.nextParserToken()
 
     var
-      statement: Node = parser.parseExpression(Precedence.LOWEST)
+      statement: Node = parser.parseExpression(Precedence.LOWEST.int)
       statements: seq[Node] = @[statement]
     functionBody = newBlockStatement(
       token=token,
@@ -238,7 +240,7 @@ proc parseIfExpression(parser: var Parser): Node =
   let token: Token = parser.curToken
   discard parser.nextParserToken()
 
-  var condition: Node = parser.parseExpression(Precedence.LOWEST)
+  var condition: Node = parser.parseExpression(Precedence.LOWEST.int)
   var consequence: Node = parser.parseBlockStatement()
   var alternative: Node = nil
   if parser.curToken.tokenType == TokenType.ELSE:
@@ -257,7 +259,7 @@ proc parseCaseExpression(parser: var Parser): Node =
   let token: Token = parser.curToken
   discard parser.nextParserToken()
 
-  let condition: Node = parser.parseExpression(Precedence.LOWEST)
+  let condition: Node = parser.parseExpression(Precedence.LOWEST.int)
   discard parser.nextParserToken()  # RPAREN
 
   var casePatterns: seq[CasePattern] = @[]
@@ -275,7 +277,7 @@ proc parseCaseExpression(parser: var Parser): Node =
 
     discard parser.nextParserToken()
 
-    let conditionPattern: Node = parser.parseExpression(Precedence.LOWEST)
+    let conditionPattern: Node = parser.parseExpression(Precedence.LOWEST.int)
     if not parser.expectPeek(TokenType.RARROW):
       return nil
 
@@ -296,7 +298,7 @@ proc parseArrayExpressionList(parser: var Parser): seq[Node] =
   discard parser.nextParserToken()
 
   var elements: seq[Node] = @[
-    parser.parseExpression(Precedence.LOWEST)
+    parser.parseExpression(Precedence.LOWEST.int)
   ]
 
   while parser.peekToken.tokenType == TokenType.COMMA:
@@ -304,7 +306,7 @@ proc parseArrayExpressionList(parser: var Parser): seq[Node] =
     discard parser.nextParserToken()
 
     elements.add(
-      parser.parseExpression(Precedence.LOWEST)
+      parser.parseExpression(Precedence.LOWEST.int)
     )
 
   # Remove any trailing newline
@@ -335,13 +337,13 @@ proc parseHashMapLiteral(parser: var Parser): Node =
 
   while parser.curToken.tokenType != TokenType.RBRACE:
     discard parser.nextParserToken()
-    let key: Node = parser.parseExpression(Precedence.LOWEST)
+    let key: Node = parser.parseExpression(Precedence.LOWEST.int)
 
     if not parser.expectPeek(TokenType.COLON):
       return nil
 
     discard parser.nextParserToken()
-    let value: Node = parser.parseExpression(Precedence.LOWEST)
+    let value: Node = parser.parseExpression(Precedence.LOWEST.int)
     discard parser.nextParserToken()
 
     # Remove any trailing newlinw
@@ -410,7 +412,7 @@ proc parseInfixExpression(parser: var Parser, left: Node): Node =
     precedence: Precedence = parser.currentPrecedence()
   discard parser.nextParserToken()
 
-  var right: Node = parser.parseExpression(precedence)
+  var right: Node = parser.parseExpression(precedence.int)
   return newInfixExpression(
     token=token, infixLeft=left, infixRight=right, infixOperator=token.literal
   )
@@ -423,7 +425,7 @@ proc parseCallArguments(parser: var Parser): seq[Node] =
   discard parser.nextParserToken()
 
   var callArguments: seq[Node] = @[
-    parser.parseExpression(Precedence.LOWEST)
+    parser.parseExpression(Precedence.LOWEST.int)
   ]
 
   while parser.peekToken.tokenType == TokenType.COMMA:
@@ -431,7 +433,7 @@ proc parseCallArguments(parser: var Parser): seq[Node] =
     discard parser.nextParserToken()
 
     callArguments.add(
-      parser.parseExpression(Precedence.LOWEST)
+      parser.parseExpression(Precedence.LOWEST.int)
     )
 
   while parser.peekToken.tokenType == TokenType.NEWLINE:
@@ -458,9 +460,20 @@ proc parsePipeLRInfix(parser: var Parser, left: Node): Node =
     precedence: Precedence = parser.currentPrecedence()
   discard parser.nextParserToken()
 
-  var right: Node = parser.parseExpression(precedence)
+  var right: Node = parser.parseExpression(precedence.int)
   return newPipeLR(
     token=token, pipeLeft=left, pipeRight=right
+  )
+
+proc parsePipeRLInfix(parser: var Parser, left: Node): Node =
+  var
+    token: Token = parser.curToken
+    precedence: Precedence = parser.currentPrecedence()
+  discard parser.nextParserToken()
+
+  var right: Node = parser.parseExpression(precedence.int-1)
+  return newPipeRL(
+    token=token, pipeRLLeft=left, pipeRLRight=right
   )
 
 proc parseComposeRLInfix(parser: var Parser, left: Node): Node =
@@ -469,7 +482,7 @@ proc parseComposeRLInfix(parser: var Parser, left: Node): Node =
     precedence: Precedence = parser.currentPrecedence()
   discard parser.nextParserToken()
 
-  var right: Node = parser.parseExpression(precedence)
+  var right: Node = parser.parseExpression(precedence.int)
   return newFNCompositionRL(
     token=token, fnCompositionRLLeft=left, fnCompositionRLRight=right
   )
@@ -480,7 +493,7 @@ proc parseIndexPropertyOperationInfix(parser: var Parser, left: Node): Node =
     precedence: Precedence = parser.currentPrecedence()
   discard parser.nextParserToken()
 
-  var right: Node = parser.parseExpression(precedence)
+  var right: Node = parser.parseExpression(precedence.int)
   # Transform identifier property to string
   if right.nodeType == NodeType.NTIdentifier:
     right = newStringLiteral(token=parser.curToken, strValue=right.identValue)
@@ -497,7 +510,7 @@ proc parseIndexOperationInfix(parser: var Parser, left: Node): Node =
     precedence: Precedence = parser.currentPrecedence()
   discard parser.nextParserToken()
 
-  let right: Node = parser.parseExpression(Precedence.LOWEST)
+  let right: Node = parser.parseExpression(Precedence.LOWEST.int)
   if not expectPeek(parser, TokenType.RBRACKET):
     return nil
 
@@ -529,12 +542,13 @@ proc getInfixFn(tokenType: TokenType): InfixFunction =
     of LTE: parseInfixExpression
     of LPAREN: parseCallExpression
     of PIPERARROW: parsePipeLRInfix
+    of PIPELARROW: parsePipeRLInfix
     of DOUBLELT: parseComposeRLInfix
     of DOT: parseIndexPropertyOperationInfix
     of LBRACKET: parseIndexOperationInfix
     else: nil
 
-proc parseExpression(parser: var Parser, precedence: Precedence): Node =
+proc parseExpression(parser: var Parser, precedence: int): Node =
   while parser.curToken.tokenType in [TokenType.NEWLINE]:
     discard parser.nextParserToken()
     continue
@@ -554,7 +568,7 @@ proc parseExpression(parser: var Parser, precedence: Precedence): Node =
   while (
     parser.peekToken.tokenType != TokenType.SEMICOLON and
     parser.peekToken.tokenType != TokenType.NEWLINE and
-    precedence < parser.peekPrecedence()
+    precedence < parser.peekPrecedence().int
   ):
     var
       infixFn = getInfixFn(parser.peekToken.tokenType)
@@ -569,7 +583,7 @@ proc parseExpression(parser: var Parser, precedence: Precedence): Node =
 
 proc parseExpressionStatement(parser: var Parser): Node =
   let
-    expression = parser.parseExpression(Precedence.LOWEST)
+    expression = parser.parseExpression(Precedence.LOWEST.int)
   return newExpressionStatement(token=parser.curToken, expression=expression)
 
 proc parseAssignmentRegularStatement(parser: var Parser): Node =
@@ -581,7 +595,7 @@ proc parseAssignmentRegularStatement(parser: var Parser): Node =
   discard parser.nextParserToken()  # ident
   discard parser.nextParserToken()  # =
 
-  let assignValue: Node = parser.parseExpression(Precedence.LOWEST)
+  let assignValue: Node = parser.parseExpression(Precedence.LOWEST.int)
   if parser.peekToken.tokenType in [TokenType.NEWLINE, TokenType.SEMICOLON]:
     discard parser.nextParserToken()
 
@@ -599,7 +613,7 @@ proc parseAssignmentArrayUnpackStatement(parser: var Parser): Node =
   discard parser.nextParserToken()  # ]
   discard parser.nextParserToken()  # =
 
-  let assignValue: Node = parser.parseExpression(Precedence.LOWEST)
+  let assignValue: Node = parser.parseExpression(Precedence.LOWEST.int)
 
   if parser.peekToken.tokenType in [TokenType.NEWLINE, TokenType.SEMICOLON]:
     discard parser.nextParserToken()
@@ -634,7 +648,7 @@ proc parseReturnStatement(parser: var Parser): Node =
     token: Token = parser.curToken
   discard parser.nextParserToken()
 
-  var returnValue: Node = parser.parseExpression(Precedence.LOWEST)
+  var returnValue: Node = parser.parseExpression(Precedence.LOWEST.int)
   return newReturnStatement(
     token=token,
     returnValue=returnValue,

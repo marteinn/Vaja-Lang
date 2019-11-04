@@ -23,6 +23,7 @@ type
     NTCallExpression,
     NTReturnStatement,
     NTPipeLR,
+    NTPipeRL,
     NTFNCompositionRL,
     NTIfExpression,
     NTCaseExpression,
@@ -67,6 +68,9 @@ type
       of NTPipeLR:
         pipeLeft*: Node
         pipeRight*: Node
+      of NTPipeRL:
+        pipeRLLeft*: Node
+        pipeRLRight*: Node
       of NTFNCompositionRL:
         fnCompositionRLLeft*: Node
         fnCompositionRLRight*: Node
@@ -138,14 +142,9 @@ proc toCode*(node: Node): string =
     of NTReturnStatement:
       "return " & toCode(node.returnValue)
     of NTPipeLR:
-      # TODO: Fix issue where already specified args does not appear
-      var pipeLeftCode: string
-      if node.pipeLeft.nodeType != NTCallExpression:
-        pipeLeftCode = "(" & node.pipeLeft.toCode() & ")"
-      else:
-        pipeLeftCode = node.pipeLeft.toCode()
-
-      node.pipeRight.callFunction.toCode() & pipeLeftCode
+      node.pipeLeft.toCode() & " |> " & node.pipeRight.toCode()
+    of NTPipeRL:
+      node.pipeRLLeft.toCode() & " <| " & node.pipeRLRight.toCode()
     of NTFNCompositionRL:
       node.fnCompositionRLLeft.toCode() & " << " & node.fnCompositionRLRight.toCode()
     of NTIfExpression:
@@ -291,6 +290,14 @@ proc newPipeLR*(token: Token, pipeLeft: Node, pipeRight: Node): Node =
     nodeType: NodeType.NTPipeLR,
     pipeLeft: pipeLeft,
     pipeRight: pipeRight
+  )
+
+proc newPipeRL*(token: Token, pipeRLLeft: Node, pipeRLRight: Node): Node =
+  return Node(
+    token: token,
+    nodeType: NodeType.NTPipeRL,
+    pipeRLLeft: pipeRLLeft,
+    pipeRLRight: pipeRLRight
   )
 
 proc newFNCompositionRL*(

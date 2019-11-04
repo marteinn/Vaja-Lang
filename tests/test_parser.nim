@@ -266,16 +266,26 @@ end
     check len(program.statements) == 1
     check program.statements[0].expression.toCode() == """fn hello(a, b) 1 end"""
 
-  test "left to right argument piping":
+  test "L to R function application":
     var
       tests: ExpectedTokens = @[
-        ("1 |> a()", "a(1)"),
-        ("1 |> a() |> b()", "b(a(1))"),
+        ("1 |> a()", "1 |> a()"),
+        ("1 |> a() |> b()", "1 |> a() |> b()"),
         ("""
 1 \
 |> a() \
 |> b()
-""", "b(a(1))"),
+""", "1 |> a() |> b()"),
+      ]
+    for testPair in tests:
+      var program: Node = parseSource(testPair[0])
+      check program.statements[0].toCode() == testPair[1]
+
+  test "R to L function application":
+    var
+      tests: ExpectedTokens = @[
+        ("a() <| 1", "a() <| 1"),
+        ("b() <| a() <| 1", "b() <| a() <| 1"),
       ]
     for testPair in tests:
       var program: Node = parseSource(testPair[0])
@@ -295,7 +305,7 @@ end
       tests: ExpectedTokens = @[
         ("if (true) 1 end", "if (true) 1 end"),
         ("if (val()) 1 end", "if (val()) 1 end"),
-        ("if (1 |> fun()) 1 end", "if (fun(1)) 1 end"),
+        ("if (1 |> fun()) 1 end", "if (1 |> fun()) 1 end"),
         ("let a = if (true) 1 else 2 end", "let a = if (true) 1 else 2 end"),
       ]
     for testPair in tests:

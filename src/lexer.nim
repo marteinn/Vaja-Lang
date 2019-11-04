@@ -153,6 +153,10 @@ proc nextToken*(lexer: var Lexer): Token =
         var nextCh: char = lexer.peekAhead(0)
         lexer.readCharacter()
         tok = newToken(tokenType=TokenType.LTE, literal=($ch & $nextCh))
+      elif lexer.peekAhead(0) == '|':
+        var nextCh: char = lexer.peekAhead(0)
+        lexer.readCharacter()
+        tok = newToken(tokenType=TokenType.PIPELARROW, literal=($ch & $nextCh))
       elif lexer.peekAhead(0) == '<':
         var nextCh: char = lexer.peekAhead(0)
         lexer.readCharacter()

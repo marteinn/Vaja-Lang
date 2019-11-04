@@ -203,9 +203,10 @@ end
 | `/`       | Division                       |                                 |
 | `-`       | Subtraction                    | Arithmetic negation             |
 | `%`       | Modulo                         |                                 |
-| `**`      |                                |                                 |
+| `**`      | Exponent                       |                                 |
 | `++`      | Inflix increment               |                                 |
 | `\|>`     | Pass value to fn L -> R        |                                 |
+| `<\|`     | Pass value to fn R -> L        |                                 |
 | `<<`      | Functional compositon R -> L   |                                 |
 
 
@@ -215,14 +216,14 @@ end
 
 Full import
 ```
-import mylibrary
+import MyLibrary
 
-funcFromMyLibrary()
+MyLibrary.sayHi()
 ```
 
 IN PROGRESS: Import certain objects
 ```
-from mylibrary import funcFromMyLibrary
+from MyLibrary import funcFromMyLibrary
 
 funcFromMyLibrary()
 ```
