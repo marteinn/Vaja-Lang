@@ -1,0 +1,24 @@
+import Bob
+
+let app = \
+  Bob.new() \
+  |> Bob.addMiddlewares([
+    Bob.enforceTrailingSlashMiddleware,
+    Bob.debugMiddleware,
+    Bob.rendererMiddleware
+  ]) \
+  |> Bob.addRoute404(fn(req, _) -> {"status": 404, "body": "Page not found"}) \
+  |> Bob.addRoutes([
+    [
+      Bob.newPath("/artist/([a-z]*)/"),
+      fn(req, args) -> Bob.newJSONResponse({"status": 200, "context": {
+        "artist": args[0]
+      }})
+    ]
+  ])
+
+Http.createServer() \
+|> Http.addHandler(
+  app |> Bob.makeHandler()
+) \
+|> Http.listen(8080)
