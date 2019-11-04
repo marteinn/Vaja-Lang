@@ -146,6 +146,10 @@ proc nextToken*(lexer: var Lexer): Token =
         var nextCh: char = lexer.peekAhead(0)
         lexer.readCharacter()
         tok = newToken(tokenType=TokenType.GTE, literal=($ch & $nextCh))
+      elif lexer.peekAhead(0) == '>':
+        var nextCh: char = lexer.peekAhead(0)
+        lexer.readCharacter()
+        tok = newToken(tokenType=TokenType.DOUBLEGT, literal=($ch & $nextCh))
       else:
         tok = newToken(tokenType=TokenType.GT, literal=($ch))
     of '<':

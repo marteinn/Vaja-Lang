@@ -573,3 +573,22 @@ sum(2)""", "7"),
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.objType == ObjType.OTInteger
       check evaluated.inspect() == testPair[1]
+
+  test "function composition L->R":
+    var
+      tests: ExpectedEvals = @[
+      ("""fn a(x) -> x + 1
+fn b(x) -> x + 2
+let sum = a >> b
+sum(1)""", "4"),
+    ("""fn a(x) -> x + 1
+fn b(x) -> x + 2
+fn c(x) -> x * 2
+let sum = a >> b >> c
+sum(2)""", "10"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.objType == ObjType.OTInteger
+      check evaluated.inspect() == testPair[1]

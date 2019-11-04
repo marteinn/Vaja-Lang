@@ -34,6 +34,7 @@ type
     RETURN,
     RARROW,       # ->
     DOUBLELT,     # <<
+    DOUBLEGT,     # >>
     DOLLAR,
     PIPERARROW,   # |>
     PIPELARROW,   # <|

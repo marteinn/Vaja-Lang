@@ -22,6 +22,7 @@ from ast import
   newReturnStatement,
   newPipeLR,
   newPipeRL,
+  newFNCompositionLR,
   newFNCompositionRL,
   newIfExpression,
   newCaseExpression,
@@ -72,6 +73,7 @@ var
     TokenType.DOT: Precedence.INDEX,
     TokenType.LBRACKET: Precedence.INDEX,
     TokenType.DOUBLELT: Precedence.INDEX,
+    TokenType.DOUBLEGT: Precedence.INDEX,
   }.toTable
 
 proc newParser*(lexer: Lexer): Parser  # Forward declaration
@@ -487,6 +489,17 @@ proc parseComposeRLInfix(parser: var Parser, left: Node): Node =
     token=token, fnCompositionRLLeft=left, fnCompositionRLRight=right
   )
 
+proc parseComposeLRInfix(parser: var Parser, left: Node): Node =
+  var
+    token: Token = parser.curToken
+    precedence: Precedence = parser.currentPrecedence()
+  discard parser.nextParserToken()
+
+  var right: Node = parser.parseExpression(precedence.int)
+  return newFNCompositionLR(
+    token=token, fnCompositionLRLeft=left, fnCompositionLRRight=right
+  )
+
 proc parseIndexPropertyOperationInfix(parser: var Parser, left: Node): Node =
   var
     token: Token = parser.curToken
@@ -544,6 +557,7 @@ proc getInfixFn(tokenType: TokenType): InfixFunction =
     of PIPERARROW: parsePipeLRInfix
     of PIPELARROW: parsePipeRLInfix
     of DOUBLELT: parseComposeRLInfix
+    of DOUBLEGT: parseComposeLRInfix
     of DOT: parseIndexPropertyOperationInfix
     of LBRACKET: parseIndexOperationInfix
     else: nil

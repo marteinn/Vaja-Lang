@@ -24,6 +24,7 @@ type
     NTReturnStatement,
     NTPipeLR,
     NTPipeRL,
+    NTFNCompositionLR,
     NTFNCompositionRL,
     NTIfExpression,
     NTCaseExpression,
@@ -71,6 +72,9 @@ type
       of NTPipeRL:
         pipeRLLeft*: Node
         pipeRLRight*: Node
+      of NTFNCompositionLR:
+        fnCompositionLRLeft*: Node
+        fnCompositionLRRight*: Node
       of NTFNCompositionRL:
         fnCompositionRLLeft*: Node
         fnCompositionRLRight*: Node
@@ -145,6 +149,8 @@ proc toCode*(node: Node): string =
       node.pipeLeft.toCode() & " |> " & node.pipeRight.toCode()
     of NTPipeRL:
       node.pipeRLLeft.toCode() & " <| " & node.pipeRLRight.toCode()
+    of NTFNCompositionLR:
+      node.fnCompositionLRLeft.toCode() & " >> " & node.fnCompositionLRRight.toCode()
     of NTFNCompositionRL:
       node.fnCompositionRLLeft.toCode() & " << " & node.fnCompositionRLRight.toCode()
     of NTIfExpression:
@@ -298,6 +304,16 @@ proc newPipeRL*(token: Token, pipeRLLeft: Node, pipeRLRight: Node): Node =
     nodeType: NodeType.NTPipeRL,
     pipeRLLeft: pipeRLLeft,
     pipeRLRight: pipeRLRight
+  )
+
+proc newFNCompositionLR*(
+  token: Token, fnCompositionLRLeft: Node, fnCompositionLRRight: Node
+): Node =
+  return Node(
+    token: token,
+    nodeType: NodeType.NTFNCompositionLR,
+    fnCompositionLRLeft: fnCompositionLRLeft,
+    fnCompositionLRRight: fnCompositionLRRight
   )
 
 proc newFNCompositionRL*(

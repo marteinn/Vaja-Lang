@@ -26,6 +26,7 @@ not true
 return false
 $
 |>
+<|
 nil
 add5
 _
@@ -36,6 +37,7 @@ import
 "a"
 ++
 <<
+>>
 # hello
 """
       lexer: Lexer = newLexer(source)
@@ -97,6 +99,8 @@ import
         (TokenType.NEWLINE, "\n"),
         (TokenType.PIPERARROW, "|>"),
         (TokenType.NEWLINE, "\n"),
+        (TokenType.PIPELARROW, "<|"),
+        (TokenType.NEWLINE, "\n"),
         (TokenType.NIL, "nil"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.IDENT, "add5"),
@@ -116,6 +120,8 @@ import
         (TokenType.PLUSPLUS, "++"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.DOUBLELT, "<<"),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.DOUBLEGT, ">>"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.COMMENT, "# hello"),
         (TokenType.NEWLINE, "\n"),

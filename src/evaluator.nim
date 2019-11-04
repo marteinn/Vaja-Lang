@@ -468,6 +468,38 @@ proc eval*(node: Node, env: var Env): Obj =
         nil
       else:
         fn
+    of NTFNCompositionLR:
+      let
+        left = node.fnCompositionLRLeft
+        right = node.fnCompositionLRRight
+        token = newEmptyToken()
+
+      let functionBody: Node = newBlockStatement(
+          token=token,
+          blockStatements= @[
+            newCallExpression(
+              token=token,
+              callFunction=right,
+              callArguments= @[
+                newCallExpression(
+                  token=token,
+                  callFunction=left,
+                  callArguments= @[
+                    newIdentifier(token=token, identValue="x")
+                  ]
+                )
+              ]
+            )
+          ]
+        )
+
+      newFunction(
+        functionBody=functionBody,
+        functionEnv=env,
+        functionParams= @[
+          newIdentifier(token=token, identValue="x")
+        ]
+      )
     of NTFNCompositionRL:
       let
         left = node.fnCompositionRLLeft

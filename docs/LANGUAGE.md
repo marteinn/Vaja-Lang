@@ -208,6 +208,7 @@ end
 | `\|>`     | Pass value to fn L -> R        |                                 |
 | `<\|`     | Pass value to fn R -> L        |                                 |
 | `<<`      | Functional compositon R -> L   |                                 |
+| `>>`      | Functional compositon L -> R   |                                 |
 
 
 

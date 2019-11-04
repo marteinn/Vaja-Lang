@@ -423,6 +423,16 @@ c: 3
       var program: Node = parseSource(testPair[0])
       check program.statements[0].toCode() == testPair[1]
 
+  test "test functional composition L->R":
+    var
+      tests: ExpectedTokens = @[
+        ("a >> b", "a >> b"),
+        ("a >> b >> c", "a >> b >> c"),
+      ]
+    for testPair in tests:
+      var program: Node = parseSource(testPair[0])
+      check program.statements[0].toCode() == testPair[1]
+
   test "test comment parsing":
     var
       tests: ExpectedTokens = @[
