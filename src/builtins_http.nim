@@ -258,6 +258,7 @@ proc httpListen(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
     {.gcsafe}:
       var fnEnv: Env = newEnv()
       let response: Obj = applyFn(handler, handlerArgs, fnEnv)
+      echo response.inspect()
 
     if response.objType == OTError:
       echo response.inspect()

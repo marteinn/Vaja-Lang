@@ -153,6 +153,21 @@ proc hashMapHasKey(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   else:
     return FALSE
 
+proc hashMapGet(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  curryIfMissingArgs(arguments, 2, hashMapHasKey)
+  requireArgOfType(arguments, 0, ObjType.OTString)
+  requireArgOfType(arguments, 2, ObjType.OTHashMap)
+
+  let
+    keyObj: Obj = arguments[0]
+    defaultValue: Obj = arguments[1]
+    source: Obj = arguments[2]
+
+  if contains(source.hashMapElements, keyObj.strValue):
+    return source.hashMapElements[keyObj.strValue]
+  else:
+    return defaultValue
+
 let functions*: OrderedTable[string, Obj] = {
   "len": newBuiltin(builtinFn=hashMapLen),
   "map": newBuiltin(builtinFn=hashMapMap),
@@ -164,6 +179,7 @@ let functions*: OrderedTable[string, Obj] = {
   "update": newBuiltin(builtinFn=hashMapUpdate),
   "empty": newBuiltin(builtinFn=hashMapEmpty),
   "hasKey": newBuiltin(builtinFn=hashMapHasKey),
+  "get": newBuiltin(builtinFn=hashMapGet),
   # TODO: Implement keys
   # TODO: Implement values
   # TODO: Implement fromArray

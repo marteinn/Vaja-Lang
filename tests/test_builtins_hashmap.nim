@@ -156,3 +156,14 @@ b""", "{name: 2}"),
     for testPair in tests:
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
+
+  test "HashMap.get":
+    var
+      tests: ExpectedEvals = @[
+        ("""HashMap.get("name", nil, {"name": 1, "another": 2})""", "1"),
+        ("""HashMap.get("name2", nil, {"name": 1, "another": 2})""", "nil"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]

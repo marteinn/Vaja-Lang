@@ -292,6 +292,7 @@ funcFromMyLibrary()
 | `update: string, id, hashMap`                                                |
 | `hasKey: string, hashMap`                                                    |
 | `empty: void`                                                                |
+| `get: string, id, hashMap`                                                   |
 
 
 ### Http module

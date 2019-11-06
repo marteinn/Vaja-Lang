@@ -1,13 +1,16 @@
 fn new() -> {"routes": [], "middlewares": []}
 
-let newJSONResponse = HashMap.insert("render", JSON.toJSON)
+let newJSONResponse = fn (conn)
+  conn \
+  |> HashMap.insert("render", JSON.toJSON) \
+  |> HashMap.insert("respHeaders", [["Content-Type", "application/json"]])
+end
 
 fn newPath(path)
   "^" ++ path ++ "$" |> String.split("/") |> String.join("\/") |> Regex.fromString()
 end
 
 fn newRedirect(status, url) -> {
-  "response": true,
   "headers": [["location", url]],
   "status": status
 }
@@ -16,30 +19,39 @@ let addMiddlewares = HashMap.insert("middlewares")
 let addRoutes = HashMap.insert("routes")
 let addRoute404 = HashMap.insert("route404")
 
-let isResponse = HashMap.hasKey("response")
+let halt = HashMap.insert("halted", true)
+let isHalted = HashMap.hasKey("halted")
+
+fn toResponse(conn)
+  {
+    "body": HashMap.get("respBody", "", conn),
+    "status": HashMap.get("respStatus", 200, conn),
+    "headers": HashMap.get("respHeaders", [], conn)
+  }
+end
 
 fn makeHandler(app)
-  fn (req)
+  fn (conn)
     let expandedMiddlewares = Array.map(fn (x) -> x(), app.middlewares)
 
-    let updatedReq = \
+    let updatedConn = \
       expandedMiddlewares \
       |> Array.map(Array.head) \
       |> Array.reduce(fn(acc, curr)
-        if (isResponse(acc)) acc else curr(acc) end
-      end, req)
+        if (isHalted(acc)) acc else curr(acc) end
+      end, conn)
 
-    if (isResponse(updatedReq))
-      return updatedReq
+    if (isHalted(updatedConn))
+      return updatedConn |> toResponse()
     end
 
-    let matchingRoutes = matchRoute(app.routes, req)
+    let matchingRoutes = matchRoute(app.routes, conn)
     let [route, routeArgs] = \
       if (Array.len(matchingRoutes) > 0)
         let [regex, handler] = \
           matchingRoutes |> Array.head()
 
-        [handler, Regex.find(regex, req.path)]
+        [handler, Regex.find(regex, conn.path)]
       else
         [app.route404, []]
       end
@@ -48,50 +60,54 @@ fn makeHandler(app)
     |> Array.map(Array.last) \
     |> Array.reduce(
       fn(acc, curr) -> curr(acc),
-      route(updatedReq, routeArgs)
-    )
+      route(updatedConn, routeArgs)
+    ) \
+    |> toResponse()
   end
 end
 
-fn matchRoute(routes, req)
-  routes |> Array.filter(fn(route) -> Regex.contains(route[0], req.path))
+fn matchRoute(routes, conn)
+  routes |> Array.filter(fn(route) -> Regex.contains(route[0], conn.path))
 end
 
 
 # Middlewares
 
 fn enforceTrailingSlashMiddleware()
-  let processReq = fn(req)
-    if (String.right(1, req.path) != "/")
-      newRedirect(302, req.path ++ "/")
+  let processReq = fn(conn)
+    if (String.right(1, conn.path) != "/")
+      conn \
+      |> HashMap.insert("respHeaders", [["location", conn.path ++ "/"]]) \
+      |> HashMap.insert("respStatus", 302) \
+      |> halt()
     else
-      req
+      conn
     end
   end
   [processReq, identity]
 end
 
 fn debugMiddleware()
-  let processReq = fn(req)
-    print("-- Request --" ++ req.path)
-    print(req)
-    req
+  let processReq = fn(conn)
+    print("-- Request --" ++ conn.path)
+    print(conn)
+    conn
   end
-  let processResp = fn (res)
+  let processResp = fn (conn)
     print("-- Response --")
-    print(res)
-    res
+    print(conn)
+    conn
   end
 
   [processReq, processResp]
 end
 
 fn rendererMiddleware()
-  let processResp = fn (res)
-    if HashMap.hasKey("render", res)
-      res |> HashMap.insert("body", res.render(res.context))
+  let processResp = fn (conn)
+    if HashMap.hasKey("render", conn)
+      conn |> HashMap.insert("respBody", conn.render(conn.context))
     else
-      res
+      conn
     end
   end
 
