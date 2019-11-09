@@ -67,8 +67,8 @@ type
       of NTReturnStatement:
         returnValue*: Node
       of NTPipeLR:
-        pipeLeft*: Node
-        pipeRight*: Node
+        pipeLRLeft*: Node
+        pipeLRRight*: Node
       of NTPipeRL:
         pipeRLLeft*: Node
         pipeRLRight*: Node
@@ -146,7 +146,7 @@ proc toCode*(node: Node): string =
     of NTReturnStatement:
       "return " & toCode(node.returnValue)
     of NTPipeLR:
-      node.pipeLeft.toCode() & " |> " & node.pipeRight.toCode()
+      node.pipeLRLeft.toCode() & " |> " & node.pipeLRRight.toCode()
     of NTPipeRL:
       node.pipeRLLeft.toCode() & " <| " & node.pipeRLRight.toCode()
     of NTFNCompositionLR:
@@ -195,6 +195,9 @@ proc hash*(node: Node): Hash =
   return !$h
 
 proc newIntegerLiteral*(token: Token, intValue: int): Node =
+  return Node(nodeType: NodeType.NTIntegerLiteral, intValue: intValue)
+
+proc newIntegerLiteral*(intValue: int): Node =
   return Node(nodeType: NodeType.NTIntegerLiteral, intValue: intValue)
 
 proc newFloatLiteral*(token: Token, floatValue: float): Node =
@@ -290,12 +293,12 @@ proc newReturnStatement*(token: Token, returnValue: Node): Node =
     token: token, nodeType: NodeType.NTReturnStatement, returnValue: returnValue
   )
 
-proc newPipeLR*(token: Token, pipeLeft: Node, pipeRight: Node): Node =
+proc newPipeLR*(token: Token, pipeLRLeft: Node, pipeLRRight: Node): Node =
   return Node(
     token: token,
     nodeType: NodeType.NTPipeLR,
-    pipeLeft: pipeLeft,
-    pipeRight: pipeRight
+    pipeLRLeft: pipeLRLeft,
+    pipeLRRight: pipeLRRight
   )
 
 proc newPipeRL*(token: Token, pipeRLLeft: Node, pipeRLRight: Node): Node =

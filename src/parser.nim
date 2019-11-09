@@ -464,7 +464,7 @@ proc parsePipeLRInfix(parser: var Parser, left: Node): Node =
 
   var right: Node = parser.parseExpression(precedence.int)
   return newPipeLR(
-    token=token, pipeLeft=left, pipeRight=right
+    token=token, pipeLRLeft=left, pipeLRRight=right
   )
 
 proc parsePipeRLInfix(parser: var Parser, left: Node): Node =

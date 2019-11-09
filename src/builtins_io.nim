@@ -11,8 +11,7 @@ from obj import
   newStr,
   Env,
   newEnv,
-  NIL,
-  TRUE,
+  OBJ_TRUE,
   inspect
 import test_utils
 
@@ -34,7 +33,7 @@ proc ioWriteFile(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
     content: Obj = arguments[0]
     pathObj: Obj = arguments[1]
   writeFile(pathObj.strValue, content.strValue)
-  return TRUE
+  return OBJ_TRUE
 
 let functions*: OrderedTable[string, Obj] = {
   "readFile": newBuiltin(builtinFn=ioReadFile),

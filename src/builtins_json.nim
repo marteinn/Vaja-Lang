@@ -13,9 +13,9 @@ from obj import
   newArray,
   Env,
   newEnv,
-  NIL,
-  TRUE,
-  FALSE,
+  OBJ_NIL,
+  OBJ_TRUE,
+  OBJ_FALSE,
   inspect
 import test_utils
 
@@ -59,7 +59,7 @@ proc jsonNodeToObj(jsonNode: JsonNode): Obj =
     of JFloat:
       return newFloat(jsonNode.fnum.float)
     of JBool:
-      return if jsonNode.bval: TRUE else: FALSE
+      return if jsonNode.bval: OBJ_TRUE else: OBJ_FALSE
     of JArray:
       var elements: seq[Obj] = @[]
       for val in jsonNode.elems:
@@ -71,7 +71,7 @@ proc jsonNodeToObj(jsonNode: JsonNode): Obj =
         elements[key] = jsonNodeToObj(val)
       return newHashMap(elements)
     else:
-      return NIL
+      return OBJ_NIL
 
 proc jsonFromJSON(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   requireNumArgs(arguments, 1)

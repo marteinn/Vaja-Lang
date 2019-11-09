@@ -8,10 +8,18 @@ from ast import
   NodeType,
   toCode,
   CasePattern,
+  newIntegerLiteral,
   newBlockStatement,
   newIdentifier,
-  newCallExpression
-from token import newEmptyToken
+  newCallExpression,
+  newBoolean,
+  newStringLiteral,
+  newFloatLiteral,
+  newNil,
+  newArrayLiteral,
+  newHashMapLiteral
+from ast_modify import modify
+from token import newEmptyToken, newToken, TokenType
 from obj import
   Obj,
   Env,
@@ -34,27 +42,28 @@ from obj import
   newArray,
   newHashMap,
   newModule,
+  newQuote,
   addFunctionToGroup,
   ObjType,
   hasNumberType,
   promoteToFloatValue,
   inspect,
-  TRUE,
-  FALSE,
-  NIL,
+  OBJ_TRUE,
+  OBJ_FALSE,
+  OBJ_NIL,
   compareObj
 from builtins import globals
 
 proc eval*(node: Node, env: var Env): Obj # Forward declaration
 
 proc isError(obj: Obj): bool =
-  if obj == NIL:
+  if obj == OBJ_NIL:
     return false
 
   return obj.objType == ObjType.OTError
 
 proc toBoolObj(boolValue: bool): Obj =
-  if boolValue: TRUE else: FALSE
+  if boolValue: OBJ_TRUE else: OBJ_FALSE
 
 proc evalProgram(node: Node, env: var Env): Obj =
   var resultValue: Obj = nil
@@ -347,11 +356,11 @@ proc resolveAndApplyFunction*(fn: Obj, arguments: seq[Obj], env: var Env): Obj =
 
 proc evalIfExpression(node: Node, env: var Env): Obj =
   var condition: Obj = eval(node.ifCondition, env)
-  if condition == TRUE:
+  if condition == OBJ_TRUE:
     return eval(node.ifConsequence, env)
   if node.ifAlternative != nil:
     return eval(node.ifAlternative, env)
-  return NIL
+  return OBJ_NIL
 
 proc evalCaseExpression(node: Node, env: var Env): Obj =
   var condition: Obj = eval(node.caseCondition, env)
@@ -395,6 +404,107 @@ proc evalIndexOp(left: Obj, index: Obj): Obj =
     return getVar(left.moduleEnv, index.strValue)
 
   return newError(errorMsg="Index operation is not supported")
+
+proc isUnquoteCall(node: Node): bool =
+  if node.nodeType != NTCallExpression:
+    return false
+
+  return (
+    node.callFunction.nodeType == NodeType.NTIdentifier and
+    node.callFunction.identValue == "unquote"
+  )
+
+proc convertObjToNode(obj: Obj): Node =
+  case obj.objType:
+    of OTInteger:
+      return newIntegerLiteral(
+        token=newToken(
+          tokenType=TokenType.INT,
+          literal= $obj.intValue
+        ),
+        intValue=obj.intValue
+      )
+    of OTBoolean:
+      return newBoolean(
+        token=newToken(
+          tokenType=if obj == OBJ_TRUE: TokenType.TRUE else: TokenType.FALSE,
+          literal=if obj == OBJ_TRUE: "true" else: "false",
+        ),
+        boolValue=obj.boolValue
+      )
+    of OTString:
+      return newStringLiteral(
+        token=newToken(
+          tokenType=TokenType.STRING,
+          literal= obj.strValue
+        ),
+        strValue=obj.strValue
+      )
+    of OTFloat:
+      return newFloatLiteral(
+        token=newToken(
+          tokenType=TokenType.FLOAT,
+          literal= $obj.floatValue,
+        ),
+        floatValue=obj.floatValue
+      )
+    of OTNil:
+      return newNil(
+        token=newToken(
+          tokenType=TokenType.NIL,
+          literal= "nil"
+        )
+      )
+    of OTArray:
+      let nodeElements: seq[Node] = map(obj.arrayElements, convertObjToNode)
+      return newArrayLiteral(
+        token=newToken(
+          tokenType=TokenType.LBRACKET,
+          literal= "["
+        ),
+        arrayElements=nodeElements
+      )
+    of OTHashMap:
+      var hashMapElements: OrderedTable[Node, Node] = initOrderedTable[Node, Node]()
+      for key, value in obj.hashMapElements:
+        let keyNode: Node = newStringLiteral(
+          token=newToken(
+            tokenType=TokenType.STRING,
+            literal=key
+          ),
+          strValue=key
+        )
+        hashMapElements[keyNode] = convertObjToNode(value)
+
+      return newHashMapLiteral(
+        token=newToken(
+          TokenType.LBRACE,
+          literal="{"
+        ),
+        hashMapElements=hashMapElements
+      )
+
+    of OTQuote:
+      return obj.quoteNode
+    # TODO: Add obj to ast translations (ex regex)
+    else:
+      return nil
+
+proc evalUnquoteModifier (node: Node, env: var Env): Node =
+  if not isUnquoteCall(node):
+    return node
+
+  if len(node.callArguments) != 1:
+    return node
+
+  let obj = eval(node.callArguments[0], env)
+  return convertObjToNode(obj)
+
+proc evalUnquoteCalls(quoted: Node, env: var Env): Node =
+  return modify(quoted, evalUnquoteModifier, env)
+
+proc quote(node: Node, env: var Env): Obj =
+  return newQuote(evalUnquoteCalls(node, env))
 
 proc eval*(node: Node, env: var Env): Obj =
   case node.nodeType:
@@ -533,6 +643,10 @@ proc eval*(node: Node, env: var Env): Obj =
         ]
       )
     of NTCallExpression:
+      if node.callFunction.nodeType == NodeType.NTIdentifier and
+        node.callFunction.identValue == "quote":
+        return quote(node.callArguments[0], env)
+
       var
         fnBase: Obj = eval(node.callFunction, env)
         arguments: seq[Obj] = evalExpressions(node.callArguments, env)
@@ -552,18 +666,18 @@ proc eval*(node: Node, env: var Env): Obj =
       # TODO: Add error check
       newReturn(returnValue=returnValue)
     of NTPipeLR:
-      var pipeRight: Node
-      deepCopy(pipeRight, node.pipeRight)
-      pipeRight.callArguments.add(node.pipeLeft)
-      eval(pipeRight, env)
+      var pipeLRRight: Node
+      deepCopy(pipeLRRight, node.pipeLRRight)
+      pipeLRRight.callArguments.add(node.pipeLRLeft)
+      eval(pipeLRRight, env)
     of NTPipeRL:
-      var pipeLeft: Node
-      deepCopy(pipeLeft, node.pipeRLLeft)
-      pipeLeft.callArguments.add(node.pipeRLRight)
-      eval(pipeLeft, env)
+      var pipeRLLeft: Node
+      deepCopy(pipeRLLeft, node.pipeRLLeft)
+      pipeRLLeft.callArguments.add(node.pipeRLRight)
+      eval(pipeRLLeft, env)
     of NTIfExpression: evalIfExpression(node, env)
     of NTCaseExpression: evalCaseExpression(node, env)
-    of NTNil: NIL
+    of NTNil: OBJ_NIL
     of NTArrayLiteral:
       let elements: seq[Obj] = evalExpressions(node.arrayElements, env)
       if len(elements) > 0 and isError(elements[0]):

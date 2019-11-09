@@ -8,34 +8,34 @@ type
     FALSE,
     NIL,
     # Arithmetic
-    PLUS,
-    MINUS,
-    SLASH,
-    ASTERISK,
-    MODULO,
-    EXPONENT,
+    PLUS,         # +
+    MINUS,        # -
+    SLASH,        # /
+    ASTERISK,     # *
+    MODULO,       # %
+    EXPONENT,     # **
     # TODO: Floor? //
     # Special
     ILLEGAL,
     EOF,
-    NEWLINE,
-    SEMICOLON,
-    COMMA,
-    COLON,
-    LPAREN,
-    RPAREN,
-    LBRACKET,
-    RBRACKET,
-    LBRACE,
-    RBRACE,
-    AMP,
-    PLUSPLUS,
-    DOT,
-    RETURN,
+    NEWLINE,      # \n
+    SEMICOLON,    # ;
+    COMMA,        # ,
+    COLON,        # :
+    LPAREN,       # (
+    RPAREN,       # )
+    LBRACKET,     # [
+    RBRACKET,     # ]
+    LBRACE,       # {
+    RBRACE,       # }
+    AMP,          # &
+    PLUSPLUS,     # ++
+    DOT,          # .
+    RETURN,       #  return
     RARROW,       # ->
     DOUBLELT,     # <<
     DOUBLEGT,     # >>
-    DOLLAR,
+    DOLLAR,       # $
     PIPERARROW,   # |>
     PIPELARROW,   # <|
     IF,

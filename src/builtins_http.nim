@@ -16,7 +16,7 @@ from obj import
   newNativeObject,
   Env,
   newEnv,
-  NIL,
+  OBJ_NIL,
   inspect
 import test_utils
 
@@ -267,7 +267,7 @@ proc httpListen(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
 
   echo "Serving HTTP on 0.0.0.0 port " & $port.intValue & " (http://0.0.0.0:" & $port.intValue & "/)"
   waitFor nativeServer.serve(Port(port.intValue), cb)
-  return NIL
+  return OBJ_NIL
 
 let functions*: OrderedTable[string, Obj] = {
   "createServer": newBuiltin(builtinFn=httpCreateServer),

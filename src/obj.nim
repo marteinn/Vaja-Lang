@@ -23,6 +23,7 @@ type
     OTNativeObject
     OTModule
     OTRegex
+    OTQuote
   Obj* = ref object
     case objType*: ObjType
       of OTInteger: intValue*: int
@@ -48,6 +49,8 @@ type
         moduleEnv*: Env
       of OTRegex:
         regexValue*: Regex
+      of OTQuote:
+        quoteNode*: Node
   ApplyFunction* =
     proc (fn: Obj, arguments: seq[Obj], env: var Env): Obj
   Env* = ref object
@@ -153,6 +156,7 @@ proc inspect*(obj: Obj): string =
     of OTNativeObject: "<native object>"
     of OTModule: "<module>"
     of OTRegex: "<regex>"
+    of OTQuote: "<quote " & obj.quoteNode.toCode() & ">"
 
 proc newInteger*(intValue: int): Obj =
   return Obj(objType: ObjType.OTInteger, intValue: intValue)
@@ -213,6 +217,11 @@ proc newRegex*(regexValue: Regex): Obj =
     objType: ObjType.OTRegex, regexValue: regexValue
   )
 
+proc newQuote*(quoteNode: Node): Obj =
+  return Obj(
+    objType: ObjType.OTQuote, quoteNode: quoteNode
+  )
+
 proc addFunctionToGroup*(fnGroup: var Obj, fn: Obj): Obj =
   let arity: int = len(fn.functionParams)
   if not contains(fnGroup.arityGroup, arity):
@@ -235,6 +244,6 @@ proc inspectEnv*(env: Env): string =
   return "{" & ret & "}"
 
 var
-  TRUE*: Obj = newBoolean(boolValue=true)
-  FALSE*: Obj = newBoolean(boolValue=false)
-  NIL*: Obj = newNil()
+  OBJ_TRUE*: Obj = newBoolean(boolValue=true)
+  OBJ_FALSE*: Obj = newBoolean(boolValue=false)
+  OBJ_NIL*: Obj = newNil()

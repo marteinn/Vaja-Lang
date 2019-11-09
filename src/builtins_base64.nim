@@ -7,13 +7,8 @@ from obj import
   newBuiltin,
   newHashMap,
   newError,
-  newInteger,
   newArray,
   newStr,
-  Env,
-  newEnv,
-  NIL,
-  TRUE,
   inspect
 import test_utils
 

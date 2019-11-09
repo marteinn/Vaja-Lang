@@ -48,3 +48,6 @@ task test_builtins_json, "Test json module":
 
 task test_builtins_base64, "Test base64 module":
   exec r"nim c -r tests/test_builtins_base64.nim"
+
+task test_ast_modify, "Test ast modify module":
+  exec r"nim c -r tests/test_ast_modify.nim"

@@ -11,9 +11,8 @@ from obj import
   newArray,
   Env,
   newEnv,
-  NIL,
-  TRUE,
-  FALSE,
+  OBJ_TRUE,
+  OBJ_FALSE,
   inspect,
   inspectEnv
 import test_utils
@@ -149,9 +148,9 @@ proc hashMapHasKey(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
     source: Obj = arguments[1]
 
   if contains(source.hashMapElements, keyObj.strValue):
-    return TRUE
+    return OBJ_TRUE
   else:
-    return FALSE
+    return OBJ_FALSE
 
 proc hashMapGet(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   curryIfMissingArgs(arguments, 2, hashMapHasKey)

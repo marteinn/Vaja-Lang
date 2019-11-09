@@ -11,7 +11,7 @@ from obj import
   newFunction,
   newStr,
   setVar,
-  NIL,
+  OBJ_NIL,
   inspect
 from builtins_array import arrayModule
 from builtins_string import stringModule
@@ -39,7 +39,7 @@ proc builtinType(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
     else: ""
 
   if objType == "":
-    return NIL
+    return OBJ_NIL
 
   return newStr(strValue=objType)
 

@@ -592,3 +592,53 @@ sum(2)""", "10"),
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.objType == ObjType.OTInteger
       check evaluated.inspect() == testPair[1]
+
+  test "quote":
+    var
+      tests: ExpectedEvals = @[
+        ("""quote(10)""", "10"),
+        ("""quote(1+1)""", "(1 + 1)"),
+        ("""quote(cat)""", "cat"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.quoteNode.toCode() == testPair[1]
+
+  test "unquote":
+    var
+      tests: ExpectedEvals = @[
+        ("""quote(8 + unquote(8))""", "(8 + 8)"),
+        ("""
+let releaseYear = 1977
+quote(releaseYear)""", "releaseYear"),
+      ("""
+let releaseYear = 1977
+quote(unquote(releaseYear))""", "1977"),
+        ("""quote(unquote(quote(4 + 4)))""", "(4 + 4)"),
+        ("""
+let quoteInfixExp = quote(4 + 4)
+quote(unquote(4 + 4) + unquote(quoteInfixExp))""", "(8 + (4 + 4))"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.quoteNode.toCode() == testPair[1]
+
+  test "unquotes obj to ast transform":
+    var
+      tests: ExpectedEvals = @[
+        ("""quote(unquote(10))""", "10"),
+        ("""quote(unquote(1+1))""", "2"),
+        ("""quote(unquote(true))""", "true"),
+        ("""quote(unquote("hello"))""", "hello"),
+        ("""quote(unquote(1.1))""", "1.1"),
+        ("""quote(unquote(nil))""", "nil"),
+        ("""quote(unquote([1, 2]))""", "[1, 2]"),
+        ("""quote(unquote([1, [2]]))""", "[1, [2]]"),
+        ("""quote(unquote({"hello": 1}))""", "{hello: 1}"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.quoteNode.toCode() == testPair[1]

@@ -14,9 +14,8 @@ from obj import
   newRegex,
   Env,
   newEnv,
-  NIL,
-  TRUE,
-  FALSE,
+  OBJ_TRUE,
+  OBJ_FALSE,
   inspect
 import test_utils
 
@@ -34,7 +33,7 @@ proc regexContains(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   let
     regex: Regex = arguments[0].regexValue
     source: string = arguments[1].strvalue
-  if contains(source, regex): TRUE else: FALSE
+  if contains(source, regex): OBJ_TRUE else: OBJ_FALSE
 
 proc regexFind(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   curryIfMissingArgs(arguments, 2, regexFind)

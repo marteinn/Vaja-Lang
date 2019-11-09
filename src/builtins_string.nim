@@ -13,7 +13,6 @@ from obj import
   newArray,
   Env,
   newEnv,
-  NIL,
   inspect
 import test_utils
 
