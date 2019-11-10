@@ -4,6 +4,8 @@
 
 - Everything is modules and functions
 - All standard library functions are curried
+- All data types are immutable
+- `map`, `filter` and `reduce` are used for sequence operations
 - No OOP or inheritance
 - No self/this
 - Variables cannot be re-assigned
