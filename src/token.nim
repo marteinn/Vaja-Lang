@@ -50,6 +50,7 @@ type
     LET,
     FUNCTION,
     END,
+    MACRO,
     # Identifier
     IDENT,
     # Assignment

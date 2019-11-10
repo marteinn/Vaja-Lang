@@ -7,6 +7,7 @@
 - No OOP or inheritance
 - No self/this
 - Variables cannot be re-assigned
+- Macros does not use pattern matching
 
 
 ## Supported types
@@ -228,6 +229,19 @@ from MyLibrary import funcFromMyLibrary
 
 funcFromMyLibrary()
 ```
+
+## Macros
+
+```
+macro (x, y)
+    quote(1 + 2)
+end
+```
+
+| Signature                                                                    |
+| ---------------------------------------------------------------------------- |
+| `quote: id`                                                                  |
+| `unquote: id`                                                                |
 
 ## Builtin modules
 

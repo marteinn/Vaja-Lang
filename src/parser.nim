@@ -30,6 +30,7 @@ from ast import
   newHashMapLiteral,
   newIndexOperation,
   newModule,
+  newMacroLiteral,
   Node,
   NodeType,
   toCode,
@@ -144,7 +145,7 @@ proc parseGroupedExpression(parser: var Parser): Node =
   let expression: Node = parser.parseExpression(Precedence.LOWEST.int)
 
   if not expectPeek(parser, TokenType.RPAREN):
-      return nil
+    return nil
 
   return expression
 
@@ -238,6 +239,47 @@ proc parseFunctionLiteral(parser: var Parser): Node =
     functionName=fnName,
   )
 
+proc parseMacroLiteral(parser: var Parser): Node =
+  var
+    token: Token = parser.curToken
+    macroName: Node = nil
+
+  if parser.peekToken.tokenType == TokenType.IDENT:
+    discard parser.nextParserToken()
+
+    macroName = newIdentifier(
+      token=parser.curToken, identValue=parser.curToken.literal
+    )
+
+  if not parser.expectPeek(TokenType.LPAREN):
+    return nil
+
+  var
+    parameters: seq[Node] = parseFunctionParameters(parser)
+    macroBody: Node
+
+  if parser.peekToken.tokenType == TokenType.RARROW:
+    discard parser.nextParserToken()
+    discard parser.nextParserToken()
+
+    var
+      statement: Node = parser.parseExpression(Precedence.LOWEST.int)
+      statements: seq[Node] = @[statement]
+
+    macroBody = newBlockStatement(
+      token=token,
+      blockStatements=statements,
+    )
+  else:
+    macroBody = parseBlockStatement(parser)
+
+  return newMacroLiteral(
+    token=token,
+    macroBody=macroBody,
+    macroParams=parameters,
+    macroName=macroName,
+  )
+
 proc parseIfExpression(parser: var Parser): Node =
   let token: Token = parser.curToken
   discard parser.nextParserToken()
@@ -247,8 +289,6 @@ proc parseIfExpression(parser: var Parser): Node =
   var alternative: Node = nil
   if parser.curToken.tokenType == TokenType.ELSE:
     alternative = parser.parseBlockStatement()
-
-  discard parser.nextParserToken()
 
   return newIfExpression(
     token=token,
@@ -389,6 +429,7 @@ proc getPrefixFn(tokenType: TokenType): PrefixFunction =
     of STRING: parseStringLiteral
     of LPAREN: parseGroupedExpression
     of FUNCTION: parseFunctionLiteral
+    of MACRO: parseMacroLiteral
     of IF: parseIfExpression
     of CASE: parseCaseExpression
     of LBRACKET: parseArrayLiteral

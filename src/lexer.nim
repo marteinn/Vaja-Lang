@@ -232,6 +232,8 @@ proc nextToken*(lexer: var Lexer): Token =
           tok = newToken(tokenType=TokenType.OF, literal=identifier)
         of "import":
           tok = newToken(tokenType=TokenType.IMPORT, literal=identifier)
+        of "macro":
+          tok = newToken(tokenType=TokenType.MACRO, literal=identifier)
         else:
           tok = newToken(tokenType=TokenType.IDENT, literal=identifier)
       return tok

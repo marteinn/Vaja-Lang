@@ -39,6 +39,7 @@ import
 <<
 >>
 # hello
+macro
 """
       lexer: Lexer = newLexer(source)
     let
@@ -124,6 +125,8 @@ import
         (TokenType.DOUBLEGT, ">>"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.COMMENT, "# hello"),
+        (TokenType.NEWLINE, "\n"),
+        (TokenType.MACRO, "macro"),
         (TokenType.NEWLINE, "\n"),
         (TokenType.EOF, "")
       ]

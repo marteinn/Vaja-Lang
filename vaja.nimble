@@ -51,3 +51,6 @@ task test_builtins_base64, "Test base64 module":
 
 task test_ast_modify, "Test ast modify module":
   exec r"nim c -r tests/test_ast_modify.nim"
+
+task test_macro_expansion, "Test Macro expansion":
+  exec r"nim c -r tests/test_macro_expansion.nim"

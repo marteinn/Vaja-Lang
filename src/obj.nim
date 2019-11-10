@@ -24,6 +24,7 @@ type
     OTModule
     OTRegex
     OTQuote
+    OTMacro
   Obj* = ref object
     case objType*: ObjType
       of OTInteger: intValue*: int
@@ -35,6 +36,10 @@ type
         functionBody*: Node
         functionEnv*: Env
         functionParams*: seq[Node]
+      of OTMacro:
+        macroBody*: Node
+        macroEnv*: Env
+        macroParams*: seq[Node]
       of OTFunctionGroup:
         arityGroup*: Table[int, seq[Obj]]
       of OTReturn: returnValue*: Obj
@@ -137,6 +142,11 @@ proc inspect*(obj: Obj): string =
         paramsCode: seq[string] = map(obj.functionParams, proc (x: Node): string = toCode(x))
         paramsCodeString: string = join(paramsCode, ", ")
       "fn (" & paramsCodeString & ") " & obj.functionBody.toCode() & " end"
+    of OTMacro:
+      let
+        paramsCode: seq[string] = map(obj.macroParams, proc (x: Node): string = toCode(x))
+        paramsCodeString: string = join(paramsCode, ", ")
+      "macro (" & paramsCodeString & ") " & obj.macroBody.toCode() & " end"
     of OTReturn:
       obj.returnValue.inspect()
     of OTNil: "nil"
@@ -179,6 +189,14 @@ proc newFunction*(functionBody: Node, functionEnv: Env, functionParams: seq[Node
     functionBody: functionBody,
     functionEnv: functionEnv,
     functionParams: functionParams
+  )
+
+proc newMacro*(macroBody: Node, macroEnv: Env, macroParams: seq[Node]): Obj =
+  return Obj(
+    objType: ObjType.OTMacro,
+    macroBody: macroBody,
+    macroEnv: macroEnv,
+    macroParams: macroParams
   )
 
 proc newReturn*(returnValue: Obj): Obj =

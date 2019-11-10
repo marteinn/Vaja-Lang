@@ -490,7 +490,7 @@ proc convertObjToNode(obj: Obj): Node =
     else:
       return nil
 
-proc evalUnquoteModifier (node: Node, env: var Env): Node =
+proc evalUnquoteModifier(node: Node, env: var Env): Node =
   if not isUnquoteCall(node):
     return node
 
@@ -705,4 +705,5 @@ proc eval*(node: Node, env: var Env): Obj =
         left: Obj = eval(node.indexOpLeft, env)
         index: Obj = eval(node.indexOpIndex, env)
       evalIndexOp(left, index)
-
+    of NTMacroLiteral:
+      nil

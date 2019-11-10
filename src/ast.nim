@@ -31,7 +31,8 @@ type
     NTArrayLiteral,
     NTHashMapLiteral,
     NTIndexOperation,
-    NTModule
+    NTModule,
+    NTMacroLiteral
   Node* = ref object
     token*: Token
     case nodeType*: NodeType
@@ -93,6 +94,10 @@ type
       of NTModule:
         moduleName*: string
         moduleStatements*: seq[Node]
+      of NTMacroLiteral:
+        macroBody*: Node
+        macroParams*: seq[Node]
+        macroName*: Node
   CasePattern* = tuple[condition: Node, consequence: Node]
 
 proc toCode*(node: Node): string =
@@ -134,7 +139,6 @@ proc toCode*(node: Node): string =
         "fn " & node.functionName.identValue & "(" & paramsCodeString & ") " & node.functionBody.toCode() & " end"
       else:
         "fn" & "(" & paramsCodeString & ") " & node.functionBody.toCode() & " end"
-
     of NTBlockStatement:
       let nodeCode = map(node.blockStatements, proc (x: Node): string = toCode(x))
       join(nodeCode, "\n")
@@ -183,6 +187,14 @@ proc toCode*(node: Node): string =
     of NTIndexOperation:
       node.indexOpLeft.toCode() & "[" & node.indexOpIndex.toCode() & "]"
     of NTModule: "<module>"
+    of NTMacroLiteral:
+      let
+        paramsCode: seq[string] = map(node.macroParams, proc (x: Node): string = toCode(x))
+        paramsCodeString: string = join(paramsCode, ", ")
+      if node.macroName != nil:
+        "macro " & node.macroName.identValue & "(" & paramsCodeString & ") " & node.macroBody.toCode() & " end"
+      else:
+        "macro (" & paramsCodeString & ") " & node.macroBody.toCode() & " end"
 
 proc hash*(node: Node): Hash =
   var h: Hash = 0
@@ -271,6 +283,20 @@ proc newFuntionLiteral*(
     functionBody: functionBody,
     functionParams: functionParams,
     functionName: functionName
+  )
+
+proc newMacroLiteral*(
+  token: Token,
+  macroBody: Node,
+  macroParams: seq[Node],
+  macroName: Node
+): Node =
+  return Node(
+    nodeType: NodeType.NTMacroLiteral,
+    token: token,
+    macroBody: macroBody,
+    macroParams: macroParams,
+    macroName: macroName
   )
 
 proc newBlockStatement*(token: Token, blockStatements: seq[Node]): Node =

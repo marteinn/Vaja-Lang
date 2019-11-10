@@ -433,7 +433,7 @@ c: 3
       var program: Node = parseSource(testPair[0])
       check program.statements[0].toCode() == testPair[1]
 
-  test "test comment parsing":
+  test "comment parsing":
     var
       tests: ExpectedTokens = @[
         ("# hello", ""),
@@ -447,3 +447,23 @@ end
     for testPair in tests:
       var program: Node = parseSource(testPair[0])
       check program.toCode() == testPair[1]
+
+  test "macro parsing":
+    var
+      source: string = "macro hello(a, b) 1 end"
+      program: Node = parseSource(source)
+
+    check program.statements[0].nodeType == NodeType.NTExpressionStatement
+    check program.statements[0].expression.nodeType == NodeType.NTMacroLiteral
+    check program.statements[0].expression.macroName.identValue == "hello"
+    check len(program.statements[0].expression.macroParams) == 2
+    check len(program.statements) == 1
+    check program.statements[0].expression.toCode() == "macro hello(a, b) 1 end"
+
+  test "if statement can be passed as call argument":
+    var
+      source: string = """type(if (true) 1 else 2 end)"""
+      program: Node = parseSource(source)
+
+    check program.statements[0].nodeType == NodeType.NTExpressionStatement
+    check program.statements[0].toCode() == "type(if (true) 1 else 2 end)"

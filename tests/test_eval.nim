@@ -4,6 +4,7 @@ from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
 from obj import Obj, ObjType, Env, newEnv, inspect
 from evaluator import eval
+from eval_macro_expansion import defineMacros
 
 proc evalSource(source:string): Obj =
   var

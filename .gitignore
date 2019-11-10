@@ -14,3 +14,4 @@ tests/test_builtins_regex
 tests/test_builtins_json
 tests/test_builtins_base64
 tests/test_ast_modify
+tests/test_macro_expansion
