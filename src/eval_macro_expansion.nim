@@ -1,7 +1,8 @@
 import sequtils
 from ast import
   Node,
-  NodeType
+  NodeType,
+  toCode
 from obj import
   Obj,
   Env,
@@ -67,6 +68,9 @@ proc defineMacros*(program: var Node, env: var Env): void =
   discard
 
 proc isMacroCall(node: Node, env: var Env): (bool, Obj) =
+  if node.nodeType != NodeType.NTIdentifier:
+    return (false, nil)
+
   if not containsVar(env, node.identValue):
     return (false, nil)
 

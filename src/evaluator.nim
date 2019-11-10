@@ -284,7 +284,7 @@ proc extendFunctionEnv(env: Env, functionParams: seq[Node], arguments: seq[Obj])
 
   return enclosedEnv
 
-proc unwrapReturnValue(obj: Obj): Obj =
+proc unwrapReturnValue*(obj: Obj): Obj =
   if obj.objType == ObjType.OTReturn:
     return obj.returnValue
   return obj
@@ -415,6 +415,9 @@ proc isUnquoteCall(node: Node): bool =
   )
 
 proc convertObjToNode(obj: Obj): Node =
+  if obj == nil:
+    return nil
+
   case obj.objType:
     of OTInteger:
       return newIntegerLiteral(
@@ -488,6 +491,7 @@ proc convertObjToNode(obj: Obj): Node =
       return obj.quoteNode
     # TODO: Add obj to ast translations (ex regex)
     else:
+      echo "Type " & $obj.objType & " is not supported by convertObjToNode"
       return nil
 
 proc evalUnquoteModifier(node: Node, env: var Env): Node =

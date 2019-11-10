@@ -247,6 +247,13 @@ end
 
 ## Builtin modules
 
+### UnitTest
+
+| Signature                                                                    |
+| ---------------------------------------------------------------------------- |
+| `suite: string, array[test]`                                                 |
+| `test: string, function`                                                     |
+
 ### Functions
 
 | Signature                                                                    |

@@ -1,0 +1,14 @@
+let a = 1
+let suite = UnitTest.suite
+let test = UnitTest.test
+
+suite("My test suite", [
+  test("1 == 1", fn () -> 1 == 1),
+  test("1 != 2", fn () -> 1 == 2),
+  test("true is true", fn () -> true),
+  test("Base64.encode", fn () -> Base64.encode("krautrock") == "a3JhdXRyb2Nr"),
+  test("1 == 1", fn ()
+    let val = 1
+    return val == a
+  end)
+])

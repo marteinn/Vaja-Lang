@@ -248,6 +248,8 @@ proc addFunctionToGroup*(fnGroup: var Obj, fn: Obj): Obj =
     fnGroup.arityGroup[arity].add(fn)
   fnGroup
 
+
+
 proc inspectEnv*(env: Env): string =
   var ret = ""
   for key, obj in env.store:
@@ -260,6 +262,9 @@ proc inspectEnv*(env: Env): string =
       ret = ret & ", "
     ret = ret & "outer: " & inspectEnv(env.outer)
   return "{" & ret & "}"
+
+proc inspect*(env: Env): string =
+  inspectEnv(env)
 
 var
   OBJ_TRUE*: Obj = newBoolean(boolValue=true)

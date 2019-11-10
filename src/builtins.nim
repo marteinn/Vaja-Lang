@@ -21,6 +21,7 @@ from builtins_io import ioModule
 from builtins_regex import regexModule
 from builtins_json import jsonModule
 from builtins_base64 import base64Module
+from builtins_unittest import unittestModule
 import test_utils
 
 proc builtinType(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
@@ -81,4 +82,5 @@ var
     "Regex": regexModule,
     "JSON": jsonModule,
     "Base64": base64Module,
+    "UnitTest": unitTestModule,
   }.toTable

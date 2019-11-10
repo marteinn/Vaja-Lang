@@ -1,0 +1,3 @@
+UnitTest.suite("Another sutie", [
+  UnitTest.test("3 == 3", fn () -> 3 == 3)
+])
