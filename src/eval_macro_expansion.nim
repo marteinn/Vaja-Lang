@@ -8,6 +8,7 @@ from obj import
   ObjType,
   setVar,
   getVar,
+  inspectEnv,
   containsVar,
   newMacro,
   newQuote,
@@ -90,8 +91,9 @@ proc evalMacroModifier(node: Node, env: var Env): Node =
   if node.nodeType != NodeType.NTCallExpression:
     return node
 
-  let isMacroCallResp: (bool, Obj) = isMacroCall(node.callFunction, env)
-  let isMacro = isMacroCallResp[0]
+  let
+    isMacroCallResp: (bool, Obj) = isMacroCall(node.callFunction, env)
+    isMacro = isMacroCallResp[0]
 
   if not isMacro:
     return node
@@ -101,8 +103,11 @@ proc evalMacroModifier(node: Node, env: var Env): Node =
     args: seq[Obj] = quoteArgs(node.callArguments)
   var evalEnv = expandMacroEnv(macroObj, args)
 
-  let evaluated: Obj = eval(macroObj.macroBody, evalEnv)
+  let
+    macroBody: Node = deepCopy(macroObj.macroBody)
+    evaluated: Obj = eval(macroBody, evalEnv)
   if evaluated.objType != ObjType.OTQuote:
+    echo "Error: Macro can only return OTQuote"
     quit(QuitFailure)
 
   return evaluated.quoteNode
