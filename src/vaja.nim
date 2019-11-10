@@ -6,6 +6,7 @@ from ast import Node, toCode
 from parser import newParser, Parser, parseProgram
 from obj import Obj, Env, newEnv, inspect
 from evaluator import eval
+from eval_macro_expansion import defineMacros, expandMacros
 
 type
   RunMode = enum
@@ -15,6 +16,7 @@ var
   mode: RunMode = RMRepl
   filePath: string = ""
   env: Env = newEnv()
+  macroEnv: Env = newEnv()
   showReplExp: bool = false
 
 when declared(commandLineParams):
@@ -39,7 +41,12 @@ if mode == RMRepl:
       lexer: Lexer = newLexer(source = source)
       parser: Parser = newParser(lexer = lexer)
       program: Node = parser.parseProgram()
-      evaluated: Obj = eval(program, env)
+
+    defineMacros(program, macroEnv)
+
+    var
+      expandedProgram: Node = expandMacros(program, macroEnv)
+      evaluated: Obj = eval(expandedProgram, env)
     let
       inspected: string = evaluated.inspect()
 
@@ -57,5 +64,10 @@ if mode == RMFile:
     lexer: Lexer = newLexer(source=source)
     parser: Parser = newParser(lexer=lexer)
     program: Node = parser.parseProgram()
-    evaluated: Obj = eval(program, env)
+
+  defineMacros(program, macroEnv)
+
+  let
+    expandedProgram: Node = expandMacros(program, macroEnv)
+    evaluated: Obj = eval(expandedProgram, env)
   echo evaluated.inspect()
