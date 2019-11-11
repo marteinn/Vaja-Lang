@@ -1,5 +1,5 @@
 import tables
-from ast import Node, NodeType, hash
+from ast import Node, NodeType, hash, toCode
 from obj import Env
 
 proc modify*(
@@ -10,6 +10,8 @@ proc modify*(
   case node.nodeType:
     of NTProgram:
       for index, statement in node.statements:
+        if statement == nil:
+          continue
         node.statements[index] = modify(statement, modifier, env)
     of NTExpressionStatement:
       node.expression = modify(node.expression, modifier, env)
@@ -76,6 +78,8 @@ proc modify*(
         )
     of NTModule:
       for index, statement in node.moduleStatements:
+        if statement == nil:
+          continue
         node.moduleStatements[index] = modify(statement, modifier, env)
     else:
       discard

@@ -7,7 +7,7 @@ from strutils import startsWith, endsWith
 from lexer import newLexer, Lexer
 from ast import Node, toCode
 from parser import newParser, Parser, parseProgram
-from obj import Obj, Env, newEnv, setVar, newHashMap, inspect
+from obj import Obj, Env, newEnv, setVar, newHashMap, inspect, ObjType
 from evaluator import eval, unwrapReturnValue
 from eval_macro_expansion import defineMacros, expandMacros
 
@@ -148,27 +148,35 @@ if mode == RMTestRunner:
       setup: Obj = suite.setup
     stdout.write("\n\n" & obj.arrayElements[0].strValue)
 
-    var testEnv = deepCopy(env)
 
     for test in suite.tests:
       stdout.write("\n" & test.arrayElements[1].inspect())
       stdout.write(" ")
 
-      var testState: Obj
+      var
+        testEnv = deepCopy(env)
+        setupEnv = deepCopy(env)
+        testState: Obj
+
       if setup != nil:
-        testState = eval(setup.arrayElements[1].functionBody, testEnv)
+        testState = eval(setup.arrayElements[1].functionBody, setupEnv)
       else:
         testState = newHashMap(hashMapElements=initOrderedTable[string, Obj]())
 
       testEnv = setVar(testEnv, "state", testState)
 
-      let res: Obj = eval(test.arrayElements[2].functionBody, testEnv)
-      let unwrappedRes: Obj = unwrapReturnValue(res)
-      if unwrappedRes.boolValue:
+      let
+        res: Obj = eval(test.arrayElements[2].functionBody, testEnv)
+        unwrappedRes: Obj = unwrapReturnValue(res)
+      if unwrappedRes.objType == ObjType.OTBoolean and unwrappedRes.boolValue:
         stdout.write("[OK]")
       else:
+        if unwrappedRes.objType == OTError:
+          stdout.write("[FAIL - " & unwrappedRes.errorMsg & "]")
+        else:
+          stdout.write("[FAIL]")
+
         failures += 1
-        stdout.write("[FAIL]")
 
   # Output
   let duration = (getTime() - startTime)

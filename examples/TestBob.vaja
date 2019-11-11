@@ -1,2 +1,45 @@
-UnitTest.suite(
-)
+import Bob
+
+let suite = UnitTest.suite
+let test = UnitTest.test
+let setup = UnitTest.setup
+
+suite("Bob test suite", [
+  setup(fn ()
+    {
+      "server": Http.createServer(),
+      "app": Bob.new()
+    }
+  end),
+  test("Make sure 404 works", fn (state)
+    let app = \
+      state.app \
+      |> Bob.addRoute404(fn(conn, _) -> {"respStatus": 404, "respBody": "Page not found"}) \
+
+    let conn = \
+      state.server \
+      |> Http.addHandler(app |> Bob.makeHandler()) \
+      |> Http.call("https://example.com/not-existing/", "get", "", [])
+
+    return conn.response.body == "Page not found"
+  end),
+  test("Make sure route works", fn (state)
+    let app = \
+      state.app \
+      |> Bob.addRoutes([
+        [
+          Bob.newPath("/about-us/"),
+          fn(conn, args)
+            {"respStatus": 200, "respBody": "A aatch"}
+          end
+        ]
+      ])
+
+    let conn = \
+      state.server \
+      |> Http.addHandler(app |> Bob.makeHandler()) \
+      |> Http.call("https://example.com/about-us/", "get", "", [])
+
+    return conn.response.status == 200
+  end)
+])
