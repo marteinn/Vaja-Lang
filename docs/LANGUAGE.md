@@ -245,14 +245,28 @@ end
 | `quote: id`                                                                  |
 | `unquote: id`                                                                |
 
-## Builtin modules
 
-### UnitTest
+## Unittests
+
+```
+UnitTest.suite("My test suite", [
+  UnitTest.setup(fn () -> {"myState": 1}),
+  UnitTest.test("1 != 2", fn (state) -> 1 == 2),
+    return state.myState == 1
+  end),
+  UnitTest.test("1 == 1", fn (state) -> 1 == 1)
+])
+```
 
 | Signature                                                                    |
 | ---------------------------------------------------------------------------- |
 | `suite: string, array[test]`                                                 |
 | `test: string, function`                                                     |
+| `setup: function`                                                            |
+
+
+## Builtin modules
+
 
 ### Functions
 

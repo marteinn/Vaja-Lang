@@ -1,14 +1,14 @@
-let a = 1
 let suite = UnitTest.suite
 let test = UnitTest.test
+let setup = UnitTest.setup
 
 suite("My test suite", [
-  test("1 == 1", fn () -> 1 == 1),
-  test("1 != 2", fn () -> 1 == 2),
-  test("true is true", fn () -> true),
-  test("Base64.encode", fn () -> Base64.encode("krautrock") == "a3JhdXRyb2Nr"),
-  test("1 == 1", fn ()
-    let val = 1
-    return val == a
+  setup(fn () -> {"myState": 1}),
+  test("1 == 1", fn (state) -> 1 == 1),
+  test("1 != 2", fn (state) -> 1 == 2),
+  test("true is true", fn (state) -> true),
+  test("Base64.encode", fn (state) -> Base64.encode("krautrock") == "a3JhdXRyb2Nr"),
+  test("1 == 1", fn (state)
+    return state.myState == 1
   end)
 ])

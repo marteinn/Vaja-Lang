@@ -2,11 +2,12 @@ import os
 import times
 import strutils, terminal
 import sequtils
+import tables
 from strutils import startsWith, endsWith
 from lexer import newLexer, Lexer
 from ast import Node, toCode
 from parser import newParser, Parser, parseProgram
-from obj import Obj, Env, newEnv, inspect
+from obj import Obj, Env, newEnv, setVar, newHashMap, inspect
 from evaluator import eval, unwrapReturnValue
 from eval_macro_expansion import defineMacros, expandMacros
 
@@ -94,7 +95,7 @@ if mode == RMTestRunner:
 
   # Collect
   var
-    suites: seq[(Obj, Env)] = @[]
+    suites: seq[tuple[suite: Obj, tests: seq[Obj], env: Env, setUp: Obj]] = @[]
     numTests: int = 0
     baseDir: string = getCurrentDir()
 
@@ -118,8 +119,21 @@ if mode == RMTestRunner:
       expandedProgram: Node = expandMacros(program, macroEnv)
       evaluated: Obj = eval(expandedProgram, env)
 
-    suites.add((evaluated, env))
-    numTests += len(evaluated.arrayElements[1].arrayElements)
+    let
+      tests: seq[Obj] = filter(
+        evaluated.arrayElements[1].arrayElements,
+        proc (x: Obj): bool =
+          x.arrayElements[0].strValue == "test"
+        )
+      setupList: seq[Obj] = filter(
+        evaluated.arrayElements[1].arrayElements,
+        proc (x: Obj): bool =
+          x.arrayElements[0].strValue == "setup"
+        )
+      setup: Obj = if len(setupList) > 0: setupList[0] else: nil
+
+    numTests += len(tests)
+    suites.add((suite: evaluated, tests: tests, env: env, setup: setup))
 
   stdout.eraseLine
   stdout.write("Collected " & $numTests & " tests")
@@ -129,15 +143,26 @@ if mode == RMTestRunner:
   var failures: int = 0
   for suite in suites:
     var
-      obj: Obj = suite[0]
-      env: Env = suite[1]
+      obj: Obj = suite.suite
+      env: Env = suite.env
+      setup: Obj = suite.setup
     stdout.write("\n\n" & obj.arrayElements[0].strValue)
 
-    for test in obj.arrayElements[1].arrayElements:
-      stdout.write("\n" & test.arrayElements[0].inspect())
+    var testEnv = deepCopy(env)
+
+    for test in suite.tests:
+      stdout.write("\n" & test.arrayElements[1].inspect())
       stdout.write(" ")
 
-      let res: Obj = eval(test.arrayElements[1].functionBody, env)
+      var testState: Obj
+      if setup != nil:
+        testState = eval(setup.arrayElements[1].functionBody, testEnv)
+      else:
+        testState = newHashMap(hashMapElements=initOrderedTable[string, Obj]())
+
+      testEnv = setVar(testEnv, "state", testState)
+
+      let res: Obj = eval(test.arrayElements[2].functionBody, testEnv)
       let unwrappedRes: Obj = unwrapReturnValue(res)
       if unwrappedRes.boolValue:
         stdout.write("[OK]")
