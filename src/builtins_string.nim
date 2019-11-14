@@ -13,7 +13,9 @@ from obj import
   newArray,
   Env,
   newEnv,
-  inspect
+  inspect,
+  OBJ_TRUE,
+  OBJ_FALSE
 import test_utils
 
 proc stringLen(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
@@ -197,6 +199,20 @@ proc stringRight(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
     slice = source.strValue[(strLength-length) .. strLength-1]
   return newStr(slice)
 
+proc stringContains(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  requireNumArgs(arguments, 2)
+  requireArgOfType(arguments, 0, ObjType.OTString)
+  requireArgOfType(arguments, 1, ObjType.OTString)
+
+  let
+    needle: string = arguments[0].strValue
+    source: string = arguments[1].strValue
+
+  if contains(source, needle):
+    return OBJ_TRUE
+  else:
+    return OBJ_FALSE
+
 let functions*: OrderedTable[string, Obj] = {
   "len": newBuiltin(builtinFn=stringLen),
   "split": newBuiltin(builtinFn=stringSplit),
@@ -211,6 +227,7 @@ let functions*: OrderedTable[string, Obj] = {
   "toArray": newBuiltin(builtinFn=stringToArray),
   "left": newBuiltin(builtinFn=stringLeft),
   "right": newBuiltin(builtinFn=stringRight),
+  "contains": newBuiltin(builtinFn=stringContains),
   # TODO: Add isEmpty
   # TODO: Add dropLeft
   # TODO: Add dropRight

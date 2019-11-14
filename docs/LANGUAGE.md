@@ -313,6 +313,7 @@ UnitTest.suite("My test suite", [
 | `toArray: string`                                                            |
 | `left: int, string`                                                          |
 | `right: int, string`                                                         |
+| `contains: string, string`                                                   |
 
 
 ### HashMap module

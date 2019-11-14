@@ -178,3 +178,15 @@ String.filter(
     for testPair in tests:
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
+
+  test "String.contains":
+    var
+      tests: ExpectedEvals = @[
+        ("""String.contains("Tago", "Tago Mago")""", "true"),
+        ("""String.contains("Hello", "Tago Mago")""", "false"),
+        ("""String.contains("go Ma", "Tago Mago")""", "true"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]
