@@ -145,3 +145,14 @@ multiplyByTwo([1, 2, 3])
     for testPair in tests:
       var evaluated: Obj = evalSource(testPair[0])
       check evaluated.inspect() == testPair[1]
+
+  test "Array.contains":
+    var
+      tests: ExpectedEvals = @[
+        ("Array.contains(2, [1, 2, 3, 4])", "true"),
+        ("Array.contains(99, [1, 2, 3, 4])", "false"),
+      ]
+
+    for testPair in tests:
+      var evaluated: Obj = evalSource(testPair[0])
+      check evaluated.inspect() == testPair[1]

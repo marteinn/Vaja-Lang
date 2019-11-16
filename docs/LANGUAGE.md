@@ -294,6 +294,7 @@ UnitTest.suite("My test suite", [
 | `deleteAt: id, array`                                                        |
 | `replaceAt: int, id, array`                                                  |
 | `tail: array`                                                                |
+| `contains: id, array`                                                        |
 
 
 ### String module

@@ -10,7 +10,10 @@ from obj import
   newArray,
   Env,
   newEnv,
-  inspect
+  inspect,
+  compareObj,
+  OBJ_TRUE,
+  OBJ_FALSE
 import test_utils
 
 proc arrayLen(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
@@ -140,6 +143,20 @@ proc arrayTail(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
     arrayElements = arr.arrayElements[1..high(arr.arrayElements)]
   return newArray(arrayElements=arrayElements)
 
+proc arrayContains(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
+  curryIfMissingArgs(arguments, 2, arrayAppend)
+  requireArgOfType(arguments, 1, ObjType.OTArray)
+
+  let
+    needle: Obj = arguments[0]
+    arr: Obj = arguments[1]
+
+  for x in arr.arrayElements:
+    if compareObj(needle, x):
+      return OBJ_TRUE
+
+  return OBJ_FALSE
+
 let functions*: OrderedTable[string, Obj] = {
   "len": newBuiltin(builtinFn=arrayLen),
   "head": newBuiltin(builtinFn=arrayHead),
@@ -152,6 +169,7 @@ let functions*: OrderedTable[string, Obj] = {
   "append": newBuiltin(builtinFn=arrayAppend),
   "replaceAt": newBuiltin(builtinFn=arrayReplaceAt),
   "tail": newBuiltin(builtinFn=arrayTail),
+  "contains": newBuiltin(builtinFn=arrayContains),
 }.toOrderedTable
 
 let arrayModule*: Obj = newHashMap(hashMapElements=functions)
