@@ -6,7 +6,10 @@ from code import
   toString,
   OpConstant,
   OpAdd,
-  OpPop
+  OpPop,
+  OpSub,
+  OpMul,
+  OpDiv
 from lexer import newLexer, Lexer, nextToken, readCharacter
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
@@ -98,6 +101,42 @@ suite "compiler tests":
           make(OpConstant, @[0]),
           make(OpPop, @[]),
           make(OpConstant, @[1]),
+          make(OpPop, @[]),
+      ]),
+      (
+        "1 - 2",
+        @[
+          TestValue(valueType: TVTInt, intValue: 1),
+          TestValue(valueType: TVTInt, intValue: 2)
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpConstant, @[1]),
+          make(OpSub, @[]),
+          make(OpPop, @[]),
+      ]),
+      (
+        "1 * 2",
+        @[
+          TestValue(valueType: TVTInt, intValue: 1),
+          TestValue(valueType: TVTInt, intValue: 2)
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpConstant, @[1]),
+          make(OpMul, @[]),
+          make(OpPop, @[]),
+      ]),
+      (
+        "1 / 2",
+        @[
+          TestValue(valueType: TVTInt, intValue: 1),
+          TestValue(valueType: TVTInt, intValue: 2)
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpConstant, @[1]),
+          make(OpDiv, @[]),
           make(OpPop, @[]),
       ])
     ]

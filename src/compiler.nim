@@ -4,7 +4,10 @@ from code import
   make,
   OpConstant,
   OpAdd,
-  OpPop
+  OpPop,
+  OpSub,
+  OpMul,
+  OpDiv
 from obj import Obj, newInteger
 from ast import Node, NodeType
 import strformat
@@ -62,6 +65,12 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
       case node.infixOperator:
         of "+":
           discard compiler.emit(OpAdd)
+        of "-":
+          discard compiler.emit(OpSub)
+        of "*":
+          discard compiler.emit(OpMul)
+        of "/":
+          discard compiler.emit(OpDiv)
         else:
           return CompilerError(message: fmt"Unkown infix operator {node.infixOperator}")
     of NodeType.NTIntegerLiteral:

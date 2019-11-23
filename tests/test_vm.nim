@@ -9,9 +9,11 @@ from vm import VM, newVM, runVM, lastPoppedStackElement
 type
   TestValueType* = enum
     TVTInt
+    TVTFloat
   TestValue* = ref object
     case valueType*: TestValueType
       of TVTInt: intValue*: int
+      of TVTFloat: floatValue*: float
 
 proc parseSource(source: string): Node =
   var
@@ -25,17 +27,27 @@ proc testIntObj(expected: int, actual: Obj): bool =
     return false
   return true
 
+proc testFloatObj(expected: float, actual: Obj): bool =
+  if actual.floatValue != expected:
+    return false
+  return true
+
 proc testExpectedObj(expected: TestValue, actual: Obj) =
   case expected.valueType:
     of TVTInt:
       check(testIntObj(expected.intValue, actual))
+    of TVTFloat:
+      check(testFloatObj(expected.floatValue, actual))
 
 suite "vm tests":
-  test "expected obj":
+  test "expected intrger arthmetic":
     let tests: seq[(string, TestValue)] = @[
       ("1", TestValue(valueType: TVTInt, intValue: 1)),
       ("2", TestValue(valueType: TVTInt, intValue: 2)),
       ("1 + 2", TestValue(valueType: TVTInt, intValue: 3)),
+      ("2 - 1", TestValue(valueType: TVTInt, intValue: 1)),
+      ("2 * 2", TestValue(valueType: TVTInt, intValue: 4)),
+      ("4 / 2", TestValue(valueType: TVTFloat, floatValue: 2.0)),
     ]
 
     for x in tests:

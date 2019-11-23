@@ -1,16 +1,21 @@
+import strformat
 from compiler import Bytecode
 from obj import
   Obj,
   inspect,
   newError,
-  newInteger
+  newInteger,
+  newFloat
 from code import
   Instructions,
   readUint16,
   OpCode,
   OpConstant,
   OpAdd,
-  OpPop
+  OpPop,
+  OpSub,
+  OpMul,
+  OpDiv
 
 const stackSize: int = 2048
 
@@ -51,6 +56,24 @@ proc pop(vm: var VM): Obj =
   vm.stackPointer -= 1
   return obj
 
+method execBinaryIntOp*(vm: var VM, opCode: OpCode): VMError {.base.} =
+  let rightObj = vm.pop()
+  let leftObj = vm.pop()
+  let rightValue = rightObj.intValue
+  let leftValue = leftObj.intValue
+
+  case opCode:
+    of OpAdd:
+      return vm.push(newInteger(leftValue + rightValue))
+    of OpSub:
+      return vm.push(newInteger(leftValue - rightValue))
+    of OpMul:
+      return vm.push(newInteger(leftValue * rightValue))
+    of OpDiv:
+      return vm.push(newFloat(leftValue / rightValue))
+    else:
+      return VMError(message: fmt"Unknown binary operation {opCode}")
+
 method runVM*(vm: var VM): VMError {.base.} =
   var ip = 0
   while ip < len(vm.instructions):
@@ -68,12 +91,13 @@ method runVM*(vm: var VM): VMError {.base.} =
         if vmError != nil:
           return vmError
       of OpAdd:
-        let rightObj = vm.pop()
-        let leftObj = vm.pop()
-        let rightValue = rightObj.intValue
-        let leftValue = leftObj.intValue
-
-        discard vm.push(newInteger(leftValue + rightValue))
+        discard vm.execBinaryIntOp(opCode)
+      of OpSub:
+        discard vm.execBinaryIntOp(opCode)
+      of OpMul:
+        discard vm.execBinaryIntOp(opCode)
+      of OpDiv:
+        discard vm.execBinaryIntOp(opCode)
       of OpPop:
         discard vm.pop
       else:
