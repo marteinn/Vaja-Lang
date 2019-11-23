@@ -13,6 +13,8 @@ Väja is a dynamic interpreted language inspired by Elixir, Lua, Python, Nim and
 - Arithmetic expressions
 - Pipe operator
 - Immutable data
+- Uses a tree walking, top to bottom, interpreter
+- A pratt parser
 
 ## Example syntax
 
@@ -97,6 +99,7 @@ The name comes from a lumber mill in the northen of Sweden.
 - [Let's Explore Object Oriented Programming with Nim](https://matthiashager.com/nim-object-oriented-programming)
 - [Object variants](https://nim-lang.org/0.19.2/tut2.html#object-oriented-programming-object-variants)
 - [A Scripter's Notes](https://scripter.co/notes/nim/)
+- [The Nim memory model](http://zevv.nl/nim-memory/)
 
 
 ## License

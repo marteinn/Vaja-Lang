@@ -6,7 +6,7 @@ from obj import Obj, ObjType, Env, newEnv, inspect
 from evaluator import eval
 from eval_macro_expansion import defineMacros
 
-proc evalSource(source:string): Obj =
+proc evalSource(source: string): Obj =
   var
     lexer: Lexer = newLexer(source)
     parser: Parser = newParser(lexer = lexer)

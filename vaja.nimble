@@ -54,3 +54,12 @@ task test_ast_modify, "Test ast modify module":
 
 task test_macro_expansion, "Test Macro expansion":
   exec r"nim c -r tests/test_macro_expansion.nim"
+
+task test_code, "Test code":
+  exec r"nim c -r tests/test_code.nim"
+
+task test_compiler, "Test compiler":
+  exec r"nim c -r tests/test_compiler.nim"
+
+task test_vm, "Test vm":
+  exec r"nim c -r tests/test_vm.nim"

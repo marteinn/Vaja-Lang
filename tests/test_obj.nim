@@ -1,6 +1,14 @@
 import unittest
 from obj import
-  Obj, ObjType, newInteger, newFloat, newStr, compareObj, OBJ_TRUE, OBJ_FALSE, OBJ_NIL
+  Obj,
+  ObjType,
+  newInteger,
+  newFloat,
+  newStr,
+  compareObj,
+  OBJ_TRUE,
+  OBJ_FALSE,
+  OBJ_NIL
 
 
 suite "obj tests":

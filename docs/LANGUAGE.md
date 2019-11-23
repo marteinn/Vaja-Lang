@@ -9,7 +9,6 @@
 - No OOP or inheritance
 - No self/this
 - Variables cannot be re-assigned
-- Macros does not use pattern matching
 
 
 ## Supported types
