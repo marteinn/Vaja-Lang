@@ -89,7 +89,8 @@ The name comes from a lumber mill in the northen of Sweden.
 
 
 ## Credits
-- Thorsten Ball's book [Writing A Compiler In Go](https://compilerbook.com/)
+- Thorsten Ball - [Writing A Interpreter In Go](https://interpreterbook.com/)
+- Thorsten Ball - [Writing A Compiler In Go](https://compilerbook.com/)
 
 
 ## References/links
