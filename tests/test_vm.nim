@@ -4,7 +4,7 @@ from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
 from obj import Obj, inspect
 from compiler import newCompiler, compile, toBytecode
-from vm import VM, newVM, runVM, stackTop
+from vm import VM, newVM, runVM, lastPoppedStackElement
 
 type
   TestValueType* = enum
@@ -45,6 +45,6 @@ suite "vm tests":
 
       var vm: VM = newVM(compiler.toBytecode())
       let vmErr = vm.runVM()
-      let obj: Obj = vm.stackTop()
+      let obj: Obj = vm.lastPoppedStackElement()
 
       testExpectedObj(x[1], obj)

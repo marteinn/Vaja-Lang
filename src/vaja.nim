@@ -11,7 +11,7 @@ from obj import Obj, Env, newEnv, setVar, newHashMap, inspect, ObjType
 from evaluator import eval, unwrapReturnValue
 from eval_macro_expansion import defineMacros, expandMacros
 from compiler import newCompiler, compile, toBytecode
-from vm import VM, newVM, runVM, stackTop
+from vm import VM, newVM, runVM, lastPoppedStackElement
 
 type
   RunMode = enum
@@ -78,7 +78,7 @@ if mode == RMRepl:
         stdout.write "Bytecode execution failed" & vmErr.message
         quit(QuitFailure)
 
-      let stackTop: Obj = vm.stackTop()
+      let stackTop: Obj = vm.lastPoppedStackElement()
       inspected = stackTop.inspect()
     else:
       let evaluated: Obj = eval(expandedProgram, env)

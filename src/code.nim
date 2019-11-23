@@ -8,6 +8,7 @@ type
 const
   OpConstant*: OPCode = 1
   OpAdd*: OPCode = 2
+  OpPop*: OpCode = 3
 
 type
   Definition* = ref object
@@ -16,7 +17,8 @@ type
 
 let definitions: Table[Opcode, Definition] = {
   OpConstant: Definition(name: "OpConstant", operandWidths: @[2]),
-  OpAdd: Definition(name: "OpAdd", operandWidths: @[])
+  OpAdd: Definition(name: "OpAdd", operandWidths: @[]),
+  OpPop: Definition(name: "OpPop", operandWidths: @[])
 }.toTable
 
 proc lookup*(op: byte): Definition =

@@ -1,11 +1,12 @@
 import unittest
 from code import
   Opcode,
-  OpConstant,
-  OpAdd,
   make,
   Instructions,
-  toString
+  toString,
+  OpConstant,
+  OpAdd,
+  OpPop
 from lexer import newLexer, Lexer, nextToken, readCharacter
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
@@ -72,7 +73,7 @@ proc testConstants(expected: seq[TestValue], actual: seq[Obj]) =
         check(testIntObj(constant.intValue, actual[i]))
 
 suite "compiler tests":
-  test "compilation":
+  test "integer arithmetic":
     check 1 == 1
     let tests: seq[CompilerTestCase] = @[
       (
@@ -85,6 +86,19 @@ suite "compiler tests":
           make(OpConstant, @[0]),
           make(OpConstant, @[1]),
           make(OpAdd, @[]),
+          make(OpPop, @[]),
+      ]),
+      (
+        "1; 2",
+        @[
+          TestValue(valueType: TVTInt, intValue: 1),
+          TestValue(valueType: TVTInt, intValue: 2)
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpPop, @[]),
+          make(OpConstant, @[1]),
+          make(OpPop, @[]),
       ])
     ]
 

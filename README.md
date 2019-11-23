@@ -15,6 +15,7 @@ Väja is a dynamic interpreted language inspired by Elixir, Lua, Python, Nim and
 - Immutable data
 - Uses a tree walking, top to bottom, interpreter
 - A pratt parser
+- A (work in process) compiler and virtual machine
 
 ## Example syntax
 

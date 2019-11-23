@@ -4,7 +4,13 @@ from obj import
   inspect,
   newError,
   newInteger
-from code import Instructions, readUint16, OpCode, OpConstant, OpAdd
+from code import
+  Instructions,
+  readUint16,
+  OpCode,
+  OpConstant,
+  OpAdd,
+  OpPop
 
 const stackSize: int = 2048
 
@@ -68,6 +74,8 @@ method runVM*(vm: var VM): VMError {.base.} =
         let leftValue = leftObj.intValue
 
         discard vm.push(newInteger(leftValue + rightValue))
+      of OpPop:
+        discard vm.pop
       else:
         discard
 
@@ -78,3 +86,6 @@ method stackTop*(vm: VM): Obj {.base.} =
     return nil
 
   return vm.stack[vm.stackPointer-1]
+
+method lastPoppedStackElement*(vm: VM): Obj =
+  return vm.stack[vm.stackPointer]

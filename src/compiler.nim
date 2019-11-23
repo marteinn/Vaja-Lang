@@ -1,4 +1,10 @@
-from code import Instructions, OpCode, make, OpConstant, OpAdd
+from code import
+  Instructions,
+  OpCode,
+  make,
+  OpConstant,
+  OpAdd,
+  OpPop
 from obj import Obj, newInteger
 from ast import Node, NodeType
 import strformat
@@ -44,6 +50,7 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
       let err = compiler.compile(node.expression)
       if err != nil:
         return err
+      discard compiler.emit(OpPop)
     of NodeType.NTInfixExpression:
       let errLeft = compiler.compile(node.infixLeft)
       if errLeft != nil:
