@@ -1,0 +1,30 @@
+let source = IO.readFile("dump.xml")
+let guids = [
+    "0000000000000000",
+    "0000000000000001",
+    "0000000000000002"
+]
+
+print("TOTAL GUIDS: ")
+print(Array.len(guids))
+
+let guidsNotInSource = Array.filter(fn (x) -> not String.contains(x, source), guids)
+let listings = \
+  source \
+  |> String.split("<home_listing_id>") \
+  |> Array.deleteAt(0) \
+  |> Array.map(fn (x) -> String.split("</home_listing_id>", x)[0])
+
+print("LISTINGS IN SOURCE")
+print(Array.len(listings))
+
+fn inArray(needle, arr)
+  let len = Array.filter(fn (x) -> x == needle, arr)
+  return Array.len(len) == 1
+end
+
+let diff = Array.filter(fn (x)
+  not inArray(x, guids)
+end, listings)
+
+print(diff)
