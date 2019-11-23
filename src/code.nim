@@ -5,8 +5,9 @@ type
   Opcode* = byte
   Instructions* = seq[byte]
 
-let
+const
   OpConstant*: OPCode = 1
+  OpAdd*: OPCode = 2
 
 type
   Definition* = ref object
@@ -14,7 +15,8 @@ type
     operandWidths*: seq[int]
 
 let definitions: Table[Opcode, Definition] = {
-  OpConstant: Definition(name: "OpConstant", operandWidths: @[2])
+  OpConstant: Definition(name: "OpConstant", operandWidths: @[2]),
+  OpAdd: Definition(name: "OpAdd", operandWidths: @[])
 }.toTable
 
 proc lookup*(op: byte): Definition =
@@ -47,6 +49,11 @@ proc make*(op: OpCode, operands: seq[int]): seq[byte] =
     offset += width
   return instruction
 
+proc readUint16*(instructions: Instructions): int =
+  return int(
+    uint16(instructions[1]) or uint16(instructions[0]) shl 8
+  )
+
 proc readOperands*(
   definition: Definition, instructions: Instructions): (seq[int], int
 ) =
@@ -57,7 +64,8 @@ proc readOperands*(
   for i, width in definition.operandWidths:
     case width:
       of 2:
-        operands[i] = int(uint16(instructions[1]) or uint16(instructions[0]) shl 8)
+        #operands[i] = int(uint16(instructions[1]) or uint16(instructions[0]) shl 8)
+        operands[i] = readUint16(@[instructions[0], instructions[1]])
       else:
         discard
 
@@ -76,10 +84,12 @@ proc toString*(instructions: Instructions): string =
       )
       operandCount = len(definition.operandWidths)
     case operandCount:
+      of 0:
+        result &= fmt"{i:04} {definition.name}"
       of 1:
         result &= fmt"{i:04} {definition.name} {readResult.operands[0]}"
       else:
-        result &= "Error: Unhandled operatorCount for {definition.name}"
+        result &= fmt"Error: Unhandled operatorCount for {definition.name}"
 
     result &= "\n"
 

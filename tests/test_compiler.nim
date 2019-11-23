@@ -1,5 +1,11 @@
 import unittest
-from code import Opcode, OpConstant, make, Instructions, toString
+from code import
+  Opcode,
+  OpConstant,
+  OpAdd,
+  make,
+  Instructions,
+  toString
 from lexer import newLexer, Lexer, nextToken, readCharacter
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
@@ -78,6 +84,7 @@ suite "compiler tests":
         @[
           make(OpConstant, @[0]),
           make(OpConstant, @[1]),
+          make(OpAdd, @[]),
       ])
     ]
 

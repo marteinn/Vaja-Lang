@@ -10,7 +10,6 @@ from obj import
   OBJ_FALSE,
   OBJ_NIL
 
-
 suite "obj tests":
   test "obj comparisons":
     check compareObj(newStr("hello"), newInteger(1)) == false

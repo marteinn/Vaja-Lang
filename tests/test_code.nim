@@ -2,6 +2,7 @@ import unittest
 from code import
   Opcode,
   OpConstant,
+  OpAdd,
   make,
   Instructions,
   toString,
@@ -13,7 +14,8 @@ suite "code tests":
     let tests: seq[
       tuple[op: Opcode, operands: seq[int], expected: seq[byte]]
     ] = @[
-      (OpConstant, @[65534], @[byte(OpConstant), 255, 254])
+      (OpConstant, @[65534], @[byte(OpConstant), 255, 254]),
+      (OpAdd, @[], @[byte(OpAdd)])
     ]
 
     for x in tests:
@@ -22,14 +24,16 @@ suite "code tests":
 
   test "instructions string":
     let instructions: seq[Instructions] = @[
+      make(OpAdd, @[]),
       make(OpConstant, @[1]),
       make(OpConstant, @[2]),
       make(OpConstant, @[65535]),
     ]
 
-    let expected = """0000 OpConstant 1
-0003 OpConstant 2
-0006 OpConstant 65535
+    let expected = """0000 OpAdd
+0001 OpConstant 1
+0004 OpConstant 2
+0007 OpConstant 65535
 """
     var concatted: Instructions = @[]
     for instruction in instructions:

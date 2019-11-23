@@ -1,6 +1,7 @@
-from code import Instructions, OpCode, make, OpConstant
+from code import Instructions, OpCode, make, OpConstant, OpAdd
 from obj import Obj, newInteger
 from ast import Node, NodeType
+import strformat
 
 type
   Compiler* = ref object
@@ -9,6 +10,8 @@ type
   Bytecode* = ref object
     instructions*: Instructions
     constants*: seq[Obj]
+  CompilerError* = ref object
+    message: string
 
 proc newCompiler*(): Compiler =
   return Compiler(instructions: @[], constants: @[])
@@ -22,11 +25,15 @@ method emit*(compiler: var Compiler, op: OpCode, operands: seq[int]): int {.base
   let instructions = make(op, operands)
   return compiler.addInstruction(instructions)
 
+method emit*(compiler: var Compiler, op: OpCode): int {.base.} =
+  let instructions = make(op, @[])
+  return compiler.addInstruction(instructions)
+
 method addConstant*(compiler: var Compiler, obj: Obj): int {.base.} =
   compiler.constants.add(obj)
   return len(compiler.constants) - 1
 
-method compile*(compiler: var Compiler, node: Node): Node {.base.} =
+method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
   case node.nodeType:
     of NodeType.NTProgram:
       for statement in node.statements:
@@ -44,6 +51,12 @@ method compile*(compiler: var Compiler, node: Node): Node {.base.} =
       let errRight = compiler.compile(node.infixRight)
       if errRight != nil:
         return errRight
+
+      case node.infixOperator:
+        of "+":
+          discard compiler.emit(OpAdd)
+        else:
+          return CompilerError(message: fmt"Unkown infix operator {node.infixOperator}")
     of NodeType.NTIntegerLiteral:
       let obj = newInteger(node.intValue)
       discard compiler.emit(OpConstant, @[compiler.addConstant(obj)])
