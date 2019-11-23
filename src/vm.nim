@@ -18,7 +18,7 @@ type
     # If stack len = 1
     stackPointer: int
   VMError* = ref object
-    message: string
+    message*: string
 
 proc newVM*(bytecode: Bytecode): VM =
   return VM(

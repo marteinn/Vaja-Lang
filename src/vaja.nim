@@ -10,6 +10,8 @@ from parser import newParser, Parser, parseProgram
 from obj import Obj, Env, newEnv, setVar, newHashMap, inspect, ObjType
 from evaluator import eval, unwrapReturnValue
 from eval_macro_expansion import defineMacros, expandMacros
+from compiler import newCompiler, compile, toBytecode
+from vm import VM, newVM, runVM, stackTop
 
 type
   RunMode = enum
@@ -20,6 +22,7 @@ var
   mode: RunMode = RMRepl
   filePath: string = ""
   showReplExp: bool = false
+  useVM: bool = false
 
 when declared(commandLineParams):
   let
@@ -35,8 +38,14 @@ when declared(commandLineParams):
   if "--test" in cliFlags:
     mode = RMTestRunner
 
+  if "--vm" in cliFlags:
+    useVM = true
+
 if mode == RMRepl:
-  echo "Väja (type exit() to quit)"
+  if useVM:
+    echo "Väja (with VM) (type exit() to quit)"
+  else:
+    echo "Väja (type exit() to quit)"
 
   var
     env: Env = newEnv()
@@ -54,9 +63,26 @@ if mode == RMRepl:
 
     var
       expandedProgram: Node = expandMacros(program, macroEnv)
-      evaluated: Obj = eval(expandedProgram, env)
-    let
-      inspected: string = evaluated.inspect()
+      inspected: string
+
+    if useVM:
+      var compiler = newCompiler()
+      let compilerErr = compiler.compile(expandedProgram)
+      if compilerErr != nil:
+        stdout.write "Compilation failed " & compilerErr.message
+        quit(QuitFailure)
+
+      var vm: VM = newVM(compiler.toBytecode())
+      let vmErr = vm.runVM()
+      if vmErr != nil:
+        stdout.write "Bytecode execution failed" & vmErr.message
+        quit(QuitFailure)
+
+      let stackTop: Obj = vm.stackTop()
+      inspected = stackTop.inspect()
+    else:
+      let evaluated: Obj = eval(expandedProgram, env)
+      inspected = evaluated.inspect()
 
     if len(inspected) > 0 and showReplExp:
       echo program.toCode() & " = " & inspected

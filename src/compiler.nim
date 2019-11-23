@@ -11,7 +11,7 @@ type
     instructions*: Instructions
     constants*: seq[Obj]
   CompilerError* = ref object
-    message: string
+    message*: string
 
 proc newCompiler*(): Compiler =
   return Compiler(instructions: @[], constants: @[])

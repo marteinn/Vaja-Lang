@@ -45,6 +45,6 @@ suite "vm tests":
 
       var vm: VM = newVM(compiler.toBytecode())
       let vmErr = vm.runVM()
-      let stackElement = vm.stackTop()
+      let obj: Obj = vm.stackTop()
 
-      testExpectedObj(x[1], stackElement)
+      testExpectedObj(x[1], obj)
