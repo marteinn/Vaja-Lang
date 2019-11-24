@@ -2,6 +2,7 @@ import strformat
 from compiler import Bytecode
 from obj import
   Obj,
+  ObjType,
   inspect,
   newError,
   newInteger,
@@ -18,7 +19,10 @@ from code import
   OpMul,
   OpDiv,
   OpTrue,
-  OpFalse
+  OpFalse,
+  OpEqual,
+  OpNotEqual,
+  OpGreaterThan
 
 var
   OBJ_TRUE*: Obj = newBoolean(boolValue=true)
@@ -63,7 +67,37 @@ proc pop(vm: var VM): Obj =
   vm.stackPointer -= 1
   return obj
 
-method execBinaryIntOp*(vm: var VM, opCode: OpCode): VMError {.base.} =
+proc toBoolObj(boolValue: bool): Obj =
+  if boolValue: OBJ_TRUE else: OBJ_FALSE
+
+method execIntComparison(vm: var VM, opCode: OpCode, left: Obj, right: Obj): VMError {.base.} =
+  case opCode:
+    of OpEqual:
+      return vm.push(toBoolObj(left.intValue == right.intValue))
+    of OpNotEqual:
+      return vm.push(toBoolObj(left.intValue != right.intValue))
+    of OpGreaterThan:
+      return vm.push(toBoolObj(left.intValue > right.intValue))
+    else:
+      return VMError(message: fmt"Unknown operation {opCode}")
+
+method execComparison(vm: var VM, opCode: OpCode): VMError {.base.} =
+  let rightObj = vm.pop()
+  let leftObj = vm.pop()
+
+  if leftObj.objType == ObjType.OTInteger and rightObj.objType == ObjType.OTInteger:
+    return vm.execIntComparison(opCode, leftObj, rightObj)
+
+  case opCode:
+    of OpEqual:
+      return vm.push(toBoolObj(leftObj == rightObj))
+    of OpNotEqual:
+      return vm.push(toBoolObj(leftObj != rightObj))
+    else:
+      return VMError(message: fmt"Unknown operation {opCode}")
+
+
+method execBinaryIntOp(vm: var VM, opCode: OpCode): VMError {.base.} =
   let rightObj = vm.pop()
   let leftObj = vm.pop()
   let rightValue = rightObj.intValue
@@ -111,6 +145,11 @@ method runVM*(vm: var VM): VMError {.base.} =
         let vmError = vm.push(OBJ_FALSE)
         if vmError != nil:
           return vmError
+      of OpEqual, OpNotEqual, OpGreaterThan:
+        let vmError = vm.execComparison(opCode)
+        if vmError != nil:
+          return vmError
+        discard
       else:
         discard
 

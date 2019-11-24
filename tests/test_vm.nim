@@ -32,9 +32,11 @@ suite "vm tests":
       let program = parseSource(x[0])
       var compiler = newCompiler()
       let compilerErr = compiler.compile(program)
+      check(compilerErr == nil)
 
       var vm: VM = newVM(compiler.toBytecode())
       let vmErr = vm.runVM()
+      check(vmErr == nil)
       let obj: Obj = vm.lastPoppedStackElement()
 
       testExpectedObj(x[1], obj)
@@ -43,15 +45,29 @@ suite "vm tests":
     let tests: seq[(string, TestValue)] = @[
       ("true", TestValue(valueType: TVTBool, boolValue: true)),
       ("false", TestValue(valueType: TVTBool, boolValue: false)),
+      ("1 < 2", TestValue(valueType: TVTBool, boolValue: true)),
+      ("1 > 2", TestValue(valueType: TVTBool, boolValue: false)),
+      ("1 < 1", TestValue(valueType: TVTBool, boolValue: false)),
+      ("1 > 1", TestValue(valueType: TVTBool, boolValue: false)),
+      ("1 == 1", TestValue(valueType: TVTBool, boolValue: true)),
+      ("1 == 2", TestValue(valueType: TVTBool, boolValue: false)),
+      ("1 != 1", TestValue(valueType: TVTBool, boolValue: false)),
+      ("2 != 1", TestValue(valueType: TVTBool, boolValue: true)),
+      ("true == true", TestValue(valueType: TVTBool, boolValue: true)),
+      ("true == false", TestValue(valueType: TVTBool, boolValue: false)),
+      ("true != false", TestValue(valueType: TVTBool, boolValue: true)),
+      ("(2 > 1) == true", TestValue(valueType: TVTBool, boolValue: true)),
     ]
 
     for x in tests:
       let program = parseSource(x[0])
       var compiler = newCompiler()
       let compilerErr = compiler.compile(program)
+      check(compilerErr == nil)
 
       var vm: VM = newVM(compiler.toBytecode())
       let vmErr = vm.runVM()
+      check(vmErr == nil)
       let obj: Obj = vm.lastPoppedStackElement()
 
       testExpectedObj(x[1], obj)

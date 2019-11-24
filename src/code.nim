@@ -14,6 +14,9 @@ const
   OpDiv*: OpCode = 6
   OpTrue*: OpCode = 7
   OpFalse*: OpCode = 8
+  OpEqual*: OpCode = 9
+  OpNotEqual*: OpCode = 10
+  OpGreaterThan*: OpCode = 11
 
 type
   Definition* = ref object
@@ -29,6 +32,9 @@ let definitions: Table[Opcode, Definition] = {
   OpDiv: Definition(name: "OpDiv", operandWidths: @[]),
   OpTrue: Definition(name: "OpTrue", operandWidths: @[]),
   OpFalse: Definition(name: "OpFalse", operandWidths: @[]),
+  OpEqual: Definition(name: "OpEqual", operandWidths: @[]),
+  OpNotEqual: Definition(name: "OpNotEqual", operandWidths: @[]),
+  OpGreaterThan: Definition(name: "OpGreaterThan", operandWidths: @[]),
 }.toTable
 
 proc lookup*(op: byte): Definition =

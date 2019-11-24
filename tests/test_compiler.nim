@@ -1,4 +1,5 @@
 import unittest
+import strformat
 from code import
   Opcode,
   make,
@@ -11,7 +12,10 @@ from code import
   OpMul,
   OpDiv,
   OpTrue,
-  OpFalse
+  OpFalse,
+  OpEqual,
+  OpNotEqual,
+  OpGreaterThan
 from lexer import newLexer, Lexer, nextToken, readCharacter
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
@@ -83,12 +87,80 @@ suite "compiler tests":
           make(OpFalse, @[]),
           make(OpPop, @[]),
       ]),
+      (
+        "1 > 2",
+        @[
+          TestValue(valueType: TVTInt, intValue: 1),
+          TestValue(valueType: TVTInt, intValue: 2)
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpConstant, @[1]),
+          make(OpGreaterThan, @[]),
+          make(OpPop, @[]),
+      ]),
+      (
+        "1 < 2",
+        @[
+          TestValue(valueType: TVTInt, intValue: 2),
+          TestValue(valueType: TVTInt, intValue: 1),
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpConstant, @[1]),
+          make(OpGreaterThan, @[]),
+          make(OpPop, @[]),
+      ]),
+      (
+        "1 == 2",
+        @[
+          TestValue(valueType: TVTInt, intValue: 1),
+          TestValue(valueType: TVTInt, intValue: 2)
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpConstant, @[1]),
+          make(OpEqual, @[]),
+          make(OpPop, @[]),
+      ]),
+      (
+        "1 != 2",
+        @[
+          TestValue(valueType: TVTInt, intValue: 1),
+          TestValue(valueType: TVTInt, intValue: 2)
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpConstant, @[1]),
+          make(OpNotEqual, @[]),
+          make(OpPop, @[]),
+      ]),
+      (
+        "true == false",
+        newSeq[TestValue](),
+        @[
+          make(OpTrue, @[]),
+          make(OpFalse, @[]),
+          make(OpEqual, @[]),
+          make(OpPop, @[]),
+      ]),
+      (
+        "true != false",
+        newSeq[TestValue](),
+        @[
+          make(OpTrue, @[]),
+          make(OpFalse, @[]),
+          make(OpNotEqual, @[]),
+          make(OpPop, @[]),
+      ]),
     ]
 
     for x in tests:
       let program = parseSource(x.input)
       var compiler = newCompiler()
       let err = compiler.compile(program)
+      if err != nil:
+        echo fmt"Compile contains error: {err.message}"
 
       check(err == nil)
 
@@ -164,6 +236,8 @@ suite "compiler tests":
       let program = parseSource(x.input)
       var compiler = newCompiler()
       let err = compiler.compile(program)
+      if err != nil:
+        echo fmt"Compile contains error: {err.message}"
 
       check(err == nil)
 

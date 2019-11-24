@@ -9,7 +9,10 @@ from code import
   OpMul,
   OpDiv,
   OpTrue,
-  OpFalse
+  OpFalse,
+  OpEqual,
+  OpNotEqual,
+  OpGreaterThan
 from obj import Obj, newInteger
 from ast import Node, NodeType
 import strformat
@@ -57,6 +60,16 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
         return err
       discard compiler.emit(OpPop)
     of NodeType.NTInfixExpression:
+      if node.infixOperator == "<":
+        let errRight = compiler.compile(node.infixRight)
+        if errRight != nil:
+          return errRight
+        let errLeft = compiler.compile(node.infixLeft)
+        if errLeft != nil:
+          return errLeft
+        discard compiler.emit(OpGreaterThan)
+        return nil
+
       let errLeft = compiler.compile(node.infixLeft)
       if errLeft != nil:
         return errLeft
@@ -73,6 +86,12 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
           discard compiler.emit(OpMul)
         of "/":
           discard compiler.emit(OpDiv)
+        of "==":
+          discard compiler.emit(OpEqual)
+        of "!=":
+          discard compiler.emit(OpNotEqual)
+        of ">":
+          discard compiler.emit(OpGreaterThan)
         else:
           return CompilerError(message: fmt"Unkown infix operator {node.infixOperator}")
     of NodeType.NTIntegerLiteral:
