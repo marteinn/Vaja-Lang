@@ -12,6 +12,8 @@ const
   OpSub*: OpCode = 4
   OpMul*: OpCode = 5
   OpDiv*: OpCode = 6
+  OpTrue*: OpCode = 7
+  OpFalse*: OpCode = 8
 
 type
   Definition* = ref object
@@ -25,6 +27,8 @@ let definitions: Table[Opcode, Definition] = {
   OpSub: Definition(name: "OpSub", operandWidths: @[]),
   OpMul: Definition(name: "OpMul", operandWidths: @[]),
   OpDiv: Definition(name: "OpDiv", operandWidths: @[]),
+  OpTrue: Definition(name: "OpTrue", operandWidths: @[]),
+  OpFalse: Definition(name: "OpFalse", operandWidths: @[]),
 }.toTable
 
 proc lookup*(op: byte): Definition =

@@ -7,7 +7,9 @@ from code import
   OpPop,
   OpSub,
   OpMul,
-  OpDiv
+  OpDiv,
+  OpTrue,
+  OpFalse
 from obj import Obj, newInteger
 from ast import Node, NodeType
 import strformat
@@ -76,6 +78,11 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
     of NodeType.NTIntegerLiteral:
       let obj = newInteger(node.intValue)
       discard compiler.emit(OpConstant, @[compiler.addConstant(obj)])
+    of NodeType.NTBoolean:
+      if node.boolValue:
+        discard compiler.emit(OpTrue)
+      else:
+        discard compiler.emit(OpFalse)
     else:
       return nil
   return nil

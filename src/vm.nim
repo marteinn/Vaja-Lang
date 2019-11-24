@@ -5,7 +5,8 @@ from obj import
   inspect,
   newError,
   newInteger,
-  newFloat
+  newFloat,
+  newBoolean
 from code import
   Instructions,
   readUint16,
@@ -15,7 +16,13 @@ from code import
   OpPop,
   OpSub,
   OpMul,
-  OpDiv
+  OpDiv,
+  OpTrue,
+  OpFalse
+
+var
+  OBJ_TRUE*: Obj = newBoolean(boolValue=true)
+  OBJ_FALSE*: Obj = newBoolean(boolValue=false)
 
 const stackSize: int = 2048
 
@@ -90,16 +97,20 @@ method runVM*(vm: var VM): VMError {.base.} =
         let vmError: VMError = vm.push(vm.constants[constIndex])
         if vmError != nil:
           return vmError
-      of OpAdd:
-        discard vm.execBinaryIntOp(opCode)
-      of OpSub:
-        discard vm.execBinaryIntOp(opCode)
-      of OpMul:
-        discard vm.execBinaryIntOp(opCode)
-      of OpDiv:
-        discard vm.execBinaryIntOp(opCode)
+      of OpAdd, OpSub, OpMul, OpDiv:
+        let vmError = vm.execBinaryIntOp(opCode)
+        if vmError != nil:
+          return vmError
       of OpPop:
         discard vm.pop
+      of OpTrue:
+        let vmError = vm.push(OBJ_TRUE)
+        if vmError != nil:
+          return vmError
+      of OpFalse:
+        let vmError = vm.push(OBJ_FALSE)
+        if vmError != nil:
+          return vmError
       else:
         discard
 

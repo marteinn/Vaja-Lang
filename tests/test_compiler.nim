@@ -9,12 +9,15 @@ from code import
   OpPop,
   OpSub,
   OpMul,
-  OpDiv
+  OpDiv,
+  OpTrue,
+  OpFalse
 from lexer import newLexer, Lexer, nextToken, readCharacter
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
 from compiler import newCompiler, compile, toBytecode
 from obj import Obj, inspect
+from helpers import TestValueType, TestValue, `==`
 
 proc parseSource(source: string): Node =
   var
@@ -24,11 +27,6 @@ proc parseSource(source: string): Node =
   return program
 
 type
-  TestValueType* = enum
-    TVTInt
-  TestValue* = ref object
-    case valueType*: TestValueType
-      of TVTInt: intValue*: int
   CompilerTestCase = tuple[
     input: string,
     expectedConstants: seq[TestValue],
@@ -56,11 +54,6 @@ proc testInstructions(expected: seq[Instructions], actual: Instructions) =
   for i, instruction in flatExpected:
     check(actual[i] == instruction)
 
-proc testIntObj(expected: int, actual: Obj): bool =
-  if actual.intValue != expected:
-    return false
-  return true
-
 proc testConstants(expected: seq[TestValue], actual: seq[Obj]) =
   let
     hasEqLength = len(expected) == len(actual)
@@ -71,13 +64,39 @@ proc testConstants(expected: seq[TestValue], actual: seq[Obj]) =
     return
 
   for i, constant in expected:
-    case constant.valueType:
-      of TVTInt:
-        check(testIntObj(constant.intValue, actual[i]))
+    check(constant == actual[i])
 
 suite "compiler tests":
+  test "boolean expressions":
+    let tests: seq[CompilerTestCase] = @[
+      (
+        "true",
+        newSeq[TestValue](),
+        @[
+          make(OpTrue, @[]),
+          make(OpPop, @[]),
+      ]),
+      (
+        "false",
+        newSeq[TestValue](),
+        @[
+          make(OpFalse, @[]),
+          make(OpPop, @[]),
+      ]),
+    ]
+
+    for x in tests:
+      let program = parseSource(x.input)
+      var compiler = newCompiler()
+      let err = compiler.compile(program)
+
+      check(err == nil)
+
+      let bytecode = compiler.toBytecode()
+      testInstructions(x.expectedInstructions, bytecode.instructions)
+      testConstants(x.expectedConstants, bytecode.constants)
+
   test "integer arithmetic":
-    check 1 == 1
     let tests: seq[CompilerTestCase] = @[
       (
         "1 + 2",

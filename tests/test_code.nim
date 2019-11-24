@@ -2,12 +2,12 @@ import unittest
 from code import
   Opcode,
   OpConstant,
-  OpAdd,
   make,
   Instructions,
   toString,
   lookup,
-  readOperands
+  readOperands,
+  OpAdd
 
 suite "code tests":
   test "test make":
