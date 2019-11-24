@@ -168,6 +168,9 @@ proc inspect*(obj: Obj): string =
     of OTRegex: "<regex>"
     of OTQuote: "<quote " & obj.quoteNode.toCode() & ">"
 
+proc `$`*(obj: Obj): string =
+  return inspect(obj)
+
 proc newInteger*(intValue: int): Obj =
   return Obj(objType: ObjType.OTInteger, intValue: intValue)
 

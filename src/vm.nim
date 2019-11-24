@@ -22,7 +22,9 @@ from code import
   OpFalse,
   OpEqual,
   OpNotEqual,
-  OpGreaterThan
+  OpGreaterThan,
+  OpMinus,
+  OpNot
 
 var
   OBJ_TRUE*: Obj = newBoolean(boolValue=true)
@@ -49,10 +51,6 @@ proc newVM*(bytecode: Bytecode): VM =
     stack: newSeq[Obj](stackSize),
     stackPointer: 0
   )
-
-proc toOpCode(input: byte): OPCode =
-  if input == OpConstant:
-    return OpConstant
 
 proc push(vm: var VM, obj: Obj): VMError =
   if vm.stackPointer >= stackSize:
@@ -96,6 +94,18 @@ method execComparison(vm: var VM, opCode: OpCode): VMError {.base.} =
     else:
       return VMError(message: fmt"Unknown operation {opCode}")
 
+method execNotOperator(vm: var VM, opCode: OpCode): VMError {.base.} =
+  let rightObj = vm.pop()
+  if rightObj.objType == ObjType.OTBoolean:
+    return vm.push(toBoolObj(not rightObj.boolValue))
+
+  return VMError(message: fmt"Type {rightObj.objType} does not support not")
+
+method execMinusOperator(vm: var VM, opCode: OpCode): VMError {.base.} =
+  let rightObj = vm.pop()
+  if rightObj.objType == ObjType.OTInteger:
+    return vm.push(newInteger(-rightObj.intValue))
+  return VMError(message: fmt"Type {rightObj.objType} does not support minus")
 
 method execBinaryIntOp(vm: var VM, opCode: OpCode): VMError {.base.} =
   let rightObj = vm.pop()
@@ -131,6 +141,14 @@ method runVM*(vm: var VM): VMError {.base.} =
         let vmError: VMError = vm.push(vm.constants[constIndex])
         if vmError != nil:
           return vmError
+      of OpNot:
+        let vmError = vm.execNotOperator(opCode)
+        if vmError != nil:
+          return vmError
+      of OpMinus:
+        let vmError = vm.execMinusOperator(opCode)
+        if vmError != nil:
+          return vmError
       of OpAdd, OpSub, OpMul, OpDiv:
         let vmError = vm.execBinaryIntOp(opCode)
         if vmError != nil:
@@ -149,7 +167,6 @@ method runVM*(vm: var VM): VMError {.base.} =
         let vmError = vm.execComparison(opCode)
         if vmError != nil:
           return vmError
-        discard
       else:
         discard
 
@@ -161,5 +178,5 @@ method stackTop*(vm: VM): Obj {.base.} =
 
   return vm.stack[vm.stackPointer-1]
 
-method lastPoppedStackElement*(vm: VM): Obj =
+method lastPoppedStackElement*(vm: VM): Obj {.base.} =
   return vm.stack[vm.stackPointer]

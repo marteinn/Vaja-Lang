@@ -2,10 +2,10 @@ import unittest
 from lexer import newLexer, Lexer
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
-from obj import Obj, inspect
+from obj import Obj, inspect, `$`
 from compiler import newCompiler, compile, toBytecode
 from vm import VM, newVM, runVM, lastPoppedStackElement
-from helpers import TestValueType, TestValue, `==`
+from helpers import TestValueType, TestValue, `==`, `$`
 
 proc parseSource(source: string): Node =
   var
@@ -26,6 +26,10 @@ suite "vm tests":
       ("2 - 1", TestValue(valueType: TVTInt, intValue: 1)),
       ("2 * 2", TestValue(valueType: TVTInt, intValue: 4)),
       ("4 / 2", TestValue(valueType: TVTFloat, floatValue: 2.0)),
+      ("-1", TestValue(valueType: TVTInt, intValue: -1)),
+      ("-10", TestValue(valueType: TVTInt, intValue: -10)),
+      ("-50 + 20", TestValue(valueType: TVTInt, intValue: -30)),
+      ("((5 + 10) * 2 + -10) / 2", TestValue(valueType: TVTFloat, floatValue: 10.0)),
     ]
 
     for x in tests:
@@ -57,6 +61,9 @@ suite "vm tests":
       ("true == false", TestValue(valueType: TVTBool, boolValue: false)),
       ("true != false", TestValue(valueType: TVTBool, boolValue: true)),
       ("(2 > 1) == true", TestValue(valueType: TVTBool, boolValue: true)),
+      ("not true", TestValue(valueType: TVTBool, boolValue: false)),
+      ("not false", TestValue(valueType: TVTBool, boolValue: true)),
+      ("not (2 > 1)", TestValue(valueType: TVTBool, boolValue: false)),
     ]
 
     for x in tests:

@@ -11,6 +11,15 @@ type
       of TVTBool: boolValue*: bool
       of TVTFloat: floatValue*: float
 
+proc `$`*(tv: TestValue): string =
+  case tv.valueType:
+    of TVTInt:
+      return $tv.intValue
+    of TVTBool:
+      return $tv.boolValue
+    of TVTFloat:
+      return $tv.floatValue
+
 proc `==`*(tv: TestValue, obj: Obj): bool =
   case tv.valueType:
     of TVTInt:

@@ -15,7 +15,9 @@ from code import
   OpFalse,
   OpEqual,
   OpNotEqual,
-  OpGreaterThan
+  OpGreaterThan,
+  OpMinus,
+  OpNot
 from lexer import newLexer, Lexer, nextToken, readCharacter
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
@@ -85,6 +87,14 @@ suite "compiler tests":
         newSeq[TestValue](),
         @[
           make(OpFalse, @[]),
+          make(OpPop, @[]),
+      ]),
+      (
+        "not false",
+        newSeq[TestValue](),
+        @[
+          make(OpFalse, @[]),
+          make(OpNot, @[]),
           make(OpPop, @[]),
       ]),
       (
@@ -228,6 +238,16 @@ suite "compiler tests":
           make(OpConstant, @[0]),
           make(OpConstant, @[1]),
           make(OpDiv, @[]),
+          make(OpPop, @[]),
+      ]),
+      (
+        "-1",
+        @[
+          TestValue(valueType: TVTInt, intValue: 1),
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpMinus, @[]),
           make(OpPop, @[]),
       ])
     ]
