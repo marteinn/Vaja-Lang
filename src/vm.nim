@@ -24,7 +24,9 @@ from code import
   OpNotEqual,
   OpGreaterThan,
   OpMinus,
-  OpNot
+  OpNot,
+  OpJump,
+  OpJumpNotThruthy
 
 var
   OBJ_TRUE*: Obj = newBoolean(boolValue=true)
@@ -167,6 +169,20 @@ method runVM*(vm: var VM): VMError {.base.} =
         let vmError = vm.execComparison(opCode)
         if vmError != nil:
           return vmError
+      of OpJumpNotThruthy:
+        let pos = readUint16(
+          vm.instructions[ip+1 .. len(vm.instructions)-1]
+        )
+        ip += 2
+
+        let condition = vm.pop()
+        if not condition.boolValue:
+          ip = pos - 1
+      of OpJump:
+        let pos = readUint16(
+          vm.instructions[ip+1 .. len(vm.instructions)-1]
+        )
+        ip = pos - 1
       else:
         discard
 

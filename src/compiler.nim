@@ -14,23 +14,38 @@ from code import
   OpNotEqual,
   OpGreaterThan,
   OpMinus,
-  OpNot
+  OpNot,
+  OpJump,
+  OpJumpNotThruthy
 from obj import Obj, newInteger
 from ast import Node, NodeType
 import strformat
 
 type
-  Compiler* = ref object
-    instructions*: Instructions
-    constants*: seq[Obj]
   Bytecode* = ref object
     instructions*: Instructions
     constants*: seq[Obj]
   CompilerError* = ref object
     message*: string
+  EmittedInstruction* = ref object
+    opCode: OpCode
+    position: int
+  Compiler* = ref object
+    instructions*: Instructions
+    constants*: seq[Obj]
+    lastInstruction: EmittedInstruction
+    prevInstruction: EmittedInstruction
 
 proc newCompiler*(): Compiler =
   return Compiler(instructions: @[], constants: @[])
+
+method setLastInstruction(compiler: var Compiler, op: OpCode, position: int) {.base.} =
+  let
+    prev = compiler.lastInstruction
+    last = EmittedInstruction(opCode: op, position: position)
+
+  compiler.prevInstruction = prev
+  compiler.lastInstruction = last
 
 method addInstruction(compiler: var Compiler, instructions: seq[byte]): int {.base.} =
   let posNewInstruction = len(compiler.instructions)
@@ -38,16 +53,33 @@ method addInstruction(compiler: var Compiler, instructions: seq[byte]): int {.ba
   return posNewInstruction
 
 method emit*(compiler: var Compiler, op: OpCode, operands: seq[int]): int {.base.} =
-  let instructions = make(op, operands)
-  return compiler.addInstruction(instructions)
+  let
+    instructions = make(op, operands)
+    pos = compiler.addInstruction(instructions)
+
+  compiler.setLastInstruction(op, pos)
+  return pos
 
 method emit*(compiler: var Compiler, op: OpCode): int {.base.} =
-  let instructions = make(op, @[])
-  return compiler.addInstruction(instructions)
+  return emit(compiler, op, @[])
 
 method addConstant*(compiler: var Compiler, obj: Obj): int {.base.} =
   compiler.constants.add(obj)
   return len(compiler.constants) - 1
+
+method replaceInstruction(compiler: var Compiler, pos: int, newInstruction: seq[byte]) {.base.} =
+  for i, instruction in newInstruction:
+    compiler.instructions[pos+i] = instruction
+
+method changeOperand(compiler: var Compiler, opPos: int, operand: int) {.base.} =
+  let op = OpCode(compiler.instructions[opPos])
+  let newInstruction = make(op, @[operand])
+
+  compiler.replaceInstruction(opPos, newInstruction)
+
+method removeLastPop(compiler: var Compiler) {.base.} =
+  discard pop(compiler.instructions)
+  compiler.lastInstruction = compiler.prevInstruction
 
 method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
   case node.nodeType:
@@ -56,11 +88,48 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
         let err = compiler.compile(statement)
         if err != nil:
           return err
+    of NodeType.NTBlockStatement:
+      for statement in node.blockStatements:
+        let err = compiler.compile(statement)
+        if err != nil:
+          return err
     of NodeType.NTExpressionStatement:
       let err = compiler.compile(node.expression)
       if err != nil:
         return err
       discard compiler.emit(OpPop)
+    of NodeType.NTIfExpression:
+      let err = compiler.compile(node.ifCondition)
+      if err != nil:
+        return err
+
+      let jumpNotTruthyPos = compiler.emit(OpJumpNotThruthy, @[9999])
+      let cErr = compiler.compile(node.ifConsequence)
+      if cErr != nil:
+        return cErr
+
+      if compiler.lastInstruction.opCode == OpPop:
+        compiler.removeLastPop()
+
+      if node.ifAlternative == nil:
+        let afterConsPos = len(compiler.instructions)
+        compiler.changeOperand(jumpNotTruthyPos, afterConsPos)
+      else:
+        let jumpPos = compiler.emit(OpJump, @[9999])
+
+        let afterConsPos = len(compiler.instructions)
+        compiler.changeOperand(jumpNotTruthyPos, afterConsPos)
+
+        let altError = compiler.compile(node.ifAlternative)
+        if altError != nil:
+          return altError
+
+        if compiler.lastInstruction.opCode == OpPop:
+          compiler.removeLastPop()
+
+        let afterAltPos = len(compiler.instructions)
+        compiler.changeOperand(jumpPos, afterAltPos)
+
     of NodeType.NTPrefixExpression:
       let errRight = compiler.compile(node.prefixRight)
       if errRight != nil:

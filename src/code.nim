@@ -19,6 +19,8 @@ const
   OpGreaterThan*: OpCode = 11
   OpMinus*: OpCode = 12
   OpNot*: OpCode = 13
+  OpJumpNotThruthy*: OpCode = 14
+  OpJump*: OpCode = 15
 
 type
   Definition* = ref object
@@ -39,6 +41,8 @@ let definitions: Table[Opcode, Definition] = {
   OpGreaterThan: Definition(name: "OpGreaterThan", operandWidths: @[]),
   OpMinus: Definition(name: "OpMinus", operandWidths: @[]),
   OpNot: Definition(name: "OpNot", operandWidths: @[]),
+  OpJump: Definition(name: "OpJump", operandWidths: @[2]),
+  OpJumpNotThruthy: Definition(name: "OpJumpNotThruthy", operandWidths: @[2]),
 }.toTable
 
 proc lookup*(op: byte): Definition =
@@ -70,6 +74,9 @@ proc make*(op: OpCode, operands: seq[int]): seq[byte] =
 
     offset += width
   return instruction
+
+proc make*(op: OpCode): seq[byte] =
+  return make(op, @[])
 
 proc readUint16*(instructions: Instructions): int =
   return int(

@@ -17,7 +17,9 @@ from code import
   OpNotEqual,
   OpGreaterThan,
   OpMinus,
-  OpNot
+  OpNot,
+  OpJump,
+  OpJumpNotThruthy
 from lexer import newLexer, Lexer, nextToken, readCharacter
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
@@ -72,7 +74,69 @@ proc testConstants(expected: seq[TestValue], actual: seq[Obj]) =
   for i, constant in expected:
     check(constant == actual[i])
 
+proc runTests(tests: seq[CompilerTestCase]) =
+  for x in tests:
+    let program = parseSource(x.input)
+    var compiler = newCompiler()
+    let err = compiler.compile(program)
+    if err != nil:
+      echo fmt"Compile contains error: {err.message}"
+
+    check(err == nil)
+
+    let bytecode = compiler.toBytecode()
+    testInstructions(x.expectedInstructions, bytecode.instructions)
+    testConstants(x.expectedConstants, bytecode.constants)
+
 suite "compiler tests":
+  test "conditionals":
+    let tests: seq[CompilerTestCase] = @[
+      (
+        "if (true) 10 end",
+        @[
+          TestValue(valueType: TVTInt, intValue: 10),
+        ],
+        @[
+          make(OpTrue),
+          make(OpJumpNotThruthy, @[7]),
+          make(OpConstant, @[0]),
+          make(OpPop),
+      ]),
+      (
+        "if (true) 10 end; 3333",
+        @[
+          TestValue(valueType: TVTInt, intValue: 10),
+          TestValue(valueType: TVTInt, intValue: 3333),
+        ],
+        @[
+          make(OpTrue),
+          make(OpJumpNotThruthy, @[7]),
+          make(OpConstant, @[0]),
+          make(OpPop),
+          make(OpConstant, @[1]),
+          make(OpPop),
+      ]),
+      (
+        "if (true) 10 else 20 end; 3333",
+        @[
+          TestValue(valueType: TVTInt, intValue: 10),
+          TestValue(valueType: TVTInt, intValue: 20),
+          TestValue(valueType: TVTInt, intValue: 3333),
+        ],
+        @[
+          make(OpTrue),
+          make(OpJumpNotThruthy, @[10]),
+          make(OpConstant, @[0]),
+          make(OpJump, @[13]),
+          make(OpConstant, @[1]),
+          make(OpPop),
+          make(OpConstant, @[2]),
+          make(OpPop),
+      ]),
+    ]
+
+    runTests(tests)
+
   test "boolean expressions":
     let tests: seq[CompilerTestCase] = @[
       (
@@ -165,18 +229,7 @@ suite "compiler tests":
       ]),
     ]
 
-    for x in tests:
-      let program = parseSource(x.input)
-      var compiler = newCompiler()
-      let err = compiler.compile(program)
-      if err != nil:
-        echo fmt"Compile contains error: {err.message}"
-
-      check(err == nil)
-
-      let bytecode = compiler.toBytecode()
-      testInstructions(x.expectedInstructions, bytecode.instructions)
-      testConstants(x.expectedConstants, bytecode.constants)
+    runTests(tests)
 
   test "integer arithmetic":
     let tests: seq[CompilerTestCase] = @[
@@ -252,15 +305,4 @@ suite "compiler tests":
       ])
     ]
 
-    for x in tests:
-      let program = parseSource(x.input)
-      var compiler = newCompiler()
-      let err = compiler.compile(program)
-      if err != nil:
-        echo fmt"Compile contains error: {err.message}"
-
-      check(err == nil)
-
-      let bytecode = compiler.toBytecode()
-      testInstructions(x.expectedInstructions, bytecode.instructions)
-      testConstants(x.expectedConstants, bytecode.constants)
+    runTests(tests)

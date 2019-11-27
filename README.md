@@ -102,6 +102,8 @@ The name comes from a lumber mill in the northen of Sweden.
 - [Object variants](https://nim-lang.org/0.19.2/tut2.html#object-oriented-programming-object-variants)
 - [A Scripter's Notes](https://scripter.co/notes/nim/)
 - [The Nim memory model](http://zevv.nl/nim-memory/)
+- [Insie The Python Virtual Machine](https://leanpub.com/insidethepythonvirtualmachine/read)
+- [Let’s Build A Simple Interpreter](https://ruslanspivak.com/lsbasi-part1/)
 
 
 ## License

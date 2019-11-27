@@ -18,6 +18,26 @@ proc testExpectedObj(expected: TestValue, actual: Obj) =
   check(expected == actual)
 
 suite "vm tests":
+  test "if statements":
+    let tests: seq[(string, TestValue)] = @[
+      ("if (true) 10 end", TestValue(valueType: TVTInt, intValue: 10)),
+      ("if (true) 1 else 2 end", TestValue(valueType: TVTInt, intValue: 1)),
+      ("if (false) 1 else 2 end", TestValue(valueType: TVTInt, intValue: 2)),
+    ]
+
+    for x in tests:
+      let program = parseSource(x[0])
+      var compiler = newCompiler()
+      let compilerErr = compiler.compile(program)
+      check(compilerErr == nil)
+
+      var vm: VM = newVM(compiler.toBytecode())
+      let vmErr = vm.runVM()
+      check(vmErr == nil)
+      let obj: Obj = vm.lastPoppedStackElement()
+
+      testExpectedObj(x[1], obj)
+
   test "expected integer arthmetic":
     let tests: seq[(string, TestValue)] = @[
       ("1", TestValue(valueType: TVTInt, intValue: 1)),
