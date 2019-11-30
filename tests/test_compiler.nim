@@ -117,19 +117,19 @@ suite "compiler tests":
           make(OpGetGlobal, @[0]),
           make(OpPop),
       ]),
-      # (
-      #   "let one = 1; let two = one; two;",
-      #   @[
-      #     TestValue(valueType: TVTInt, intValue: 1),
-      #   ],
-      #   @[
-      #     make(OpConstant, @[0]),
-      #     make(OpSetGlobal, @[0]),
-      #     make(OpGetGlobal, @[0]),
-      #     make(OpSetGlobal, @[1]),
-      #     make(OpGetGlobal, @[1]),
-      #     make(OpPop),
-      # ]),
+      (
+        "let one = 1; let two = one; two;",
+        @[
+          TestValue(valueType: TVTInt, intValue: 1),
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpSetGlobal, @[0]),
+          make(OpGetGlobal, @[0]),
+          make(OpSetGlobal, @[1]),
+          make(OpGetGlobal, @[1]),
+          make(OpPop),
+      ]),
     ]
 
     runTests(tests)
