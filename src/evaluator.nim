@@ -214,15 +214,17 @@ proc evalMinusOperatorExpression(right: Obj): Obj =
     return newFloat(-right.floatValue)
 
   return newError(
-    errorMsg="Prefix operator - does not support type " & $(right.objType)
+    errorMsg="Prefix operator \"-\" does not support type " & $(right.objType)
   )
 
 proc evalNotOperatorExpression(right: Obj): Obj =
   if right.objType == ObjType.OTBoolean:
     return toBoolObj(not right.boolValue)
+  if right.objType == ObjType.OTNil:
+    return OBJ_TRUE
 
   return newError(
-    errorMsg="Prefix operator - does not support type " & $(right.objType)
+    errorMsg="Prefix operator \"not\" does not support type " & $(right.objType)
   )
 
 proc evalPrefixExpression(operator: string, right: Obj): Obj =

@@ -190,7 +190,7 @@ a""", "Variable a cannot be reassigned"),
         ("1 & 1", "Unknown infix operator &"),
         ("1 & 1; 5", "Unknown infix operator &"),
         ("\"a\" + \"b\"", "Unknown infix operator +"),
-        ("-true", "Prefix operator - does not support type OTBoolean"),
+        ("-true", "Prefix operator \"-\" does not support type OTBoolean"),
         ("(fn(x, y) -> x)(1, 2, 3)", "Function with arity 2 called with 3 arguments"),
         ("case (2) of 1 -> 2 end", "No clause matching"),
         ("cat(1)", "Name cat is not defined"),
@@ -209,6 +209,7 @@ a""", "Variable a cannot be reassigned"),
       tests: ExpectedEvals = @[
         ("not true", "false"),
         ("not not true", "true"),
+        ("not (if (false) false end)", "true"),
       ]
 
     for testPair in tests:
