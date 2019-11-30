@@ -19,7 +19,8 @@ from code import
   OpMinus,
   OpNot,
   OpJump,
-  OpJumpNotThruthy
+  OpJumpNotThruthy,
+  OpNil
 from lexer import newLexer, Lexer, nextToken, readCharacter
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
@@ -92,17 +93,6 @@ suite "compiler tests":
   test "conditionals":
     let tests: seq[CompilerTestCase] = @[
       (
-        "if (true) 10 end",
-        @[
-          TestValue(valueType: TVTInt, intValue: 10),
-        ],
-        @[
-          make(OpTrue),
-          make(OpJumpNotThruthy, @[7]),
-          make(OpConstant, @[0]),
-          make(OpPop),
-      ]),
-      (
         "if (true) 10 end; 3333",
         @[
           TestValue(valueType: TVTInt, intValue: 10),
@@ -110,8 +100,10 @@ suite "compiler tests":
         ],
         @[
           make(OpTrue),
-          make(OpJumpNotThruthy, @[7]),
+          make(OpJumpNotThruthy, @[10]),
           make(OpConstant, @[0]),
+          make(OpJump, @[11]),
+          make(OpNil),
           make(OpPop),
           make(OpConstant, @[1]),
           make(OpPop),

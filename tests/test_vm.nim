@@ -23,6 +23,7 @@ suite "vm tests":
       ("if (true) 10 end", TestValue(valueType: TVTInt, intValue: 10)),
       ("if (true) 1 else 2 end", TestValue(valueType: TVTInt, intValue: 1)),
       ("if (false) 1 else 2 end", TestValue(valueType: TVTInt, intValue: 2)),
+      ("if (false) 10 end", TestValue(valueType: TVTNil)),
     ]
 
     for x in tests:

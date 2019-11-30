@@ -16,7 +16,8 @@ from code import
   OpMinus,
   OpNot,
   OpJump,
-  OpJumpNotThruthy
+  OpJumpNotThruthy,
+  OpNil
 from obj import Obj, newInteger
 from ast import Node, NodeType
 import strformat
@@ -111,15 +112,13 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
       if compiler.lastInstruction.opCode == OpPop:
         compiler.removeLastPop()
 
+      let jumpPos = compiler.emit(OpJump, @[9999])
+      let afterConsPos = len(compiler.instructions)
+      compiler.changeOperand(jumpNotTruthyPos, afterConsPos)
+
       if node.ifAlternative == nil:
-        let afterConsPos = len(compiler.instructions)
-        compiler.changeOperand(jumpNotTruthyPos, afterConsPos)
+        discard compiler.emit(OpNil)
       else:
-        let jumpPos = compiler.emit(OpJump, @[9999])
-
-        let afterConsPos = len(compiler.instructions)
-        compiler.changeOperand(jumpNotTruthyPos, afterConsPos)
-
         let altError = compiler.compile(node.ifAlternative)
         if altError != nil:
           return altError
@@ -127,9 +126,8 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
         if compiler.lastInstruction.opCode == OpPop:
           compiler.removeLastPop()
 
-        let afterAltPos = len(compiler.instructions)
-        compiler.changeOperand(jumpPos, afterAltPos)
-
+      let afterAltPos = len(compiler.instructions)
+      compiler.changeOperand(jumpPos, afterAltPos)
     of NodeType.NTPrefixExpression:
       let errRight = compiler.compile(node.prefixRight)
       if errRight != nil:

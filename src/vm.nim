@@ -7,7 +7,8 @@ from obj import
   newError,
   newInteger,
   newFloat,
-  newBoolean
+  newBoolean,
+  newNil
 from code import
   Instructions,
   readUint16,
@@ -26,11 +27,13 @@ from code import
   OpMinus,
   OpNot,
   OpJump,
-  OpJumpNotThruthy
+  OpJumpNotThruthy,
+  OpNil
 
 var
   OBJ_TRUE*: Obj = newBoolean(boolValue=true)
   OBJ_FALSE*: Obj = newBoolean(boolValue=false)
+  OBJ_NIL*: Obj = newNil()
 
 const stackSize: int = 2048
 
@@ -183,6 +186,10 @@ method runVM*(vm: var VM): VMError {.base.} =
           vm.instructions[ip+1 .. len(vm.instructions)-1]
         )
         ip = pos - 1
+      of OpNil:
+        let vmError = vm.push(OBJ_NIL)
+        if vmError != nil:
+          return vmError
       else:
         discard
 
