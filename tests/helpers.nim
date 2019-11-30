@@ -6,12 +6,14 @@ type
     TVTBool
     TVTFloat
     TVTNil
+    TVTString
   TestValue* = ref object
     case valueType*: TestValueType
       of TVTInt: intValue*: int
       of TVTBool: boolValue*: bool
       of TVTFloat: floatValue*: float
       of TVTNil: discard
+      of TVTString: strValue*: string
 
 proc `$`*(tv: TestValue): string =
   case tv.valueType:
@@ -23,6 +25,8 @@ proc `$`*(tv: TestValue): string =
       return $tv.floatValue
     of TVTNil:
       return "null"
+    of TVTString:
+      return $tv.strValue
 
 proc `==`*(tv: TestValue, obj: Obj): bool =
   case tv.valueType:
@@ -34,3 +38,5 @@ proc `==`*(tv: TestValue, obj: Obj): bool =
       return tv.floatValue == obj.floatValue
     of TVTNil:
       return obj.objType == ObjType.OTNil
+    of TVTString:
+      return tv.strValue == obj.strValue

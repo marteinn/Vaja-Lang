@@ -8,7 +8,8 @@ from obj import
   newInteger,
   newFloat,
   newBoolean,
-  newNil
+  newNil,
+  newStr
 from code import
   Instructions,
   readUint16,
@@ -30,7 +31,8 @@ from code import
   OpJumpNotThruthy,
   OpNil,
   OpSetGlobal,
-  OpGetGlobal
+  OpGetGlobal,
+  OpCombine
 
 var
   OBJ_TRUE*: Obj = newBoolean(boolValue=true)
@@ -130,6 +132,16 @@ method execMinusOperator(vm: var VM, opCode: OpCode): VMError {.base.} =
     return vm.push(newInteger(-rightObj.intValue))
   return VMError(message: fmt"Type {rightObj.objType} does not support minus")
 
+method execBinaryStringOp(vm: var VM, opCode: OpCode): VMError {.base.} =
+  let right = vm.pop()
+  let left = vm.pop()
+
+  case opCode:
+    of OpCombine:
+      return vm.push(newStr(left.strValue & right.strValue))
+    else:
+      return VMError(message: fmt"Unknown binary operation {opCode}")
+
 method execBinaryIntOp(vm: var VM, opCode: OpCode): VMError {.base.} =
   let rightObj = vm.pop()
   let leftObj = vm.pop()
@@ -174,6 +186,10 @@ method runVM*(vm: var VM): VMError {.base.} =
           return vmError
       of OpAdd, OpSub, OpMul, OpDiv:
         let vmError = vm.execBinaryIntOp(opCode)
+        if vmError != nil:
+          return vmError
+      of OpCombine:
+        let vmError = vm.execBinaryStringOp(opCode)
         if vmError != nil:
           return vmError
       of OpPop:

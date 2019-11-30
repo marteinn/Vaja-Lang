@@ -19,8 +19,9 @@ from code import
   OpJumpNotThruthy,
   OpNil,
   OpSetGlobal,
-  OpGetGlobal
-from obj import Obj, newInteger
+  OpGetGlobal,
+  OpCombine
+from obj import Obj, newInteger, newStr
 from ast import Node, NodeType
 from symbol_table import newSymbolTable, SymbolTable, define, resolve, Symbol, `$`
 import strformat
@@ -184,10 +185,15 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
           discard compiler.emit(OpNotEqual)
         of ">":
           discard compiler.emit(OpGreaterThan)
+        of "++":
+          discard compiler.emit(OpCombine)
         else:
           return CompilerError(message: fmt"Unkown infix operator {node.infixOperator}")
     of NodeType.NTIntegerLiteral:
       let obj = newInteger(node.intValue)
+      discard compiler.emit(OpConstant, @[compiler.addConstant(obj)])
+    of NodeType.NTStringLiteral:
+      let obj = newStr(node.strValue)
       discard compiler.emit(OpConstant, @[compiler.addConstant(obj)])
     of NodeType.NTBoolean:
       if node.boolValue:

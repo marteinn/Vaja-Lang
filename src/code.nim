@@ -24,6 +24,7 @@ const
   OpNil*: OpCode = 16
   OpGetGlobal*: OpCode = 17
   OpSetGlobal*: OpCode = 18
+  OpCombine*: OPCode = 19  # ++
 
 type
   Definition* = ref object
@@ -49,6 +50,7 @@ let definitions: Table[Opcode, Definition] = {
   OpNil: Definition(name: "OpNil", operandWidths: @[]),
   OpGetGlobal: Definition(name: "OpGetGlobal", operandWidths: @[2]),
   OpSetGlobal: Definition(name: "OpSetGlobal", operandWidths: @[2]),
+  OpCombine: Definition(name: "OpCombine", operandWidths: @[]),
 }.toTable
 
 proc lookup*(op: byte): Definition =

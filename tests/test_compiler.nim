@@ -22,13 +22,14 @@ from code import
   OpJumpNotThruthy,
   OpNil,
   OpGetGlobal,
-  OpSetGlobal
+  OpSetGlobal,
+  OpCombine
 from lexer import newLexer, Lexer, nextToken, readCharacter
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
 from compiler import newCompiler, compile, toBytecode
-from obj import Obj, inspect
-from helpers import TestValueType, TestValue, `==`
+from obj import Obj, inspect, `$`
+from helpers import TestValueType, TestValue, `==`, `$`
 
 proc parseSource(source: string): Node =
   var
@@ -92,6 +93,33 @@ proc runTests(tests: seq[CompilerTestCase]) =
     testConstants(x.expectedConstants, bytecode.constants)
 
 suite "compiler tests":
+  test "strings":
+    let tests: seq[CompilerTestCase] = @[
+      (
+        "\"Hello world\"",
+        @[
+          TestValue(valueType: TVTString, strValue: "Hello world"),
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpPop),
+      ]),
+      (
+        "\"Hello\" ++ \"world\"",
+        @[
+          TestValue(valueType: TVTString, strValue: "Hello"),
+          TestValue(valueType: TVTString, strValue: "world"),
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpConstant, @[1]),
+          make(OpCombine),
+          make(OpPop),
+      ]),
+    ]
+
+    runTests(tests)
+
   test "assignment":
     let tests: seq[CompilerTestCase] = @[
       (
