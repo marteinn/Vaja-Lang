@@ -17,9 +17,12 @@ from code import
   OpNot,
   OpJump,
   OpJumpNotThruthy,
-  OpNil
+  OpNil,
+  OpSetGlobal,
+  OpGetGlobal
 from obj import Obj, newInteger
 from ast import Node, NodeType
+from symbol_table import newSymbolTable, SymbolTable, define, resolve, Symbol, `$`
 import strformat
 
 type
@@ -34,11 +37,18 @@ type
   Compiler* = ref object
     instructions*: Instructions
     constants*: seq[Obj]
+    symbolTable*: SymbolTable
     lastInstruction: EmittedInstruction
     prevInstruction: EmittedInstruction
 
 proc newCompiler*(): Compiler =
-  return Compiler(instructions: @[], constants: @[])
+  return Compiler(instructions: @[], constants: @[], symbolTable: newSymbolTable())
+
+proc newCompiler*(constants: var seq[Obj], symbolTable: var SymbolTable): Compiler =
+  var compiler = newCompiler()
+  compiler.constants = constants
+  compiler.symbolTable = symbolTable
+  return compiler
 
 method setLastInstruction(compiler: var Compiler, op: OpCode, position: int) {.base.} =
   let
@@ -184,6 +194,21 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
         discard compiler.emit(OpTrue)
       else:
         discard compiler.emit(OpFalse)
+    of NodeType.NTAssignStatement:
+      let err = compiler.compile(node.assignValue)
+      if err != nil:
+        return err
+      let symbol: Symbol = compiler.symbolTable.define(node.assignName.identValue)
+      discard compiler.emit(OpSetGlobal, @[symbol.index])
+    of NodeType.NTIdentifier:
+      let
+        symbolRes: (Symbol, bool) = compiler.symbolTable.resolve(node.identValue)
+        symbol: Symbol = symbolRes[0]
+
+      if not symbolRes[1]:
+        return CompilerError(message: "Name " & node.identValue & " is not defined")
+
+      discard compiler.emit(OpGetGlobal, @[symbol.index])
     else:
       return nil
   return nil

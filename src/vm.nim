@@ -28,14 +28,18 @@ from code import
   OpNot,
   OpJump,
   OpJumpNotThruthy,
-  OpNil
+  OpNil,
+  OpSetGlobal,
+  OpGetGlobal
 
 var
   OBJ_TRUE*: Obj = newBoolean(boolValue=true)
   OBJ_FALSE*: Obj = newBoolean(boolValue=false)
   OBJ_NIL*: Obj = newNil()
 
-const stackSize: int = 2048
+const
+  stackSize: int = 2048
+  globalsSize*: int = 65536
 
 type
   VM* = ref object
@@ -46,6 +50,7 @@ type
     # If stack len = 1
     # If stack len = 1
     stackPointer: int
+    globals: seq[Obj]
   VMError* = ref object
     message*: string
 
@@ -54,6 +59,16 @@ proc newVM*(bytecode: Bytecode): VM =
     constants: bytecode.constants,
     instructions: bytecode.instructions,
     stack: newSeq[Obj](stackSize),
+    globals: newSeq[Obj](globalsSize),
+    stackPointer: 0
+  )
+
+proc newVM*(bytecode: Bytecode, globals: var seq[Obj]): VM =
+  return VM(
+    constants: bytecode.constants,
+    instructions: bytecode.instructions,
+    stack: newSeq[Obj](stackSize),
+    globals: globals,
     stackPointer: 0
   )
 
@@ -191,6 +206,22 @@ method runVM*(vm: var VM): VMError {.base.} =
         ip = pos - 1
       of OpNil:
         let vmError = vm.push(OBJ_NIL)
+        if vmError != nil:
+          return vmError
+      of OpSetGlobal:
+        let globalIndex = readUint16(
+          vm.instructions[ip+1 .. len(vm.instructions)-1]
+        )
+        ip += 2
+
+        vm.globals[globalIndex] = vm.pop()
+      of OpGetGlobal:
+        let globalIndex = readUint16(
+          vm.instructions[ip+1 .. len(vm.instructions)-1]
+        )
+        ip += 2
+
+        let vmError: VMError = vm.push(vm.constants[globalIndex])
         if vmError != nil:
           return vmError
       else:

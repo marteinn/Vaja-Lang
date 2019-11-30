@@ -63,3 +63,6 @@ task test_compiler, "Test compiler":
 
 task test_vm, "Test vm":
   exec r"nim c -r tests/test_vm.nim"
+
+task test_symbol_table, "Test symbol table":
+  exec r"nim c -r tests/test_symbol_table.nim"

@@ -22,6 +22,8 @@ const
   OpJumpNotThruthy*: OpCode = 14
   OpJump*: OpCode = 15
   OpNil*: OpCode = 16
+  OpGetGlobal*: OpCode = 17
+  OpSetGlobal*: OpCode = 18
 
 type
   Definition* = ref object
@@ -45,6 +47,8 @@ let definitions: Table[Opcode, Definition] = {
   OpJump: Definition(name: "OpJump", operandWidths: @[2]),
   OpJumpNotThruthy: Definition(name: "OpJumpNotThruthy", operandWidths: @[2]),
   OpNil: Definition(name: "OpNil", operandWidths: @[]),
+  OpGetGlobal: Definition(name: "OpGetGlobal", operandWidths: @[2]),
+  OpSetGlobal: Definition(name: "OpSetGlobal", operandWidths: @[2]),
 }.toTable
 
 proc lookup*(op: byte): Definition =

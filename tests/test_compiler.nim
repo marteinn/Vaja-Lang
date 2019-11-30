@@ -20,7 +20,9 @@ from code import
   OpNot,
   OpJump,
   OpJumpNotThruthy,
-  OpNil
+  OpNil,
+  OpGetGlobal,
+  OpSetGlobal
 from lexer import newLexer, Lexer, nextToken, readCharacter
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
@@ -90,6 +92,48 @@ proc runTests(tests: seq[CompilerTestCase]) =
     testConstants(x.expectedConstants, bytecode.constants)
 
 suite "compiler tests":
+  test "assignment":
+    let tests: seq[CompilerTestCase] = @[
+      (
+        "let one = 1; let two = 2;",
+        @[
+          TestValue(valueType: TVTInt, intValue: 1),
+          TestValue(valueType: TVTInt, intValue: 2),
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpSetGlobal, @[0]),
+          make(OpConstant, @[1]),
+          make(OpSetGlobal, @[1]),
+      ]),
+      (
+        "let one = 1; one;",
+        @[
+          TestValue(valueType: TVTInt, intValue: 1),
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpSetGlobal, @[0]),
+          make(OpGetGlobal, @[0]),
+          make(OpPop),
+      ]),
+      # (
+      #   "let one = 1; let two = one; two;",
+      #   @[
+      #     TestValue(valueType: TVTInt, intValue: 1),
+      #   ],
+      #   @[
+      #     make(OpConstant, @[0]),
+      #     make(OpSetGlobal, @[0]),
+      #     make(OpGetGlobal, @[0]),
+      #     make(OpSetGlobal, @[1]),
+      #     make(OpGetGlobal, @[1]),
+      #     make(OpPop),
+      # ]),
+    ]
+
+    runTests(tests)
+
   test "conditionals":
     let tests: seq[CompilerTestCase] = @[
       (

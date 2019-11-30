@@ -251,8 +251,6 @@ proc addFunctionToGroup*(fnGroup: var Obj, fn: Obj): Obj =
     fnGroup.arityGroup[arity].add(fn)
   fnGroup
 
-
-
 proc inspectEnv*(env: Env): string =
   var ret = ""
   for key, obj in env.store:

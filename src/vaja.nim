@@ -10,8 +10,9 @@ from parser import newParser, Parser, parseProgram
 from obj import Obj, Env, newEnv, setVar, newHashMap, inspect, ObjType
 from evaluator import eval, unwrapReturnValue
 from eval_macro_expansion import defineMacros, expandMacros
-from compiler import newCompiler, compile, toBytecode
-from vm import VM, newVM, runVM, lastPoppedStackElement
+from compiler import newCompiler, compile, toBytecode, Bytecode
+from vm import VM, newVM, runVM, lastPoppedStackElement, globalsSize
+from symbol_table import newSymbolTable, SymbolTable
 
 type
   RunMode = enum
@@ -50,14 +51,19 @@ if mode == RMRepl:
   var
     env: Env = newEnv()
     macroEnv: Env = newEnv()
+  var
+    constants: seq[Obj] = @[]
+    globals = newSeq[Obj](globalsSize)
+    symbolTable: SymbolTable = newSymbolTable()
 
   while true:
     stdout.write ">> "
     var
       source: string = readLine(stdin)
-      lexer: Lexer = newLexer(source = source)
-      parser: Parser = newParser(lexer = lexer)
+      lexer: Lexer = newLexer(source=source)
+      parser: Parser = newParser(lexer=lexer)
       program: Node = parser.parseProgram()
+      byteCode: Bytecode
 
     defineMacros(program, macroEnv)
 
@@ -66,13 +72,17 @@ if mode == RMRepl:
       inspected: string
 
     if useVM:
-      var compiler = newCompiler()
+      var
+        compiler = newCompiler(constants=constants, symbolTable=symbolTable)
       let compilerErr = compiler.compile(expandedProgram)
       if compilerErr != nil:
         stdout.write "Compilation failed " & compilerErr.message
         quit(QuitFailure)
 
-      var vm: VM = newVM(compiler.toBytecode())
+      bytecode = compiler.toBytecode()
+      constants = bytecode.constants
+
+      var vm: VM = newVM(bytecode=bytecode, globals=globals)
       let vmErr = vm.runVM()
       if vmErr != nil:
         stdout.write "Bytecode execution failed" & vmErr.message

@@ -18,4 +18,5 @@ tests/test_macro_expansion
 tests/test_code
 tests/test_compiler
 tests/test_vm
+tests/test_symbol_table
 docs/wacig*

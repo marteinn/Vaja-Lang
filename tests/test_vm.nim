@@ -17,7 +17,31 @@ proc parseSource(source: string): Node =
 proc testExpectedObj(expected: TestValue, actual: Obj) =
   check(expected == actual)
 
+proc runTests(tests: seq[(string, TestValue)]) =
+  for x in tests:
+    let program = parseSource(x[0])
+    var compiler = newCompiler()
+    let compilerErr = compiler.compile(program)
+    check(compilerErr == nil)
+
+    var vm: VM = newVM(compiler.toBytecode())
+    let vmErr = vm.runVM()
+    check(vmErr == nil)
+    let obj: Obj = vm.lastPoppedStackElement()
+
+    testExpectedObj(x[1], obj)
+
+
 suite "vm tests":
+  test "assignment statements":
+    let tests: seq[(string, TestValue)] = @[
+      ("let one = 1; one", TestValue(valueType: TVTInt, intValue: 1)),
+      ("let one = 1; let two = 2; one + two", TestValue(valueType: TVTInt, intValue: 3)),
+      ("let one = 1; let two = one + 2; one + two", TestValue(valueType: TVTInt, intValue: 3)),
+    ]
+
+    runTests(tests)
+
   test "if statements":
     let tests: seq[(string, TestValue)] = @[
       ("if (true) 10 end", TestValue(valueType: TVTInt, intValue: 10)),
@@ -29,18 +53,7 @@ suite "vm tests":
       )),
     ]
 
-    for x in tests:
-      let program = parseSource(x[0])
-      var compiler = newCompiler()
-      let compilerErr = compiler.compile(program)
-      check(compilerErr == nil)
-
-      var vm: VM = newVM(compiler.toBytecode())
-      let vmErr = vm.runVM()
-      check(vmErr == nil)
-      let obj: Obj = vm.lastPoppedStackElement()
-
-      testExpectedObj(x[1], obj)
+    runTests(tests)
 
   test "expected integer arthmetic":
     let tests: seq[(string, TestValue)] = @[
@@ -56,18 +69,7 @@ suite "vm tests":
       ("((5 + 10) * 2 + -10) / 2", TestValue(valueType: TVTFloat, floatValue: 10.0)),
     ]
 
-    for x in tests:
-      let program = parseSource(x[0])
-      var compiler = newCompiler()
-      let compilerErr = compiler.compile(program)
-      check(compilerErr == nil)
-
-      var vm: VM = newVM(compiler.toBytecode())
-      let vmErr = vm.runVM()
-      check(vmErr == nil)
-      let obj: Obj = vm.lastPoppedStackElement()
-
-      testExpectedObj(x[1], obj)
+    runTests(tests)
 
   test "boolean expressions":
     let tests: seq[(string, TestValue)] = @[
@@ -91,15 +93,4 @@ suite "vm tests":
       ("not (if (false) true end)", TestValue(valueType: TVTBool, boolValue: true)),
     ]
 
-    for x in tests:
-      let program = parseSource(x[0])
-      var compiler = newCompiler()
-      let compilerErr = compiler.compile(program)
-      check(compilerErr == nil)
-
-      var vm: VM = newVM(compiler.toBytecode())
-      let vmErr = vm.runVM()
-      check(vmErr == nil)
-      let obj: Obj = vm.lastPoppedStackElement()
-
-      testExpectedObj(x[1], obj)
+    runTests(tests)
