@@ -379,6 +379,8 @@ c() <| b() <| a(5) <| 2""", "15"),
         ("if (false) 1 else 2 end", "2"),
         ("if (1 == 1) 1 end", "1"),
         ("if (1 == 2) 1 end", "nil"),
+        ("if (nil) 1 end", "nil"),
+        ("if (not (nil)) 1 end", "1"),
       ]
 
     for testPair in tests:

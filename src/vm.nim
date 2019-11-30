@@ -104,6 +104,9 @@ method execNotOperator(vm: var VM, opCode: OpCode): VMError {.base.} =
   if rightObj.objType == ObjType.OTBoolean:
     return vm.push(toBoolObj(not rightObj.boolValue))
 
+  if rightObj.objType == ObjType.OTNil:
+    return vm.push(OBJ_TRUE)
+
   return VMError(message: fmt"Type {rightObj.objType} does not support not")
 
 method execMinusOperator(vm: var VM, opCode: OpCode): VMError {.base.} =

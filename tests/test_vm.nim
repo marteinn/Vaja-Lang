@@ -24,6 +24,9 @@ suite "vm tests":
       ("if (true) 1 else 2 end", TestValue(valueType: TVTInt, intValue: 1)),
       ("if (false) 1 else 2 end", TestValue(valueType: TVTInt, intValue: 2)),
       ("if (false) 10 end", TestValue(valueType: TVTNil)),
+      ("if (if (false) true else false end) 10 else 20 end", TestValue(
+        valueType: TVTInt, intValue: 20
+      )),
     ]
 
     for x in tests:
@@ -85,6 +88,7 @@ suite "vm tests":
       ("not true", TestValue(valueType: TVTBool, boolValue: false)),
       ("not false", TestValue(valueType: TVTBool, boolValue: true)),
       ("not (2 > 1)", TestValue(valueType: TVTBool, boolValue: false)),
+      ("not (if (false) true end)", TestValue(valueType: TVTBool, boolValue: true)),
     ]
 
     for x in tests:
