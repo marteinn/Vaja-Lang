@@ -1,4 +1,5 @@
 import unittest
+import tables
 from lexer import newLexer, Lexer
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
@@ -32,6 +33,35 @@ proc runTests(tests: seq[(string, TestValue)]) =
     testExpectedObj(x[1], obj)
 
 suite "vm tests":
+  test "hashmap":
+    let tests: seq[(string, TestValue)] = @[
+      ("{}", TestValue(
+        valueType: TVTHashMap,
+        hashMapElements: initOrderedTable[string, TestValue]()
+      )),
+      ("{\"a\": 1}", TestValue(
+        valueType: TVTHashMap,
+        hashMapElements: {
+          "a": TestValue(valueType: TVTInt, intValue: 1),
+        }.toOrderedTable
+      )),
+      ("{\"a\": 1, \"b\": [1]}", TestValue(
+        valueType: TVTHashMap,
+        hashMapElements: {
+          "a": TestValue(valueType: TVTInt, intValue: 1),
+          "b": TestValue(valueType: TVTArray, arrayElements: @[
+            TestValue(valueType: TVTInt, intValue: 1),
+          ]),
+        }.toOrderedTable
+      )),
+      ("{\"a\": 1, \"b\": 2};1", TestValue(
+        valueType: TVTInt,
+        intValue: 1
+      )),
+    ]
+
+    runTests(tests)
+
   test "arrays":
     let tests: seq[(string, TestValue)] = @[
       ("[]", TestValue(valueType: TVTArray, arrayElements: @[])),
@@ -45,6 +75,7 @@ suite "vm tests":
         TestValue(valueType: TVTInt, intValue: 5),
         TestValue(valueType: TVTInt, intValue: 7),
       ])),
+      ("[1, 2, 3]; 1", TestValue(valueType: TVTInt, intValue: 1)),
     ]
 
     runTests(tests)

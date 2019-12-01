@@ -1,3 +1,5 @@
+import strformat
+import tables
 from code import
   Instructions,
   OpCode,
@@ -21,11 +23,11 @@ from code import
   OpSetGlobal,
   OpGetGlobal,
   OpCombine,
-  OpArray
+  OpArray,
+  OpHashMap
 from obj import Obj, newInteger, newStr
 from ast import Node, NodeType
 from symbol_table import newSymbolTable, SymbolTable, define, resolve, Symbol, `$`
-import strformat
 
 type
   Bytecode* = ref object
@@ -207,7 +209,15 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
         if err != nil:
           return err
       discard compiler.emit(OpArray, @[len(node.arrayElements)])
-
+    of NodeType.NTHashMapLiteral:
+      for keyNode, valNode in node.hashMapElements:
+        let keyErr = compiler.compile(keyNode)
+        if keyErr != nil:
+          return keyErr
+        let valErr = compiler.compile(valNode)
+        if valErr != nil:
+          return valErr
+      discard compiler.emit(OpHashMap, @[len(node.hashMapElements)*2])
     of NodeType.NTAssignStatement:
       let err = compiler.compile(node.assignValue)
       if err != nil:

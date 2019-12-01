@@ -1,4 +1,5 @@
 import strformat
+import tables
 from compiler import Bytecode
 from obj import
   Obj,
@@ -11,6 +12,7 @@ from obj import
   newNil,
   newStr,
   newArray,
+  newHashMap,
   `$`
 from code import
   Instructions,
@@ -35,7 +37,8 @@ from code import
   OpSetGlobal,
   OpGetGlobal,
   OpCombine,
-  OpArray
+  OpArray,
+  OpHashMap
 
 var
   OBJ_TRUE*: Obj = newBoolean(boolValue=true)
@@ -255,7 +258,33 @@ method runVM*(vm: var VM): VMError {.base.} =
         for index in startIndex .. endIndex:
           elements.add(vm.stack[index])
 
+        vm.stackPointer = vm.stackPointer - arrayLength
+
         let vmError: VMError = vm.push(newArray(elements))
+        if vmError != nil:
+          return vmError
+      of OpHashMap:
+        let
+          hashMapLength = readUint16(
+            vm.instructions[ip+1 .. len(vm.instructions)-1]
+          )
+          hashMapPairs = int(hashMapLength/2)
+        ip += 2
+
+        let
+          startIndex = vm.stackPointer - hashMapLength
+        var
+          elements: OrderedTable[string, Obj] = initOrderedTable[string, Obj]()
+
+        for index in 0..hashMapPairs-1:
+          let
+            keyObj = vm.stack[startIndex+(index*2)]
+            valObj = vm.stack[startIndex+(index*2)+1]
+          elements[keyObj.strValue] = valObj
+
+        vm.stackPointer = vm.stackPointer - hashMapLength
+
+        let vmError: VMError = vm.push(newHashMap(elements))
         if vmError != nil:
           return vmError
       else:

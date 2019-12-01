@@ -24,7 +24,8 @@ from code import
   OpGetGlobal,
   OpSetGlobal,
   OpCombine,
-  OpArray
+  OpArray,
+  OpHashMap
 from lexer import newLexer, Lexer, nextToken, readCharacter
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
@@ -94,6 +95,36 @@ proc runTests(tests: seq[CompilerTestCase]) =
     testConstants(x.expectedConstants, bytecode.constants)
 
 suite "compiler tests":
+  test "hashmap":
+    let tests: seq[CompilerTestCase] = @[
+      (
+        "{}",
+        newSeq[TestValue](),
+        @[
+          make(OpHashMap, @[0]),
+          make(OpPop),
+      ]),
+      (
+        "{\"hello\": \"world\", \"goodbye\": \"world\"}",
+        @[
+          TestValue(valueType: TVTString, strValue: "hello"),
+          TestValue(valueType: TVTString, strValue: "world"),
+          TestValue(valueType: TVTString, strValue: "goodbye"),
+          TestValue(valueType: TVTString, strValue: "world"),
+        ],
+        @[
+
+          make(OpConstant, @[0]),
+          make(OpConstant, @[1]),
+          make(OpConstant, @[2]),
+          make(OpConstant, @[3]),
+          make(OpHashMap, @[4]),
+          make(OpPop),
+      ]),
+    ]
+
+    runTests(tests)
+
   test "arrays":
     let tests: seq[CompilerTestCase] = @[
       (

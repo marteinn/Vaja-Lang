@@ -1,4 +1,5 @@
 import sequtils
+import tables
 from strutils import join
 from obj import Obj, ObjType
 
@@ -10,6 +11,7 @@ type
     TVTNil
     TVTString
     TVTArray
+    TVTHashMap
   TestValue* = ref object
     case valueType*: TestValueType
       of TVTInt: intValue*: int
@@ -18,6 +20,7 @@ type
       of TVTNil: discard
       of TVTString: strValue*: string
       of TVTArray: arrayElements*: seq[TestValue]
+      of TVTHashMap: hashMapElements*: OrderedTable[string, TestValue]
 
 proc `$`*(tv: TestValue): string =
   case tv.valueType:
@@ -40,6 +43,13 @@ proc `$`*(tv: TestValue): string =
         )
 
       return "[" & join(elements, ", ") & "]"
+    of TVTHashMap:
+      var elementsCode: string = ""
+      for key, val in tv.hashMapElements:
+        if elementsCode != "":
+          elementsCode = elementsCode & ", "
+        elementsCode = elementsCode & key & ": " & $val
+      return "{" & elementsCode & "}"
 
 proc `==`*(tv: TestValue, obj: Obj): bool =
   case tv.valueType:
@@ -58,5 +68,14 @@ proc `==`*(tv: TestValue, obj: Obj): bool =
         return false
       for index, tvElement in tv.arrayElements:
         if tvElement != obj.arrayElements[index]:
+          return false
+      return true
+    of TVTHashMap:
+      if len(tv.hashMapElements) != len(obj.hashMapElements):
+        return false
+      for key, tvElement in tv.hashMapElements:
+        if not (key in obj.hashMapElements):
+          return false
+        if tvElement != obj.hashMapElements[key]:
           return false
       return true
