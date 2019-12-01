@@ -25,7 +25,8 @@ from code import
   OpSetGlobal,
   OpCombine,
   OpArray,
-  OpHashMap
+  OpHashMap,
+  OpIndex
 from lexer import newLexer, Lexer, nextToken, readCharacter
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
@@ -95,6 +96,64 @@ proc runTests(tests: seq[CompilerTestCase]) =
     testConstants(x.expectedConstants, bytecode.constants)
 
 suite "compiler tests":
+  test "index operations":
+    let tests: seq[CompilerTestCase] = @[
+      (
+        "[1, 2][0]",
+        @[
+          TestValue(valueType: TVTInt, intValue: 1),
+          TestValue(valueType: TVTInt, intValue: 2),
+          TestValue(valueType: TVTInt, intValue: 0),
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpConstant, @[1]),
+          make(OpArray, @[2]),
+          make(OpConstant, @[2]),
+          make(OpIndex),
+          make(OpPop),
+      ]),
+      (
+        "[1, 2, 3][1+1]",
+        @[
+          TestValue(valueType: TVTInt, intValue: 1),
+          TestValue(valueType: TVTInt, intValue: 2),
+          TestValue(valueType: TVTInt, intValue: 3),
+          TestValue(valueType: TVTInt, intValue: 1),
+          TestValue(valueType: TVTInt, intValue: 1),
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpConstant, @[1]),
+          make(OpConstant, @[2]),
+          make(OpArray, @[3]),
+          make(OpConstant, @[3]),
+          make(OpConstant, @[4]),
+          make(OpAdd),
+          make(OpIndex),
+          make(OpPop),
+      ]),
+      (
+        "{\"a\": 1}[1+1]",
+        @[
+          TestValue(valueType: TVTString, strValue: "a"),
+          TestValue(valueType: TVTInt, intValue: 1),
+          TestValue(valueType: TVTInt, intValue: 1),
+          TestValue(valueType: TVTInt, intValue: 1),
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpConstant, @[1]),
+          make(OpHashMap, @[2]),
+          make(OpConstant, @[2]),
+          make(OpConstant, @[3]),
+          make(OpAdd),
+          make(OpIndex),
+          make(OpPop),
+      ]),
+    ]
+
+    runTests(tests)
   test "hashmap":
     let tests: seq[CompilerTestCase] = @[
       (

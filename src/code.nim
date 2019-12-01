@@ -27,6 +27,7 @@ const
   OpCombine*: OPCode = 19  # ++
   OpArray*: OPCode = 20
   OpHashMap*: OPCode = 21
+  OpIndex*: OPCode = 22
 
 type
   Definition* = ref object
@@ -55,6 +56,7 @@ let definitions: Table[Opcode, Definition] = {
   OpCombine: Definition(name: "OpCombine", operandWidths: @[]),
   OpArray: Definition(name: "OpArray", operandWidths: @[2]),
   OpHashMap: Definition(name: "OpHashMap", operandWidths: @[2]),
+  OpIndex: Definition(name: "OpIndex", operandWidths: @[]),
 }.toTable
 
 proc lookup*(op: byte): Definition =

@@ -33,6 +33,14 @@ proc runTests(tests: seq[(string, TestValue)]) =
     testExpectedObj(x[1], obj)
 
 suite "vm tests":
+  test "index operations":
+    let tests: seq[(string, TestValue)] = @[
+      ("[5, 2][0]", TestValue(valueType: TVTInt, intValue: 5)),
+      ("[5,2,3][1+1]", TestValue(valueType: TVTInt, intValue: 3)),
+      ("{\"a\": 55}.a", TestValue(valueType: TVTInt, intValue: 55)),
+    ]
+    runTests(tests)
+
   test "hashmap":
     let tests: seq[(string, TestValue)] = @[
       ("{}", TestValue(
@@ -59,7 +67,6 @@ suite "vm tests":
         intValue: 1
       )),
     ]
-
     runTests(tests)
 
   test "arrays":

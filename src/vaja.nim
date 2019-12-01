@@ -85,7 +85,7 @@ if mode == RMRepl:
       var vm: VM = newVM(bytecode=bytecode, globals=globals)
       let vmErr = vm.runVM()
       if vmErr != nil:
-        stdout.write "Bytecode execution failed" & vmErr.message
+        stdout.write "Bytecode execution failed: " & vmErr.message
         quit(QuitFailure)
 
       let stackTop: Obj = vm.lastPoppedStackElement()

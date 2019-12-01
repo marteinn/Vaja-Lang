@@ -38,7 +38,8 @@ from code import
   OpGetGlobal,
   OpCombine,
   OpArray,
-  OpHashMap
+  OpHashMap,
+  OpIndex
 
 var
   OBJ_TRUE*: Obj = newBoolean(boolValue=true)
@@ -163,6 +164,21 @@ method execBinaryIntOp(vm: var VM, opCode: OpCode): VMError {.base.} =
     else:
       return VMError(message: fmt"Unknown binary operation {opCode}")
 
+method execIndexExpression(vm: var VM, left: Obj, index: Obj): VMError {.base.} =
+  if left.objType == ObjType.OTHashMap:
+    try:
+      return vm.push(left.hashMapElements[index.strValue])
+    except:
+      return VMError(message: fmt"Key {index.strValue} not found in {left}")
+
+  if left.objType == ObjType.OTArray and index.objType == ObjType.OTInteger:
+    try:
+      return vm.push(left.arrayElements[index.intValue])
+    except:
+      return VMError(message: fmt"Key {index.intValue} not found in {left}")
+
+  return VMError(message: "Index operation is not supported")
+
 method runVM*(vm: var VM): VMError {.base.} =
   var ip = 0
   while ip < len(vm.instructions):
@@ -285,6 +301,12 @@ method runVM*(vm: var VM): VMError {.base.} =
         vm.stackPointer = vm.stackPointer - hashMapLength
 
         let vmError: VMError = vm.push(newHashMap(elements))
+        if vmError != nil:
+          return vmError
+      of OpIndex:
+        let index = vm.pop()
+        let left = vm.pop()
+        let vmError = vm.execIndexExpression(left, index)
         if vmError != nil:
           return vmError
       else:

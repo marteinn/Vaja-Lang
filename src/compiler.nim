@@ -24,7 +24,8 @@ from code import
   OpGetGlobal,
   OpCombine,
   OpArray,
-  OpHashMap
+  OpHashMap,
+  OpIndex
 from obj import Obj, newInteger, newStr
 from ast import Node, NodeType
 from symbol_table import newSymbolTable, SymbolTable, define, resolve, Symbol, `$`
@@ -233,6 +234,14 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
         return CompilerError(message: "Name " & node.identValue & " is not defined")
 
       discard compiler.emit(OpGetGlobal, @[symbol.index])
+    of NodeType.NTIndexOperation:
+      let leftErr = compiler.compile(node.indexOpLeft)
+      if leftErr != nil:
+        return leftErr
+      let indexErr = compiler.compile(node.indexOpIndex)
+      if indexErr != nil:
+        return indexErr
+      discard compiler.emit(OpIndex)
     else:
       return nil
   return nil
