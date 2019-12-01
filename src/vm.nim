@@ -9,7 +9,9 @@ from obj import
   newFloat,
   newBoolean,
   newNil,
-  newStr
+  newStr,
+  newArray,
+  `$`
 from code import
   Instructions,
   readUint16,
@@ -32,7 +34,8 @@ from code import
   OpNil,
   OpSetGlobal,
   OpGetGlobal,
-  OpCombine
+  OpCombine,
+  OpArray
 
 var
   OBJ_TRUE*: Obj = newBoolean(boolValue=true)
@@ -48,9 +51,6 @@ type
     constants: seq[Obj]
     instructions: Instructions
     stack: seq[Obj]
-    # Always use the next free value
-    # If stack len = 1
-    # If stack len = 1
     stackPointer: int
     globals: seq[Obj]
   VMError* = ref object
@@ -238,6 +238,24 @@ method runVM*(vm: var VM): VMError {.base.} =
         ip += 2
 
         let vmError: VMError = vm.push(vm.constants[globalIndex])
+        if vmError != nil:
+          return vmError
+      of OpArray:
+        let arrayLength = readUint16(
+          vm.instructions[ip+1 .. len(vm.instructions)-1]
+        )
+        ip += 2
+
+        let
+          startIndex = vm.stackPointer - arrayLength
+          endIndex = vm.stackPointer - 1
+        var
+          elements: seq[Obj] = @[]
+
+        for index in startIndex .. endIndex:
+          elements.add(vm.stack[index])
+
+        let vmError: VMError = vm.push(newArray(elements))
         if vmError != nil:
           return vmError
       else:

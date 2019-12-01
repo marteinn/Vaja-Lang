@@ -20,7 +20,8 @@ from code import
   OpNil,
   OpSetGlobal,
   OpGetGlobal,
-  OpCombine
+  OpCombine,
+  OpArray
 from obj import Obj, newInteger, newStr
 from ast import Node, NodeType
 from symbol_table import newSymbolTable, SymbolTable, define, resolve, Symbol, `$`
@@ -200,6 +201,13 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
         discard compiler.emit(OpTrue)
       else:
         discard compiler.emit(OpFalse)
+    of NodeType.NTArrayLiteral:
+      for element in node.arrayElements:
+        let err = compiler.compile(element)
+        if err != nil:
+          return err
+      discard compiler.emit(OpArray, @[len(node.arrayElements)])
+
     of NodeType.NTAssignStatement:
       let err = compiler.compile(node.assignValue)
       if err != nil:

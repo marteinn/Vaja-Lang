@@ -23,7 +23,8 @@ from code import
   OpNil,
   OpGetGlobal,
   OpSetGlobal,
-  OpCombine
+  OpCombine,
+  OpArray
 from lexer import newLexer, Lexer, nextToken, readCharacter
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
@@ -93,6 +94,52 @@ proc runTests(tests: seq[CompilerTestCase]) =
     testConstants(x.expectedConstants, bytecode.constants)
 
 suite "compiler tests":
+  test "arrays":
+    let tests: seq[CompilerTestCase] = @[
+      (
+        "[]",
+        newSeq[TestValue](),
+        @[
+          make(OpArray, @[0]),
+          make(OpPop),
+      ]),
+      (
+        "[1, 2, 3]",
+        @[
+          TestValue(valueType: TVTInt, intValue: 1),
+          TestValue(valueType: TVTInt, intValue: 2),
+          TestValue(valueType: TVTInt, intValue: 3),
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpConstant, @[1]),
+          make(OpConstant, @[2]),
+          make(OpArray, @[3]),
+          make(OpPop),
+      ]),
+      (
+        "[1+1, 2+2, 3]",
+        @[
+          TestValue(valueType: TVTInt, intValue: 1),
+          TestValue(valueType: TVTInt, intValue: 1),
+          TestValue(valueType: TVTInt, intValue: 2),
+          TestValue(valueType: TVTInt, intValue: 2),
+          TestValue(valueType: TVTInt, intValue: 3),
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpConstant, @[1]),
+          make(OpAdd),
+          make(OpConstant, @[2]),
+          make(OpConstant, @[3]),
+          make(OpAdd),
+          make(OpConstant, @[4]),
+          make(OpArray, @[3]),
+          make(OpPop),
+      ]),
+    ]
+
+    runTests(tests)
   test "strings":
     let tests: seq[CompilerTestCase] = @[
       (

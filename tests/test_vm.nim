@@ -32,6 +32,23 @@ proc runTests(tests: seq[(string, TestValue)]) =
     testExpectedObj(x[1], obj)
 
 suite "vm tests":
+  test "arrays":
+    let tests: seq[(string, TestValue)] = @[
+      ("[]", TestValue(valueType: TVTArray, arrayElements: @[])),
+      ("[1, 2, 3]", TestValue(valueType: TVTArray, arrayElements: @[
+        TestValue(valueType: TVTInt, intValue: 1),
+        TestValue(valueType: TVTInt, intValue: 2),
+        TestValue(valueType: TVTInt, intValue: 3),
+      ])),
+      ("[1 + 2, 2 + 3, 3 + 4]", TestValue(valueType: TVTArray, arrayElements: @[
+        TestValue(valueType: TVTInt, intValue: 3),
+        TestValue(valueType: TVTInt, intValue: 5),
+        TestValue(valueType: TVTInt, intValue: 7),
+      ])),
+    ]
+
+    runTests(tests)
+
   test "string expressions":
     let tests: seq[(string, TestValue)] = @[
       ("\"Hello world\"", TestValue(valueType: TVTString, strValue: "Hello world")),
