@@ -188,6 +188,28 @@ suite "compiler tests":
           make(OpPop),
         ],
       ),
+      (
+        """fn()
+1
+2
+end""",
+        @[
+          TestValue(valueType: TVTInt, intValue: 1),
+          TestValue(valueType: TVTInt, intValue: 2),
+          TestValue(
+            valueType: TVTInstructions,
+            instructions: @[
+              make(OpConstant, @[0]),
+              make(OpPop),
+              make(OpConstant, @[1]),
+              make(OpReturnValue),
+          ])
+        ],
+        @[
+          make(OpConstant, @[2]),
+          make(OpPop),
+        ],
+      ),
     ]
     runTests(tests)
 
