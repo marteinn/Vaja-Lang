@@ -26,11 +26,20 @@ from code import
   OpCombine,
   OpArray,
   OpHashMap,
-  OpIndex
+  OpIndex,
+  OpReturn,
+  OpReturnValue
 from lexer import newLexer, Lexer, nextToken, readCharacter
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
-from compiler import newCompiler, compile, toBytecode
+from compiler import
+  newCompiler,
+  compile,
+  toBytecode,
+  emit,
+  enterScope,
+  leaveScope,
+  EmittedInstruction
 from obj import Obj, inspect, `$`
 from helpers import TestValueType, TestValue, `==`, `$`
 
@@ -96,6 +105,92 @@ proc runTests(tests: seq[CompilerTestCase]) =
     testConstants(x.expectedConstants, bytecode.constants)
 
 suite "compiler tests":
+  test "compiler scopes":
+    var compiler = newCompiler()
+    check(compiler.scopeIndex == 0)
+
+    discard compiler.emit(OpMul)
+    discard compiler.enterScope()
+
+    check(len(compiler.scopes) == 2)
+    check(compiler.scopeIndex == 1)
+
+    discard compiler.emit(OpSub)
+    check(len(compiler.scopes[compiler.scopeIndex].instructions) == 1)
+
+    var lastInstruction: EmittedInstruction = compiler.scopes[compiler.scopeIndex].lastInstruction
+    check(lastInstruction.opCode == OpSub)
+
+    discard compiler.leaveScope()
+    check(compiler.scopeIndex == 0)
+
+    discard compiler.emit(OpAdd)
+    check(len(compiler.scopes[compiler.scopeIndex].instructions) == 2)
+
+    lastInstruction = compiler.scopes[compiler.scopeIndex].lastInstruction
+    check(lastInstruction.opCode == OpAdd)
+
+    var prevInstruction = compiler.scopes[compiler.scopeIndex].prevInstruction
+    check(prevInstruction.opCode == OpMul)
+
+
+  test "functions":
+    let tests: seq[CompilerTestCase] = @[
+      (
+        "fn() return 5 + 1 end",
+        @[
+          TestValue(valueType: TVTInt, intValue: 5),
+          TestValue(valueType: TVTInt, intValue: 1),
+          TestValue(
+            valueType: TVTInstructions,
+            instructions: @[
+              make(OpConstant, @[0]),
+              make(OpConstant, @[1]),
+              make(OpAdd),
+              make(OpReturnValue),
+          ])
+        ],
+        @[
+          make(OpConstant, @[2]),
+          make(OpPop),
+        ],
+      ),
+      (
+        "fn() 5 + 1 end",
+        @[
+          TestValue(valueType: TVTInt, intValue: 5),
+          TestValue(valueType: TVTInt, intValue: 1),
+          TestValue(
+            valueType: TVTInstructions,
+            instructions: @[
+              make(OpConstant, @[0]),
+              make(OpConstant, @[1]),
+              make(OpAdd),
+              make(OpReturnValue),
+          ])
+        ],
+        @[
+          make(OpConstant, @[2]),
+          make(OpPop),
+        ],
+      ),
+      (
+        "fn() end",
+        @[
+          TestValue(
+            valueType: TVTInstructions,
+            instructions: @[
+              make(OpReturn),
+          ])
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpPop),
+        ],
+      ),
+    ]
+    runTests(tests)
+
   test "index operations":
     let tests: seq[CompilerTestCase] = @[
       (

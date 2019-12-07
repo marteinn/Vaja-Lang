@@ -28,6 +28,9 @@ const
   OpArray*: OPCode = 20
   OpHashMap*: OPCode = 21
   OpIndex*: OPCode = 22
+  OpCall*: OPCode = 23
+  OpReturn*: OPCode = 24
+  OpReturnValue*: OPCode = 25
 
 type
   Definition* = ref object
@@ -57,6 +60,9 @@ let definitions: Table[Opcode, Definition] = {
   OpArray: Definition(name: "OpArray", operandWidths: @[2]),
   OpHashMap: Definition(name: "OpHashMap", operandWidths: @[2]),
   OpIndex: Definition(name: "OpIndex", operandWidths: @[]),
+  OpCall: Definition(name: "OpCall", operandWidths: @[]),
+  OpReturn: Definition(name: "OpReturn", operandWidths: @[]),
+  OpReturnValue: Definition(name: "OpReturnValue", operandWidths: @[]),
 }.toTable
 
 proc lookup*(op: byte): Definition =
@@ -137,3 +143,6 @@ proc toString*(instructions: Instructions): string =
     result &= "\n"
 
     i += 1 + readResult.read
+
+proc `$`*(instructions: Instructions): string =
+  return toString(instructions)

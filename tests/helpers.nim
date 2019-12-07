@@ -2,6 +2,7 @@ import sequtils
 import tables
 from strutils import join
 from obj import Obj, ObjType
+from code import Instructions, `$`
 
 type
   TestValueType* = enum
@@ -12,6 +13,7 @@ type
     TVTString
     TVTArray
     TVTHashMap
+    TVTInstructions,
   TestValue* = ref object
     case valueType*: TestValueType
       of TVTInt: intValue*: int
@@ -21,6 +23,7 @@ type
       of TVTString: strValue*: string
       of TVTArray: arrayElements*: seq[TestValue]
       of TVTHashMap: hashMapElements*: OrderedTable[string, TestValue]
+      of TVTInstructions: instructions*: seq[Instructions]
 
 proc `$`*(tv: TestValue): string =
   case tv.valueType:
@@ -50,6 +53,8 @@ proc `$`*(tv: TestValue): string =
           elementsCode = elementsCode & ", "
         elementsCode = elementsCode & key & ": " & $val
       return "{" & elementsCode & "}"
+    of TVTInstructions:
+      return $tv.instructions
 
 proc `==`*(tv: TestValue, obj: Obj): bool =
   case tv.valueType:
@@ -79,3 +84,10 @@ proc `==`*(tv: TestValue, obj: Obj): bool =
         if tvElement != obj.hashMapElements[key]:
           return false
       return true
+    of TVTInstructions:
+      var flattenInstructions: Instructions = @[]
+      for x in tv.instructions:
+        for y in x:
+          flattenInstructions.add(y)
+
+      return $flattenInstructions == $obj.compiledFunctionInstructions

@@ -4,6 +4,7 @@ import nre
 import tables
 import hashes
 from ast import Node, toCode
+from code import Instructions, `$`
 
 type
   NativeValue* = ref object of RootObj
@@ -15,6 +16,7 @@ type
     OTError
     OTFunction
     OTFunctionGroup
+    OTCompiledFunction
     OTReturn
     OTNil
     OTArray
@@ -36,6 +38,8 @@ type
         functionBody*: Node
         functionEnv*: Env
         functionParams*: seq[Node]
+      of OTCompiledFunction:
+        compiledFunctionInstructions*: Instructions
       of OTMacro:
         macroBody*: Node
         macroEnv*: Env
@@ -142,6 +146,8 @@ proc inspect*(obj: Obj): string =
         paramsCode: seq[string] = map(obj.functionParams, proc (x: Node): string = toCode(x))
         paramsCodeString: string = join(paramsCode, ", ")
       "fn (" & paramsCodeString & ") " & obj.functionBody.toCode() & " end"
+    of OTCompiledFunction:
+      "<compiled function " & $obj.compiledFunctionInstructions & ">"
     of OTMacro:
       let
         paramsCode: seq[string] = map(obj.macroParams, proc (x: Node): string = toCode(x))
@@ -192,6 +198,12 @@ proc newFunction*(functionBody: Node, functionEnv: Env, functionParams: seq[Node
     functionBody: functionBody,
     functionEnv: functionEnv,
     functionParams: functionParams
+  )
+
+proc newCompiledFunction*(instructions: Instructions): Obj =
+  return Obj(
+    objType: ObjType.OTCompiledFunction,
+    compiledFunctionInstructions: instructions
   )
 
 proc newMacro*(macroBody: Node, macroEnv: Env, macroParams: seq[Node]): Obj =

@@ -25,8 +25,10 @@ from code import
   OpCombine,
   OpArray,
   OpHashMap,
-  OpIndex
-from obj import Obj, newInteger, newStr
+  OpIndex,
+  OpReturn,
+  OpReturnValue
+from obj import Obj, newInteger, newStr, newCompiledFunction
 from ast import Node, NodeType
 from symbol_table import newSymbolTable, SymbolTable, define, resolve, Symbol, `$`
 
@@ -37,17 +39,28 @@ type
   CompilerError* = ref object
     message*: string
   EmittedInstruction* = ref object
-    opCode: OpCode
+    opCode*: OpCode
     position: int
-  Compiler* = ref object
+  CompilationScope* = ref object
     instructions*: Instructions
+    lastInstruction*: EmittedInstruction
+    prevInstruction*: EmittedInstruction
+  Compiler* = ref object
     constants*: seq[Obj]
     symbolTable*: SymbolTable
-    lastInstruction: EmittedInstruction
-    prevInstruction: EmittedInstruction
+    scopes*: seq[CompilationScope]
+    scopeIndex*: int
+
+proc newCompilationScope(): CompilationScope =
+  return CompilationScope(instructions: @[])
 
 proc newCompiler*(): Compiler =
-  return Compiler(instructions: @[], constants: @[], symbolTable: newSymbolTable())
+  let mainScope = newCompilationScope()
+  return Compiler(
+    constants: @[],
+    symbolTable: newSymbolTable(),
+    scopes: @[mainScope],
+  )
 
 proc newCompiler*(constants: var seq[Obj], symbolTable: var SymbolTable): Compiler =
   var compiler = newCompiler()
@@ -55,18 +68,31 @@ proc newCompiler*(constants: var seq[Obj], symbolTable: var SymbolTable): Compil
   compiler.symbolTable = symbolTable
   return compiler
 
+method currentInstructions(compiler: var Compiler): Instructions {.base.} =
+  return compiler.scopes[compiler.scopeIndex].instructions
+
 method setLastInstruction(compiler: var Compiler, op: OpCode, position: int) {.base.} =
+  var currentScope = compiler.scopes[compiler.scopeIndex]
   let
-    prev = compiler.lastInstruction
+    prev = currentScope.lastInstruction
     last = EmittedInstruction(opCode: op, position: position)
 
-  compiler.prevInstruction = prev
-  compiler.lastInstruction = last
+  currentScope.prevInstruction = prev
+  currentScope.lastInstruction = last
 
 method addInstruction(compiler: var Compiler, instructions: seq[byte]): int {.base.} =
-  let posNewInstruction = len(compiler.instructions)
-  compiler.instructions.add(instructions)
+  let posNewInstruction = len(compiler.currentInstructions())
+  var compilerInstructions = compiler.currentInstructions()
+
+  compilerInstructions.add(instructions)
+  compiler.scopes[compiler.scopeIndex].instructions = compilerInstructions
   return posNewInstruction
+
+method lastInstructionIs(compiler: var Compiler, opCode: OPCode): bool {.base.} =
+  if len(compiler.currentInstructions()) == 0:
+    return false
+
+  return compiler.scopes[compiler.scopeIndex].lastInstruction.opCode == opCode
 
 method emit*(compiler: var Compiler, op: OpCode, operands: seq[int]): int {.base.} =
   let
@@ -79,23 +105,52 @@ method emit*(compiler: var Compiler, op: OpCode, operands: seq[int]): int {.base
 method emit*(compiler: var Compiler, op: OpCode): int {.base.} =
   return emit(compiler, op, @[])
 
+method enterScope*(compiler: var Compiler): int {.base.} =
+  let
+    scope = CompilationScope(instructions: @[])
+  compiler.scopeIndex = compiler.scopeIndex + 1
+  compiler.scopes.add(scope)
+  return compiler.scopeIndex
+
+method leaveScope*(compiler: var Compiler): Instructions {.base.} =
+  let instructions = compiler.currentInstructions()
+  var scopes = compiler.scopes
+  discard pop(scopes)
+
+  compiler.scopes = scopes
+  compiler.scopeIndex = compiler.scopeIndex - 1
+
+  return instructions
+
 method addConstant*(compiler: var Compiler, obj: Obj): int {.base.} =
   compiler.constants.add(obj)
   return len(compiler.constants) - 1
 
 method replaceInstruction(compiler: var Compiler, pos: int, newInstruction: seq[byte]) {.base.} =
+  var instructions = compiler.currentInstructions()
   for i, instruction in newInstruction:
-    compiler.instructions[pos+i] = instruction
+    instructions[pos+i] = instruction
+
+  compiler.scopes[compiler.scopeIndex].instructions = instructions
 
 method changeOperand(compiler: var Compiler, opPos: int, operand: int) {.base.} =
-  let op = OpCode(compiler.instructions[opPos])
+  let op = OpCode(compiler.currentInstructions()[opPos])
   let newInstruction = make(op, @[operand])
 
   compiler.replaceInstruction(opPos, newInstruction)
 
 method removeLastPop(compiler: var Compiler) {.base.} =
-  discard pop(compiler.instructions)
-  compiler.lastInstruction = compiler.prevInstruction
+  var currentScope = compiler.scopes[compiler.scopeIndex]
+  discard pop(compiler.scopes[compiler.scopeIndex].instructions)
+  currentScope.lastInstruction = currentScope.prevInstruction
+
+method replaceLastPopWithReturnValue(compiler: var Compiler) {.base.} =
+  let currentScope = compiler.scopes[compiler.scopeIndex]
+  compiler.replaceInstruction(
+    currentScope.lastInstruction.position,
+    make(OpReturnValue)
+  )
+  currentScope.lastInstruction.opCode = OpReturnValue
 
 method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
   case node.nodeType:
@@ -114,6 +169,24 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
       if err != nil:
         return err
       discard compiler.emit(OpPop)
+    of NodeType.NTFunctionLiteral:
+      discard compiler.enterScope()
+
+      let err = compiler.compile(node.functionBody)
+      if err != nil:
+        return err
+
+      if compiler.lastInstructionIs(OpPop):
+        compiler.replaceLastPopWithReturnValue()
+
+      if not compiler.lastInstructionIs(OpReturnValue):
+        discard compiler.emit(OpReturn)
+
+      let
+        instructions = compiler.leaveScope()
+        compiledFn: Obj = newCompiledFunction(instructions)
+
+      discard compiler.emit(OpConstant, @[compiler.addConstant(compiledFn)])
     of NodeType.NTIfExpression:
       let err = compiler.compile(node.ifCondition)
       if err != nil:
@@ -124,11 +197,11 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
       if cErr != nil:
         return cErr
 
-      if compiler.lastInstruction.opCode == OpPop:
+      if compiler.lastInstructionIs(OpPop):
         compiler.removeLastPop()
 
       let jumpPos = compiler.emit(OpJump, @[9999])
-      let afterConsPos = len(compiler.instructions)
+      let afterConsPos = len(compiler.currentInstructions())
       compiler.changeOperand(jumpNotTruthyPos, afterConsPos)
 
       if node.ifAlternative == nil:
@@ -138,10 +211,10 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
         if altError != nil:
           return altError
 
-        if compiler.lastInstruction.opCode == OpPop:
+        if compiler.lastInstructionIs(OpPop):
           compiler.removeLastPop()
 
-      let afterAltPos = len(compiler.instructions)
+      let afterAltPos = len(compiler.currentInstructions())
       compiler.changeOperand(jumpPos, afterAltPos)
     of NodeType.NTPrefixExpression:
       let errRight = compiler.compile(node.prefixRight)
@@ -242,12 +315,19 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
       if indexErr != nil:
         return indexErr
       discard compiler.emit(OpIndex)
+
+    of NodeType.NTReturnStatement:
+      let err = compiler.compile(node.returnValue)
+      if err != nil:
+        return err
+
+      discard compiler.emit(OpReturnValue)
     else:
       return nil
   return nil
 
-method toBytecode*(compiler: Compiler): Bytecode {.base.} =
+method toBytecode*(compiler: var Compiler): Bytecode {.base.} =
   return Bytecode(
-    instructions: compiler.instructions,
+    instructions: compiler.currentInstructions(),
     constants: compiler.constants
   )
