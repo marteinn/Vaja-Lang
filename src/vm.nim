@@ -117,7 +117,7 @@ method currentFrame(vm: var VM): Frame {.base.} =
   return vm.frames[vm.framesIndex-1]
 
 method pushFrame(vm: var VM, frame: Frame): Frame {.base.} =
-  vm.frames.add(frame)
+  vm.frames[vm.framesIndex] = frame
   vm.framesIndex = vm.framesIndex + 1
   return frame
 
