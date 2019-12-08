@@ -99,7 +99,7 @@ suite "vm tests":
     let tests: seq[(string, TestValue)] = @[
       ("let one = 1; one", TestValue(valueType: TVTInt, intValue: 1)),
       ("let one = 1; let two = 2; one + two", TestValue(valueType: TVTInt, intValue: 3)),
-      ("let one = 1; let two = one + 2; one + two", TestValue(valueType: TVTInt, intValue: 3)),
+      ("let one = 1; let two = one + 1; one + two", TestValue(valueType: TVTInt, intValue: 3)),
     ]
 
     runTests(tests)
