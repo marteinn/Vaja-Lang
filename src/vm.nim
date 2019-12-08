@@ -43,6 +43,7 @@ from code import
   OpHashMap,
   OpIndex,
   OpCall,
+  OpReturn,
   OpReturnValue
 
 var
@@ -367,6 +368,14 @@ method runVM*(vm: var VM): VMError {.base.} =
         let vmError: VMError = vm.push(returnValue)
         if vmError != nil:
           return vmError
+      of OpReturn:
+        discard vm.popFrame()
+        discard vm.pop()
+
+        let vmError: VMError = vm.push(OBJ_NIL)
+        if vmError != nil:
+          return vmError
+
       else:
         discard
 

@@ -33,10 +33,37 @@ proc runTests(tests: seq[(string, TestValue)]) =
     testExpectedObj(x[1], obj)
 
 suite "vm tests":
-  test "function calls":
+  test "function calls without args":
     let tests: seq[(string, TestValue)] = @[
       ("""let a = fn() 2 + 3 end
 a()""", TestValue(valueType: TVTInt, intValue: 5)),
+      ("""let one = fn() 1 end
+let two = fn() 2 end
+one() + two()""", TestValue(valueType: TVTInt, intValue: 3)),
+    ("""let one = fn() 1 end
+let two = fn() one() + 1 end
+let three = fn() two() + 1 end
+three()""", TestValue(valueType: TVTInt, intValue: 3)),
+    ]
+    runTests(tests)
+
+  test "function calls with returns":
+    let tests: seq[(string, TestValue)] = @[
+      ("""let a = fn()
+  return 1
+  2
+end
+a()""", TestValue(valueType: TVTInt, intValue: 1)),
+    ]
+    runTests(tests)
+
+  test "function call with no return value":
+    let tests: seq[(string, TestValue)] = @[
+      ("""let a = fn() end
+a()""", TestValue(valueType: TVTNil)),
+      ("""let a = fn() end
+let b = fn () a() end
+b()""", TestValue(valueType: TVTNil)),
     ]
     runTests(tests)
 
