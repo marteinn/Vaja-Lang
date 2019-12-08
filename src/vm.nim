@@ -1,6 +1,7 @@
 import strformat
 import tables
 from compiler import Bytecode
+from frame import Frame, newFrame, getInstructions
 from obj import
   Obj,
   ObjType,
@@ -13,6 +14,7 @@ from obj import
   newStr,
   newArray,
   newHashMap,
+  newCompiledFunction,
   `$`
 from code import
   Instructions,
@@ -49,33 +51,53 @@ var
 const
   stackSize: int = 2048
   globalsSize*: int = 65536
+  frameSize*: int = 1024
 
 type
   VM* = ref object
     constants: seq[Obj]
-    instructions: Instructions
     stack: seq[Obj]
     stackPointer: int
     globals: seq[Obj]
+    frames: seq[Frame]
+    framesIndex: int
   VMError* = ref object
     message*: string
 
 proc newVM*(bytecode: Bytecode): VM =
+  let
+    mainFn: Obj = newCompiledFunction(bytecode.instructions)
+    mainFrame: Frame = newFrame(mainFn)
+  var
+    frames = newSeq[Frame](stackSize)
+
+  frames[0] = mainFrame
+
   return VM(
     constants: bytecode.constants,
-    instructions: bytecode.instructions,
     stack: newSeq[Obj](stackSize),
     globals: newSeq[Obj](globalsSize),
-    stackPointer: 0
+    stackPointer: 0,
+    frames: frames,
+    framesIndex: 1,
   )
 
 proc newVM*(bytecode: Bytecode, globals: var seq[Obj]): VM =
+  let
+    mainFn: Obj = newCompiledFunction(bytecode.instructions)
+    mainFrame: Frame = newFrame(mainFn)
+  var
+    frames = newSeq[Frame](stackSize)
+
+  frames[0] = mainFrame
+
   return VM(
     constants: bytecode.constants,
-    instructions: bytecode.instructions,
     stack: newSeq[Obj](stackSize),
     globals: globals,
-    stackPointer: 0
+    stackPointer: 0,
+    frames: frames,
+    framesIndex: 1,
   )
 
 proc push(vm: var VM, obj: Obj): VMError =
@@ -90,6 +112,18 @@ proc pop(vm: var VM): Obj =
   let obj = vm.stack[vm.stackPointer-1]
   vm.stackPointer -= 1
   return obj
+
+method currentFrame(vm: var VM): Frame {.base.} =
+  return vm.frames[vm.framesIndex-1]
+
+method pushFrame(vm: var VM, frame: Frame): Frame {.base.} =
+  vm.frames.add(frame)
+  vm.framesIndex = vm.framesIndex + 1
+  return frame
+
+method popFrame(vm: var VM): Frame {.base.} =
+  vm.framesIndex = vm.framesIndex - 1
+  return vm.frames[vm.framesIndex]
 
 proc toBoolObj(boolValue: bool): Obj =
   if boolValue: OBJ_TRUE else: OBJ_FALSE
@@ -180,17 +214,24 @@ method execIndexExpression(vm: var VM, left: Obj, index: Obj): VMError {.base.} 
   return VMError(message: "Index operation is not supported")
 
 method runVM*(vm: var VM): VMError {.base.} =
-  var ip = 0
-  while ip < len(vm.instructions):
-    let
-      instruction = vm.instructions[ip]
-      opCode = OpCode(instruction)
+  var
+    ip: int
+    instructions: Instructions
+    opCode: OPCode
+
+  while vm.currentFrame().ip < len(vm.currentFrame().getInstructions())-1:
+    vm.currentFrame().ip += 1
+
+    ip = vm.currentFrame().ip
+    instructions = vm.currentFrame.getInstructions()
+    opCode = OpCode(instructions[ip])
+
     case opCode:
       of OpConstant:
         let constIndex = readUint16(
-          vm.instructions[ip+1 .. len(vm.instructions)-1]
+          instructions[ip+1 .. len(instructions)-1]
         )
-        ip += 2
+        vm.currentFrame().ip += 2
 
         let vmError: VMError = vm.push(vm.constants[constIndex])
         if vmError != nil:
@@ -227,43 +268,43 @@ method runVM*(vm: var VM): VMError {.base.} =
           return vmError
       of OpJumpNotThruthy:
         let pos = readUint16(
-          vm.instructions[ip+1 .. len(vm.instructions)-1]
+          instructions[ip+1 .. len(instructions)-1]
         )
-        ip += 2
+        vm.currentFrame().ip += 2
 
         let condition = vm.pop()
         if not condition.boolValue:
-          ip = pos - 1
+          vm.currentFrame().ip = pos - 1
       of OpJump:
         let pos = readUint16(
-          vm.instructions[ip+1 .. len(vm.instructions)-1]
+          instructions[ip+1 .. len(instructions)-1]
         )
-        ip = pos - 1
+        vm.currentFrame().ip = pos - 1
       of OpNil:
         let vmError = vm.push(OBJ_NIL)
         if vmError != nil:
           return vmError
       of OpSetGlobal:
         let globalIndex = readUint16(
-          vm.instructions[ip+1 .. len(vm.instructions)-1]
+          instructions[ip+1 .. len(instructions)-1]
         )
-        ip += 2
+        vm.currentFrame().ip += 2
 
         vm.globals[globalIndex] = vm.pop()
       of OpGetGlobal:
         let globalIndex = readUint16(
-          vm.instructions[ip+1 .. len(vm.instructions)-1]
+          instructions[ip+1 .. len(instructions)-1]
         )
-        ip += 2
+        vm.currentFrame().ip += 2
 
         let vmError: VMError = vm.push(vm.constants[globalIndex])
         if vmError != nil:
           return vmError
       of OpArray:
         let arrayLength = readUint16(
-          vm.instructions[ip+1 .. len(vm.instructions)-1]
+          instructions[ip+1 .. len(instructions)-1]
         )
-        ip += 2
+        vm.currentFrame().ip += 2
 
         let
           startIndex = vm.stackPointer - arrayLength
@@ -282,10 +323,10 @@ method runVM*(vm: var VM): VMError {.base.} =
       of OpHashMap:
         let
           hashMapLength = readUint16(
-            vm.instructions[ip+1 .. len(vm.instructions)-1]
+            instructions[ip+1 .. len(instructions)-1]
           )
           hashMapPairs = int(hashMapLength/2)
-        ip += 2
+        vm.currentFrame().ip += 2
 
         let
           startIndex = vm.stackPointer - hashMapLength
@@ -312,7 +353,7 @@ method runVM*(vm: var VM): VMError {.base.} =
       else:
         discard
 
-    ip += 1
+    #ip += 1
 
 method stackTop*(vm: VM): Obj {.base.} =
   if len(vm.stack) == 0:

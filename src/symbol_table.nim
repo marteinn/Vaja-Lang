@@ -46,5 +46,4 @@ method resolve*(symbolTable: var SymbolTable, name: string): (Symbol, bool) {.ba
   if not (name in symbolTable.store):
     return (nil, false)
 
-  let res = symbolTable.store[name]
   return (symbolTable.store[name], true)

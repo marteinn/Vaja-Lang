@@ -561,7 +561,6 @@ proc parseIndexPropertyOperationInfix(parser: var Parser, left: Node): Node =
 proc parseIndexOperationInfix(parser: var Parser, left: Node): Node =
   let
     token: Token = parser.curToken
-    precedence: Precedence = parser.currentPrecedence()
   discard parser.nextParserToken()
 
   let right: Node = parser.parseExpression(Precedence.LOWEST.int)

@@ -28,7 +28,8 @@ from code import
   OpHashMap,
   OpIndex,
   OpReturn,
-  OpReturnValue
+  OpReturnValue,
+  OpCall
 from lexer import newLexer, Lexer, nextToken, readCharacter
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
@@ -133,6 +134,47 @@ suite "compiler tests":
     var prevInstruction = compiler.scopes[compiler.scopeIndex].prevInstruction
     check(prevInstruction.opCode == OpMul)
 
+  test "function calls":
+    let tests: seq[CompilerTestCase] = @[
+      (
+        "fn() 1 end()",
+        @[
+          TestValue(valueType: TVTInt, intValue: 1),
+          TestValue(
+            valueType: TVTInstructions,
+            instructions: @[
+              make(OpConstant, @[0]),
+              make(OpReturnValue),
+          ])
+        ],
+        @[
+          make(OpConstant, @[1]),
+          make(OpCall),
+          make(OpPop),
+        ],
+      ),
+      (
+        """let a = fn() 1 end
+a()""",
+        @[
+          TestValue(valueType: TVTInt, intValue: 1),
+          TestValue(
+            valueType: TVTInstructions,
+            instructions: @[
+              make(OpConstant, @[0]),
+              make(OpReturnValue),
+          ])
+        ],
+        @[
+          make(OpConstant, @[1]),
+          make(OpSetGlobal, @[0]),
+          make(OpGetGlobal, @[0]),
+          make(OpCall),
+          make(OpPop),
+        ],
+      ),
+    ]
+    runTests(tests)
 
   test "functions":
     let tests: seq[CompilerTestCase] = @[
