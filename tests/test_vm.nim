@@ -47,6 +47,14 @@ three()""", TestValue(valueType: TVTInt, intValue: 3)),
     ]
     runTests(tests)
 
+  test "first class functions":
+    let tests: seq[(string, TestValue)] = @[
+      ("""let a = fn() 4 end
+let b = fn() a end
+b()()""", TestValue(valueType: TVTInt, intValue: 4)),
+    ]
+    runTests(tests)
+
   test "function calls with returns":
     let tests: seq[(string, TestValue)] = @[
       ("""let a = fn()
