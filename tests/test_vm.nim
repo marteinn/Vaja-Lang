@@ -33,6 +33,13 @@ proc runTests(tests: seq[(string, TestValue)]) =
     testExpectedObj(x[1], obj)
 
 suite "vm tests":
+  test "function calls":
+    let tests: seq[(string, TestValue)] = @[
+      ("""let a = fn() 2 + 3 end
+a()""", TestValue(valueType: TVTInt, intValue: 5)),
+    ]
+    runTests(tests)
+
   test "index operations":
     let tests: seq[(string, TestValue)] = @[
       ("[5, 2][0]", TestValue(valueType: TVTInt, intValue: 5)),

@@ -41,7 +41,9 @@ from code import
   OpCombine,
   OpArray,
   OpHashMap,
-  OpIndex
+  OpIndex,
+  OpCall,
+  OpReturnValue
 
 var
   OBJ_TRUE*: Obj = newBoolean(boolValue=true)
@@ -289,7 +291,6 @@ method runVM*(vm: var VM): VMError {.base.} =
           instructions[ip+1 .. len(instructions)-1]
         )
         vm.currentFrame().ip += 2
-
         vm.globals[globalIndex] = vm.pop()
       of OpGetGlobal:
         let globalIndex = readUint16(
@@ -350,10 +351,24 @@ method runVM*(vm: var VM): VMError {.base.} =
         let vmError = vm.execIndexExpression(left, index)
         if vmError != nil:
           return vmError
+      of OpCall:
+        let fn: Obj = vm.stack[vm.stackPointer-1]
+        if fn.objType != ObjType.OTCompiledFunction:
+          return VMError(message: fmt"Calling non function of type {fn.objType}")
+
+        let frame: Frame = newFrame(fn)
+        discard vm.pushFrame(frame)
+      of OpReturnValue:
+        let returnValue = vm.pop
+
+        discard vm.popFrame()
+        discard vm.pop()
+
+        let vmError: VMError = vm.push(returnValue)
+        if vmError != nil:
+          return vmError
       else:
         discard
-
-    #ip += 1
 
 method stackTop*(vm: VM): Obj {.base.} =
   if len(vm.stack) == 0:
