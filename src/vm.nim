@@ -297,7 +297,7 @@ method runVM*(vm: var VM): VMError {.base.} =
         )
         vm.currentFrame().ip += 2
 
-        let vmError: VMError = vm.push(vm.constants[globalIndex])
+        let vmError: VMError = vm.push(vm.globals[globalIndex])
         if vmError != nil:
           return vmError
       of OpArray:
