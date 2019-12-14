@@ -29,7 +29,9 @@ from code import
   OpIndex,
   OpReturn,
   OpReturnValue,
-  OpCall
+  OpCall,
+  OpGetLocal,
+  OpSetLocal
 from lexer import newLexer, Lexer, nextToken, readCharacter
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
@@ -42,6 +44,7 @@ from compiler import
   leaveScope,
   EmittedInstruction
 from obj import Obj, inspect, `$`
+from symbol_table import SymbolTable
 from helpers import TestValueType, TestValue, `==`, `$`
 
 proc parseSource(source: string): Node =
@@ -106,9 +109,85 @@ proc runTests(tests: seq[CompilerTestCase]) =
     testConstants(x.expectedConstants, bytecode.constants)
 
 suite "compiler tests":
+  test "let statement scopes":
+    let tests: seq[CompilerTestCase] = @[
+      (
+        """let val = 5
+fn () val end
+""",
+        @[
+          TestValue(valueType: TVTInt, intValue: 5),
+          TestValue(
+            valueType: TVTInstructions,
+            instructions: @[
+              make(OpGetGlobal, @[0]),
+              make(OpReturnValue),
+          ])
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpSetGlobal, @[0]),
+          make(OpConstant, @[1]),
+          make(OpPop),
+        ],
+      ),
+      (
+        """fn()
+  let num = 5
+  num
+end
+""",
+        @[
+          TestValue(valueType: TVTInt, intValue: 5),
+          TestValue(
+            valueType: TVTInstructions,
+            instructions: @[
+              make(OpConstant, @[0]),
+              make(OpSetLocal, @[0]),
+              make(OpGetLocal, @[0]),
+              make(OpReturnValue),
+          ])
+        ],
+        @[
+          make(OpConstant, @[1]),
+          make(OpPop),
+        ],
+      ),
+      (
+        """fn()
+  let a = 55
+  let b = 77
+  a + b
+end
+""",
+        @[
+          TestValue(valueType: TVTInt, intValue: 55),
+          TestValue(valueType: TVTInt, intValue: 77),
+          TestValue(
+            valueType: TVTInstructions,
+            instructions: @[
+              make(OpConstant, @[0]),
+              make(OpSetLocal, @[0]),
+              make(OpConstant, @[1]),
+              make(OpSetLocal, @[1]),
+              make(OpGetLocal, @[0]),
+              make(OpGetLocal, @[1]),
+              make(OpAdd),
+              make(OpReturnValue),
+          ])
+        ],
+        @[
+          make(OpConstant, @[2]),
+          make(OpPop),
+        ],
+      ),
+    ]
+    runTests(tests)
+
   test "compiler scopes":
     var compiler = newCompiler()
     check(compiler.scopeIndex == 0)
+    let globalSymbolTable: SymbolTable = compiler.symbolTable
 
     discard compiler.emit(OpMul)
     discard compiler.enterScope()
@@ -122,6 +201,8 @@ suite "compiler tests":
     var lastInstruction: EmittedInstruction = compiler.scopes[compiler.scopeIndex].lastInstruction
     check(lastInstruction.opCode == OpSub)
 
+    check(compiler.symbolTable.outer == globalSymbolTable)
+
     discard compiler.leaveScope()
     check(compiler.scopeIndex == 0)
 
@@ -133,6 +214,9 @@ suite "compiler tests":
 
     var prevInstruction = compiler.scopes[compiler.scopeIndex].prevInstruction
     check(prevInstruction.opCode == OpMul)
+
+    check(compiler.symbolTable == globalSymbolTable)
+    check(compiler.symbolTable.outer == nil)
 
   test "function calls":
     let tests: seq[CompilerTestCase] = @[

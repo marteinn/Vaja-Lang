@@ -22,6 +22,8 @@ from code import
   OpNil,
   OpSetGlobal,
   OpGetGlobal,
+  OpSetLocal,
+  OpGetLocal,
   OpCombine,
   OpArray,
   OpHashMap,
@@ -31,7 +33,16 @@ from code import
   OpCall
 from obj import Obj, newInteger, newStr, newCompiledFunction
 from ast import Node, NodeType
-from symbol_table import newSymbolTable, SymbolTable, define, resolve, Symbol, `$`
+from symbol_table import
+  newSymbolTable,
+  newEnclosedSymbolTable,
+  SymbolTable,
+  define,
+  resolve,
+  Symbol,
+  GLOBAL_SCOPE,
+  LOCAL_SCOPE,
+  `$`
 
 type
   Bytecode* = ref object
@@ -111,6 +122,7 @@ method enterScope*(compiler: var Compiler): int {.base.} =
     scope = CompilationScope(instructions: @[])
   compiler.scopeIndex = compiler.scopeIndex + 1
   compiler.scopes.add(scope)
+  compiler.symbolTable = newEnclosedSymbolTable(compiler.symbolTable)
   return compiler.scopeIndex
 
 method leaveScope*(compiler: var Compiler): Instructions {.base.} =
@@ -120,6 +132,7 @@ method leaveScope*(compiler: var Compiler): Instructions {.base.} =
 
   compiler.scopes = scopes
   compiler.scopeIndex = compiler.scopeIndex - 1
+  compiler.symbolTable = compiler.symbolTable.outer
 
   return instructions
 
@@ -303,7 +316,10 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
       if err != nil:
         return err
       let symbol: Symbol = compiler.symbolTable.define(node.assignName.identValue)
-      discard compiler.emit(OpSetGlobal, @[symbol.index])
+      if symbol.scope == GLOBAL_SCOPE:
+        discard compiler.emit(OpSetGlobal, @[symbol.index])
+      else:
+        discard compiler.emit(OpSetLocal, @[symbol.index])
     of NodeType.NTIdentifier:
       let
         symbolRes: (Symbol, bool) = compiler.symbolTable.resolve(node.identValue)
@@ -312,7 +328,11 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
       if not symbolRes[1]:
         return CompilerError(message: "Name " & node.identValue & " is not defined")
 
-      discard compiler.emit(OpGetGlobal, @[symbol.index])
+      if symbol.scope == GLOBAL_SCOPE:
+        discard compiler.emit(OpGetGlobal, @[symbol.index])
+      else:
+        discard compiler.emit(OpGetLocal, @[symbol.index])
+
     of NodeType.NTIndexOperation:
       let leftErr = compiler.compile(node.indexOpLeft)
       if leftErr != nil:

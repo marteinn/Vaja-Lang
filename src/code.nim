@@ -31,6 +31,8 @@ const
   OpCall*: OPCode = 23
   OpReturn*: OPCode = 24
   OpReturnValue*: OPCode = 25
+  OpGetLocal*: OpCode = 26
+  OpSetLocal*: OpCode = 27
 
 type
   Definition* = ref object
@@ -63,6 +65,8 @@ let definitions: Table[Opcode, Definition] = {
   OpCall: Definition(name: "OpCall", operandWidths: @[]),
   OpReturn: Definition(name: "OpReturn", operandWidths: @[]),
   OpReturnValue: Definition(name: "OpReturnValue", operandWidths: @[]),
+  OpGetLocal: Definition(name: "OpGetLocal", operandWidths: @[1]),
+  OpSetLocal: Definition(name: "OpSetLocal", operandWidths: @[1]),
 }.toTable
 
 proc lookup*(op: byte): Definition =
@@ -86,6 +90,8 @@ proc make*(op: OpCode, operands: seq[int]): seq[byte] =
   for i, operand in operands:
     let width: int = definition.operandWidths[i]
     case width:
+      of 1:
+        instruction[offset] = byte(operand)
       of 2:
         instruction[offset] = byte(operand shr 8 and 0xFF)
         instruction[offset+1] = byte(operand and 0xFF)
@@ -103,6 +109,11 @@ proc readUint16*(instructions: Instructions): int =
     uint16(instructions[1]) or uint16(instructions[0]) shl 8
   )
 
+proc readUint8*(instructions: Instructions): int =
+  return int(
+    uint8(instructions[0])
+  )
+
 proc readOperands*(
   definition: Definition, instructions: Instructions): (seq[int], int
 ) =
@@ -112,8 +123,9 @@ proc readOperands*(
 
   for i, width in definition.operandWidths:
     case width:
+      of 1:
+        operands[i] = readUint8(@[instructions[0]])
       of 2:
-        #operands[i] = int(uint16(instructions[1]) or uint16(instructions[0]) shl 8)
         operands[i] = readUint16(@[instructions[0], instructions[1]])
       else:
         discard

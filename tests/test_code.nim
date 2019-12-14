@@ -7,7 +7,8 @@ from code import
   toString,
   lookup,
   readOperands,
-  OpAdd
+  OpAdd,
+  OpGetLocal
 
 suite "code tests":
   test "test make":
@@ -15,7 +16,8 @@ suite "code tests":
       tuple[op: Opcode, operands: seq[int], expected: seq[byte]]
     ] = @[
       (OpConstant, @[65534], @[byte(OpConstant), 255, 254]),
-      (OpAdd, @[], @[byte(OpAdd)])
+      (OpAdd, @[], @[byte(OpAdd)]),
+      (OpGetLocal, @[255], @[byte(OpGetLocal), 255])
     ]
 
     for x in tests:
@@ -47,7 +49,8 @@ suite "code tests":
       tuple[op: Opcode, operands: seq[int], bytesRead: int]
     ] = @[
       (OpConstant, @[65534], 2),
-      (OpConstant, @[65100], 2)
+      (OpConstant, @[65100], 2),
+      (OpGetLocal, @[255], 1),
     ]
 
     for x in tests:
