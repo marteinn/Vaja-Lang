@@ -197,8 +197,12 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
         discard compiler.emit(OpReturn)
 
       let
+        numLocals = compiler.symbolTable.numDefinitions
         instructions = compiler.leaveScope()
-        compiledFn: Obj = newCompiledFunction(instructions)
+        compiledFn: Obj = newCompiledFunction(
+          instructions=instructions,
+          numLocals=numLocals
+        )
 
       discard compiler.emit(OpConstant, @[compiler.addConstant(compiledFn)])
     of NodeType.NTCallExpression:

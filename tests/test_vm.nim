@@ -33,6 +33,52 @@ proc runTests(tests: seq[(string, TestValue)]) =
     testExpectedObj(x[1], obj)
 
 suite "vm tests":
+  test "calling functions with binding":
+    let tests: seq[(string, TestValue)] = @[
+      ("""let a = fn()
+  let value = 5
+  value
+end
+a()""", TestValue(valueType: TVTInt, intValue: 5)),
+      ("""let a = fn()
+  let one = 1
+  let two = 2
+  one + two
+end
+a()""", TestValue(valueType: TVTInt, intValue: 3)),
+      ("""let oneAndTwo = fn()
+  let one = 1
+  let two = 2
+  one + two
+end
+let twoAndThree = fn()
+  let two = 2
+  let three = 3
+  two + three
+end
+oneAndTwo() + twoAndThree()""", TestValue(valueType: TVTInt, intValue: 8)),
+        ("""let a = fn()
+  let value = 1
+  return value
+end
+let b = fn()
+  let value = 2
+  return value
+end
+a() + b()""", TestValue(valueType: TVTInt, intValue: 3)),
+      ("""let globalVal = 50
+let a = fn()
+  let value = 2
+  globalVal - value
+end
+let b = fn()
+  let value = 4
+  globalVal + value
+end
+a() + b()""", TestValue(valueType: TVTInt, intValue: 102)),
+    ]
+    runTests(tests)
+
   test "function calls without args":
     let tests: seq[(string, TestValue)] = @[
       ("""let a = fn() 2 + 3 end
@@ -52,6 +98,11 @@ three()""", TestValue(valueType: TVTInt, intValue: 3)),
       ("""let a = fn() 4 end
 let b = fn() a end
 b()()""", TestValue(valueType: TVTInt, intValue: 4)),
+      ("""let a = fn()
+    let one = fn() 1 end
+    one
+end
+a()()""", TestValue(valueType: TVTInt, intValue: 1)),
     ]
     runTests(tests)
 

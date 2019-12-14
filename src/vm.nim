@@ -19,6 +19,7 @@ from obj import
 from code import
   Instructions,
   readUint16,
+  readUint8,
   OpCode,
   OpConstant,
   OpAdd,
@@ -44,7 +45,9 @@ from code import
   OpIndex,
   OpCall,
   OpReturn,
-  OpReturnValue
+  OpReturnValue,
+  OpSetLocal,
+  OpGetLocal
 
 var
   OBJ_TRUE*: Obj = newBoolean(boolValue=true)
@@ -60,7 +63,7 @@ type
   VM* = ref object
     constants: seq[Obj]
     stack: seq[Obj]
-    stackPointer: int
+    stackPointer*: int
     globals: seq[Obj]
     frames: seq[Frame]
     framesIndex: int
@@ -69,8 +72,8 @@ type
 
 proc newVM*(bytecode: Bytecode): VM =
   let
-    mainFn: Obj = newCompiledFunction(bytecode.instructions)
-    mainFrame: Frame = newFrame(mainFn)
+    mainFn: Obj = newCompiledFunction(bytecode.instructions, 0)
+    mainFrame: Frame = newFrame(mainFn, 0)
   var
     frames = newSeq[Frame](stackSize)
 
@@ -87,8 +90,8 @@ proc newVM*(bytecode: Bytecode): VM =
 
 proc newVM*(bytecode: Bytecode, globals: var seq[Obj]): VM =
   let
-    mainFn: Obj = newCompiledFunction(bytecode.instructions)
-    mainFrame: Frame = newFrame(mainFn)
+    mainFn: Obj = newCompiledFunction(bytecode.instructions, 0)
+    mainFrame: Frame = newFrame(mainFn, 0)
   var
     frames = newSeq[Frame](stackSize)
 
@@ -302,6 +305,25 @@ method runVM*(vm: var VM): VMError {.base.} =
         let vmError: VMError = vm.push(vm.globals[globalIndex])
         if vmError != nil:
           return vmError
+      of OpSetLocal:
+        let localIndex = readUint8(
+          instructions[ip+1 .. len(instructions)-1]
+        )
+        vm.currentFrame().ip += 1
+        let frame = vm.currentFrame()
+        vm.stack[frame.basePointer+localIndex] = vm.pop()
+      of OpGetLocal:
+        let localIndex = readUint8(
+          instructions[ip+1 .. len(instructions)-1]
+        )
+        vm.currentFrame().ip += 1
+
+        let frame = vm.currentFrame()
+        let vmError: VMError = vm.push(
+          vm.stack[frame.basePointer+localIndex]
+        )
+        if vmError != nil:
+          return vmError
       of OpArray:
         let arrayLength = readUint16(
           instructions[ip+1 .. len(instructions)-1]
@@ -357,20 +379,21 @@ method runVM*(vm: var VM): VMError {.base.} =
         if fn.objType != ObjType.OTCompiledFunction:
           return VMError(message: fmt"Calling non function of type {fn.objType}")
 
-        let frame: Frame = newFrame(fn)
+        let frame: Frame = newFrame(fn, vm.stackPointer)
         discard vm.pushFrame(frame)
+        vm.stackPointer = frame.basePointer + fn.compiledFunctionNumLocals
       of OpReturnValue:
         let returnValue = vm.pop
 
-        discard vm.popFrame()
-        discard vm.pop()
+        let frame = vm.popFrame()
+        vm.stackPointer = frame.basePointer - 1
 
         let vmError: VMError = vm.push(returnValue)
         if vmError != nil:
           return vmError
       of OpReturn:
-        discard vm.popFrame()
-        discard vm.pop()
+        let frame = vm.popFrame()
+        vm.stackPointer = frame.basePointer - 1
 
         let vmError: VMError = vm.push(OBJ_NIL)
         if vmError != nil:

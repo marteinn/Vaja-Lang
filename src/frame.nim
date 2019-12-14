@@ -5,9 +5,10 @@ type
   Frame* = ref object
     fn*: Obj
     ip*: int
+    basePointer*: int
 
-proc newFrame*(fn: Obj): Frame =
-  return Frame(fn: fn, ip: -1)
+proc newFrame*(fn: Obj, basePointer: int): Frame =
+  return Frame(fn: fn, ip: -1, basePointer: basePointer)
 
 method getInstructions*(frame: Frame): Instructions {.base.} =
   return frame.fn.compiledFunctionInstructions
