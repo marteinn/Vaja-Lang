@@ -14,6 +14,7 @@ type
     TVTArray
     TVTHashMap
     TVTInstructions,
+    TVTVMError,
   TestValue* = ref object
     case valueType*: TestValueType
       of TVTInt: intValue*: int
@@ -24,6 +25,7 @@ type
       of TVTArray: arrayElements*: seq[TestValue]
       of TVTHashMap: hashMapElements*: OrderedTable[string, TestValue]
       of TVTInstructions: instructions*: seq[Instructions]
+      of TVTVMError: vmErrorMsg*: string
 
 proc `$`*(tv: TestValue): string =
   case tv.valueType:
@@ -55,6 +57,8 @@ proc `$`*(tv: TestValue): string =
       return "{" & elementsCode & "}"
     of TVTInstructions:
       return $tv.instructions
+    of TVTVMError:
+      return tv.vmErrorMsg
 
 proc `==`*(tv: TestValue, obj: Obj): bool =
   if isNil(obj):
@@ -99,3 +103,5 @@ proc `==`*(tv: TestValue, obj: Obj): bool =
           flattenInstructions.add(y)
 
       return $flattenInstructions == $obj.compiledFunctionInstructions
+    else:
+      return false

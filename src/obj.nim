@@ -41,6 +41,7 @@ type
       of OTCompiledFunction:
         compiledFunctionInstructions*: Instructions
         compiledFunctionNumLocals*: int
+        compiledFunctionNumParams*: int
       of OTMacro:
         macroBody*: Node
         macroEnv*: Env
@@ -202,11 +203,14 @@ proc newFunction*(functionBody: Node, functionEnv: Env, functionParams: seq[Node
     functionParams: functionParams
   )
 
-proc newCompiledFunction*(instructions: Instructions, numLocals: int): Obj =
+proc newCompiledFunction*(
+  instructions: Instructions, numLocals: int, numParams: int
+): Obj =
   return Obj(
     objType: ObjType.OTCompiledFunction,
     compiledFunctionInstructions: instructions,
     compiledFunctionNumLocals: numLocals,
+    compiledFunctionNumParams: numParams,
   )
 
 proc newMacro*(macroBody: Node, macroEnv: Env, macroParams: seq[Node]): Obj =

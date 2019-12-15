@@ -204,7 +204,8 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
         instructions = compiler.leaveScope()
         compiledFn: Obj = newCompiledFunction(
           instructions=instructions,
-          numLocals=numLocals
+          numLocals=numLocals,
+          numParams=len(node.functionParams),
         )
 
       discard compiler.emit(OpConstant, @[compiler.addConstant(compiledFn)])

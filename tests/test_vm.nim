@@ -27,12 +27,31 @@ proc runTests(tests: seq[(string, TestValue)]) =
 
     var vm: VM = newVM(compiler.toBytecode())
     let vmErr = vm.runVM()
-    check(vmErr == nil)
-    let obj: Obj = vm.lastPoppedStackElement()
-
-    testExpectedObj(x[1], obj)
+    if x[1].valueType == TVTVMError:
+      check(x[1].vmErrorMsg == vmErr.message)
+    else:
+      check(vmErr == nil)
+      let obj: Obj = vm.lastPoppedStackElement()
+      testExpectedObj(x[1], obj)
 
 suite "vm tests":
+  test "calling with wrong number of arguments":
+    let tests: seq[(string, TestValue)] = @[
+      ("""let sum = fn(a, b) a+b end; sum(2)""",
+        TestValue(
+          valueType: TVTVMError,
+          vmErrorMsg: "Incorrect number of arguments, expected 2, got 1"
+        )
+      ),
+      ("""let sum = fn() 1 end; sum(2)""",
+        TestValue(
+          valueType: TVTVMError,
+          vmErrorMsg: "Incorrect number of arguments, expected 0, got 1"
+        )
+      ),
+    ]
+    runTests(tests)
+
   test "calling functions with arguments and bindings":
     let tests: seq[(string, TestValue)] = @[
       ("""let a = fn(a) a end

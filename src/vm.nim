@@ -72,7 +72,7 @@ type
 
 proc newVM*(bytecode: Bytecode): VM =
   let
-    mainFn: Obj = newCompiledFunction(bytecode.instructions, 0)
+    mainFn: Obj = newCompiledFunction(bytecode.instructions, 0, 0)
     mainFrame: Frame = newFrame(mainFn, 0)
   var
     frames = newSeq[Frame](stackSize)
@@ -90,7 +90,7 @@ proc newVM*(bytecode: Bytecode): VM =
 
 proc newVM*(bytecode: Bytecode, globals: var seq[Obj]): VM =
   let
-    mainFn: Obj = newCompiledFunction(bytecode.instructions, 0)
+    mainFn: Obj = newCompiledFunction(bytecode.instructions, 0, 0)
     mainFrame: Frame = newFrame(mainFn, 0)
   var
     frames = newSeq[Frame](stackSize)
@@ -384,6 +384,9 @@ method runVM*(vm: var VM): VMError {.base.} =
         let fn: Obj = vm.stack[vm.stackPointer-numArgs-1]
         if fn.objType != ObjType.OTCompiledFunction:
           return VMError(message: fmt"Calling non function of type {fn.objType}")
+
+        if numArgs != fn.compiledFunctionNumParams:
+          return VMError(message: fmt"Incorrect number of arguments, expected {fn.compiledFunctionNumParams}, got {numArgs}")
 
         let frame: Frame = newFrame(fn, vm.stackPointer-numArgs)
         discard vm.pushFrame(frame)
