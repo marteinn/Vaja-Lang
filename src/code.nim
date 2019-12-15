@@ -62,7 +62,7 @@ let definitions: Table[Opcode, Definition] = {
   OpArray: Definition(name: "OpArray", operandWidths: @[2]),
   OpHashMap: Definition(name: "OpHashMap", operandWidths: @[2]),
   OpIndex: Definition(name: "OpIndex", operandWidths: @[]),
-  OpCall: Definition(name: "OpCall", operandWidths: @[]),
+  OpCall: Definition(name: "OpCall", operandWidths: @[1]),
   OpReturn: Definition(name: "OpReturn", operandWidths: @[]),
   OpReturnValue: Definition(name: "OpReturnValue", operandWidths: @[]),
   OpGetLocal: Definition(name: "OpGetLocal", operandWidths: @[1]),

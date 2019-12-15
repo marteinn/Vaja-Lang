@@ -375,11 +375,17 @@ method runVM*(vm: var VM): VMError {.base.} =
         if vmError != nil:
           return vmError
       of OpCall:
-        let fn: Obj = vm.stack[vm.stackPointer-1]
+        vm.currentFrame().ip += 1
+
+        let numArgs = readUint8(
+          instructions[ip+1 .. len(instructions)-1]
+        )
+
+        let fn: Obj = vm.stack[vm.stackPointer-numArgs-1]
         if fn.objType != ObjType.OTCompiledFunction:
           return VMError(message: fmt"Calling non function of type {fn.objType}")
 
-        let frame: Frame = newFrame(fn, vm.stackPointer)
+        let frame: Frame = newFrame(fn, vm.stackPointer-numArgs)
         discard vm.pushFrame(frame)
         vm.stackPointer = frame.basePointer + fn.compiledFunctionNumLocals
       of OpReturnValue:

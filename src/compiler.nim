@@ -186,6 +186,9 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
     of NodeType.NTFunctionLiteral:
       discard compiler.enterScope()
 
+      for arg in node.functionParams:
+        discard compiler.symbolTable.define(arg.identValue)
+
       let err = compiler.compile(node.functionBody)
       if err != nil:
         return err
@@ -209,7 +212,13 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
       let err = compiler.compile(node.callFunction)
       if err != nil:
         return err
-      discard compiler.emit(OpCall)
+
+      for arg in node.callArguments:
+        var argErr = compiler.compile(arg)
+        if argErr != nil:
+          return argErr
+
+      discard compiler.emit(OpCall, @[len(node.callArguments)])
     of NodeType.NTIfExpression:
       let err = compiler.compile(node.ifCondition)
       if err != nil:

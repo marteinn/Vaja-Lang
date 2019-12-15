@@ -33,6 +33,40 @@ proc runTests(tests: seq[(string, TestValue)]) =
     testExpectedObj(x[1], obj)
 
 suite "vm tests":
+  test "calling functions with arguments and bindings":
+    let tests: seq[(string, TestValue)] = @[
+      ("""let a = fn(a) a end
+a(5)""", TestValue(valueType: TVTInt, intValue: 5)),
+    ("""let a = fn(a, b) a+b end
+a(5, 3)""", TestValue(valueType: TVTInt, intValue: 8)),
+      ("""let a = fn(a, b, c)
+  let value = a+b
+  value + c
+end
+a(5, 3, 7)""", TestValue(valueType: TVTInt, intValue: 15)),
+    ("""let sum = fn(a, b)
+  a+b
+end
+sum(2, 3) + sum(6, 4)""", TestValue(valueType: TVTInt, intValue: 15)),
+      ("""let outer = fn(a, b)
+  a+b
+end
+let inner = fn(a, b)
+  outer(a, b)
+end
+inner(2, 3)""", TestValue(valueType: TVTInt, intValue: 5)),
+      ("""let globalVal = 1
+let sum = fn(a, b)
+  let c = a + b
+  c+globalVal
+end
+let outer = fn()
+  sum(6, 2) + sum(2, 1) + globalVal
+end
+outer() + globalVal""", TestValue(valueType: TVTInt, intValue: 15)),
+    ]
+    runTests(tests)
+
   test "calling functions with binding":
     let tests: seq[(string, TestValue)] = @[
       ("""let a = fn()

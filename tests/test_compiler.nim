@@ -233,7 +233,7 @@ end
         ],
         @[
           make(OpConstant, @[1]),
-          make(OpCall),
+          make(OpCall, @[0]),
           make(OpPop),
         ],
       ),
@@ -253,7 +253,56 @@ a()""",
           make(OpConstant, @[1]),
           make(OpSetGlobal, @[0]),
           make(OpGetGlobal, @[0]),
-          make(OpCall),
+          make(OpCall, @[0]),
+          make(OpPop),
+        ],
+      ),
+      (
+        """let a = fn(a) a end
+a(55)""",
+        @[
+          TestValue(
+            valueType: TVTInstructions,
+            instructions: @[
+              make(OpGetLocal, @[0]),
+              make(OpReturnValue),
+          ]),
+          TestValue(valueType: TVTInt, intValue: 55),
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpSetGlobal, @[0]),
+          make(OpGetGlobal, @[0]),
+          make(OpConstant, @[1]),
+          make(OpCall, @[1]),
+          make(OpPop),
+        ],
+      ),
+      (
+        """let a = fn(a, b)
+    a
+    b
+end
+a(55, 66)""",
+        @[
+          TestValue(
+            valueType: TVTInstructions,
+            instructions: @[
+              make(OpGetLocal, @[0]),
+              make(OpPop),
+              make(OpGetLocal, @[1]),
+              make(OpReturnValue),
+          ]),
+          TestValue(valueType: TVTInt, intValue: 55),
+          TestValue(valueType: TVTInt, intValue: 66),
+        ],
+        @[
+          make(OpConstant, @[0]),
+          make(OpSetGlobal, @[0]),
+          make(OpGetGlobal, @[0]),
+          make(OpConstant, @[1]),
+          make(OpConstant, @[2]),
+          make(OpCall, @[2]),
           make(OpPop),
         ],
       ),

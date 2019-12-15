@@ -148,6 +148,7 @@ proc inspect*(obj: Obj): string =
         paramsCodeString: string = join(paramsCode, ", ")
       "fn (" & paramsCodeString & ") " & obj.functionBody.toCode() & " end"
     of OTCompiledFunction:
+      #"<compiled function " & $obj.compiledFunctionInstructions & ">"
       "<compiled function " & $len(obj.compiledFunctionInstructions) & ">"
     of OTMacro:
       let

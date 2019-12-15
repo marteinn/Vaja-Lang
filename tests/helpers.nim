@@ -57,6 +57,9 @@ proc `$`*(tv: TestValue): string =
       return $tv.instructions
 
 proc `==`*(tv: TestValue, obj: Obj): bool =
+  if isNil(obj):
+    return false
+
   if tv.valueType == TVTInt and obj.objType != OTInteger:
     return false
   if tv.valueType == TVTBool and obj.objType != OTBoolean:
