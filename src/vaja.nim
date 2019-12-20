@@ -90,6 +90,8 @@ if mode == RMRepl:
 
       let stackTop: Obj = vm.lastPoppedStackElement()
       inspected = stackTop.inspect()
+
+      globals = vm.globals
     else:
       let evaluated: Obj = eval(expandedProgram, env)
       inspected = evaluated.inspect()
