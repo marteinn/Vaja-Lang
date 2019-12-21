@@ -7,6 +7,7 @@ type
 const
   GLOBAL_SCOPE*: SymbolScope = "GLOBAL"
   LOCAL_SCOPE*: SymbolScope = "LOCAL"
+  BUILTIN_SCOPE*: SymbolScope = "BUILTIN"
 
 type
   Symbol* = ref object
@@ -58,6 +59,15 @@ method define*(symbolTable: var SymbolTable, name: string): Symbol {.base.} =
   symbolTable.store[name] = symbol
   symbolTable.numDefinitions = symbolTable.numDefinitions + 1
 
+  return symbol
+
+method defineBuiltin*(symbolTable: var SymbolTable, index: int, name: string): Symbol {.base.} =
+  let symbol: Symbol = Symbol(
+    name: name,
+    index: index,
+    scope: BUILTIN_SCOPE,
+  )
+  symbolTable.store[name] = symbol
   return symbol
 
 method resolve*(symbolTable: var SymbolTable, name: string): (Symbol, bool) {.base.} =

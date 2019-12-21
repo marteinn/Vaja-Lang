@@ -6,7 +6,7 @@ from obj import
   ObjType,
   ApplyFunction,
   newBuiltin,
-  newHashMap,
+  newBuiltinModule,
   newError,
   newInteger,
   newArray,
@@ -62,4 +62,4 @@ let functions*: OrderedTable[string, Obj] = {
   "find": newBuiltin(builtinFn=regexFind),
 }.toOrderedTable
 
-let regexModule*: Obj = newHashMap(hashMapElements=functions)
+let regexModule*: Obj = newBuiltinModule(moduleFns=functions)

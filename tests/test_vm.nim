@@ -28,6 +28,7 @@ proc runTests(tests: seq[(string, TestValue)]) =
     var vm: VM = newVM(compiler.toBytecode())
     let vmErr = vm.runVM()
     if x[1].valueType == TVTVMError:
+      echo vmErr.message
       check(x[1].vmErrorMsg == vmErr.message)
     else:
       check(vmErr == nil)
@@ -35,6 +36,29 @@ proc runTests(tests: seq[(string, TestValue)]) =
       testExpectedObj(x[1], obj)
 
 suite "vm tests":
+  test "calling builtins":
+    let tests: seq[(string, TestValue)] = @[
+      ("type([])",
+        TestValue(
+          valueType: TVTString,
+          strValue: "array"
+        )
+      ),
+      ("""let a = fn(x) type(x) end; a("hello")""",
+        TestValue(
+          valueType: TVTString,
+          strValue: "string"
+        )
+      ),
+      ("""Array.len([1])""",
+        TestValue(
+          valueType: TVTInt,
+          intValue: 1
+        )
+      ),
+    ]
+    runTests(tests)
+
   test "calling with wrong number of arguments":
     let tests: seq[(string, TestValue)] = @[
       ("""let sum = fn(a, b) a+b end; sum(2)""",
@@ -184,6 +208,7 @@ b()""", TestValue(valueType: TVTNil)),
       ("[5, 2][0]", TestValue(valueType: TVTInt, intValue: 5)),
       ("[5,2,3][1+1]", TestValue(valueType: TVTInt, intValue: 3)),
       ("{\"a\": 55}.a", TestValue(valueType: TVTInt, intValue: 55)),
+      ("""let val = {"a": 55}; val.a""", TestValue(valueType: TVTInt, intValue: 55)),
     ]
     runTests(tests)
 

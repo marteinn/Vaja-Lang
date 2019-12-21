@@ -7,13 +7,35 @@ from symbol_table import
   SymbolTable,
   Symbol,
   define,
+  defineBuiltin,
   resolve,
   GLOBAL_SCOPE,
   LOCAL_SCOPE,
+  BUILTIN_SCOPE,
   `$`,
   `==`
 
 suite "symbol table tests":
+  test "resolve builtins":
+    var
+      global: SymbolTable = newSymbolTable()
+      local: SymbolTable = newEnclosedSymbolTable(global)
+
+    let
+      expected: seq[Symbol] = @[
+        Symbol(name: "a", scope: BUILTIN_SCOPE, index: 0),
+        Symbol(name: "b", scope: BUILTIN_SCOPE, index: 1),
+        Symbol(name: "c", scope: BUILTIN_SCOPE, index: 2),
+        Symbol(name: "d", scope: BUILTIN_SCOPE, index: 3),
+      ]
+
+    for index, symbol in expected:
+      discard global.defineBuiltin(index, symbol.name)
+
+    for symbol in expected:
+      let resolvedSymbol: (Symbol, bool) = local.resolve(symbol.name)
+      check(resolvedSymbol[0] == symbol)
+
   test "resolve local":
     var
       global: SymbolTable = newSymbolTable()

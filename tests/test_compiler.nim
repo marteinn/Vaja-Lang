@@ -31,7 +31,8 @@ from code import
   OpReturnValue,
   OpCall,
   OpGetLocal,
-  OpSetLocal
+  OpSetLocal,
+  OpGetBuiltin
 from lexer import newLexer, Lexer, nextToken, readCharacter
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
@@ -109,6 +110,23 @@ proc runTests(tests: seq[CompilerTestCase]) =
     testConstants(x.expectedConstants, bytecode.constants)
 
 suite "compiler tests":
+  test "builtins":
+    let tests: seq[CompilerTestCase] = @[
+      (
+        "type(1)",
+        @[
+          TestValue(valueType: TVTInt, intValue: 1),
+        ],
+        @[
+          make(OpGetBuiltin, @[0]),
+          make(OpConstant, @[0]),
+          make(OpCall, @[1]),
+          make(OpPop),
+        ],
+      ),
+    ]
+    runTests(tests)
+
   test "let statement scopes":
     let tests: seq[CompilerTestCase] = @[
       (

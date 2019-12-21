@@ -6,7 +6,7 @@ from obj import
   ObjType,
   ApplyFunction,
   newBuiltin,
-  newHashMap,
+  newBuiltinModule,
   newStr,
   newError,
   newInteger,
@@ -233,4 +233,4 @@ let functions*: OrderedTable[string, Obj] = {
   # TODO: Add dropRight
 }.toOrderedTable
 
-let stringModule*: Obj = newHashMap(hashMapElements=functions)
+let stringModule*: Obj = newBuiltinModule(moduleFns=functions)

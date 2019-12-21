@@ -11,8 +11,9 @@ from obj import Obj, Env, newEnv, setVar, newHashMap, inspect, ObjType
 from evaluator import eval, unwrapReturnValue
 from eval_macro_expansion import defineMacros, expandMacros
 from compiler import newCompiler, compile, toBytecode, Bytecode
+from builtins import globals
 from vm import VM, newVM, runVM, lastPoppedStackElement, globalsSize
-from symbol_table import newSymbolTable, SymbolTable
+from symbol_table import newSymbolTable, SymbolTable, defineBuiltin
 
 type
   RunMode = enum
@@ -53,8 +54,13 @@ if mode == RMRepl:
     macroEnv: Env = newEnv()
   var
     constants: seq[Obj] = @[]
-    globals = newSeq[Obj](globalsSize)
+    vmGlobals = newSeq[Obj](globalsSize)
     symbolTable: SymbolTable = newSymbolTable()
+
+  var index: int = 0
+  for key in globals.keys:
+    discard symbolTable.defineBuiltin(index, key)
+    index += 1
 
   while true:
     stdout.write ">> "
@@ -82,7 +88,7 @@ if mode == RMRepl:
       bytecode = compiler.toBytecode()
       constants = bytecode.constants
 
-      var vm: VM = newVM(bytecode=bytecode, globals=globals)
+      var vm: VM = newVM(bytecode=bytecode, globals=vmGlobals)
       let vmErr = vm.runVM()
       if vmErr != nil:
         stdout.write "Bytecode execution failed: " & vmErr.message
@@ -91,7 +97,7 @@ if mode == RMRepl:
       let stackTop: Obj = vm.lastPoppedStackElement()
       inspected = stackTop.inspect()
 
-      globals = vm.globals
+      vmGlobals = vm.globals
     else:
       let evaluated: Obj = eval(expandedProgram, env)
       inspected = evaluated.inspect()

@@ -5,6 +5,7 @@ from obj import
   ApplyFunction,
   newBuiltin,
   newHashMap,
+  newBuiltinModule,
   newStr,
   newError,
   newInteger,
@@ -184,4 +185,4 @@ let functions*: OrderedTable[string, Obj] = {
   # TODO: Implement fromArray
 }.toOrderedTable
 
-let hashMapModule*: Obj = newHashMap(hashMapElements=functions)
+let hashMapModule*: Obj = newBuiltinModule(moduleFns=functions)

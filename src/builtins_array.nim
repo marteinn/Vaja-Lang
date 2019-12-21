@@ -5,7 +5,7 @@ from obj import
   ObjType,
   ApplyFunction,
   newBuiltin,
-  newHashMap,
+  newBuiltinModule,
   newInteger,
   newArray,
   Env,
@@ -172,4 +172,4 @@ let functions*: OrderedTable[string, Obj] = {
   "contains": newBuiltin(builtinFn=arrayContains),
 }.toOrderedTable
 
-let arrayModule*: Obj = newHashMap(hashMapElements=functions)
+let arrayModule*: Obj = newBuiltinModule(moduleFns=functions)

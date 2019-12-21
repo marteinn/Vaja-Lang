@@ -30,7 +30,8 @@ from code import
   OpIndex,
   OpReturn,
   OpReturnValue,
-  OpCall
+  OpCall,
+  OpGetBuiltin
 from obj import Obj, newInteger, newStr, newCompiledFunction
 from ast import Node, NodeType
 from symbol_table import
@@ -38,11 +39,14 @@ from symbol_table import
   newEnclosedSymbolTable,
   SymbolTable,
   define,
+  defineBuiltin,
   resolve,
   Symbol,
   GLOBAL_SCOPE,
   LOCAL_SCOPE,
+  BUILTIN_SCOPE,
   `$`
+from builtins import globals
 
 type
   Bytecode* = ref object
@@ -67,15 +71,26 @@ proc newCompilationScope(): CompilationScope =
   return CompilationScope(instructions: @[])
 
 proc newCompiler*(): Compiler =
-  let mainScope = newCompilationScope()
+  let
+    mainScope = newCompilationScope()
+  var
+    symbolTable = newSymbolTable()
+
+  # TODO: Add better iteration
+  var index: int = 0
+  for key in globals.keys:
+    discard symbolTable.defineBuiltin(index, key)
+    index += 1
+
   return Compiler(
     constants: @[],
-    symbolTable: newSymbolTable(),
+    symbolTable: symbolTable,
     scopes: @[mainScope],
   )
 
 proc newCompiler*(constants: var seq[Obj], symbolTable: var SymbolTable): Compiler =
-  var compiler = newCompiler()
+  var
+    compiler = newCompiler()
   compiler.constants = constants
   compiler.symbolTable = symbolTable
   return compiler
@@ -157,6 +172,15 @@ method removeLastPop(compiler: var Compiler) {.base.} =
   var currentScope = compiler.scopes[compiler.scopeIndex]
   discard pop(compiler.scopes[compiler.scopeIndex].instructions)
   currentScope.lastInstruction = currentScope.prevInstruction
+
+method loadSymbol(compiler: var Compiler, symbol: Symbol) {.base.} =
+  case symbol.scope:
+    of GLOBAL_SCOPE:
+      discard compiler.emit(OpGetGlobal, @[symbol.index])
+    of LOCAL_SCOPE:
+      discard compiler.emit(OpGetLocal, @[symbol.index])
+    of BUILTIN_SCOPE:
+      discard compiler.emit(OpGetBuiltin, @[symbol.index])
 
 method replaceLastPopWithReturnValue(compiler: var Compiler) {.base.} =
   let currentScope = compiler.scopes[compiler.scopeIndex]
@@ -342,11 +366,7 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
       if not symbolRes[1]:
         return CompilerError(message: "Name " & node.identValue & " is not defined")
 
-      if symbol.scope == GLOBAL_SCOPE:
-        discard compiler.emit(OpGetGlobal, @[symbol.index])
-      else:
-        discard compiler.emit(OpGetLocal, @[symbol.index])
-
+      compiler.loadSymbol(symbol)
     of NodeType.NTIndexOperation:
       let leftErr = compiler.compile(node.indexOpLeft)
       if leftErr != nil:

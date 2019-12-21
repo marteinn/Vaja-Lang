@@ -5,6 +5,7 @@ from frame import Frame, newFrame, getInstructions
 from obj import
   Obj,
   ObjType,
+  Env,
   inspect,
   newError,
   newInteger,
@@ -47,7 +48,9 @@ from code import
   OpReturn,
   OpReturnValue,
   OpSetLocal,
-  OpGetLocal
+  OpGetLocal,
+  OpGetBuiltin
+from builtins import globals, globalsByIndex
 
 var
   OBJ_TRUE*: Obj = newBoolean(boolValue=true)
@@ -64,7 +67,7 @@ type
     constants: seq[Obj]
     stack: seq[Obj]
     stackPointer*: int
-    globals: seq[Obj]
+    globals*: seq[Obj]
     frames: seq[Frame]
     framesIndex: int
   VMError* = ref object
@@ -89,22 +92,9 @@ proc newVM*(bytecode: Bytecode): VM =
   )
 
 proc newVM*(bytecode: Bytecode, globals: var seq[Obj]): VM =
-  let
-    mainFn: Obj = newCompiledFunction(bytecode.instructions, 0, 0)
-    mainFrame: Frame = newFrame(mainFn, 0)
-  var
-    frames = newSeq[Frame](stackSize)
-
-  frames[0] = mainFrame
-
-  return VM(
-    constants: bytecode.constants,
-    stack: newSeq[Obj](stackSize),
-    globals: globals,
-    stackPointer: 0,
-    frames: frames,
-    framesIndex: 1,
-  )
+  let vm = newVM(bytecode)
+  vm.globals = globals
+  return vm
 
 proc push(vm: var VM, obj: Obj): VMError =
   if vm.stackPointer >= stackSize:
@@ -114,7 +104,7 @@ proc push(vm: var VM, obj: Obj): VMError =
   vm.stackPointer += 1
   discard
 
-proc pop(vm: var VM): Obj =
+method pop(vm: var VM): Obj {.base.} =
   let obj = vm.stack[vm.stackPointer-1]
   vm.stackPointer -= 1
   return obj
@@ -189,6 +179,7 @@ method execBinaryStringOp(vm: var VM, opCode: OpCode): VMError {.base.} =
 method execBinaryIntOp(vm: var VM, opCode: OpCode): VMError {.base.} =
   let rightObj = vm.pop()
   let leftObj = vm.pop()
+
   let rightValue = rightObj.intValue
   let leftValue = leftObj.intValue
 
@@ -217,7 +208,45 @@ method execIndexExpression(vm: var VM, left: Obj, index: Obj): VMError {.base.} 
     except:
       return VMError(message: fmt"Key {index.intValue} not found in {left}")
 
-  return VMError(message: "Index operation is not supported")
+  if left.objType == ObjType.OTBuiltinModule:
+    try:
+      return vm.push(left.moduleFns[index.strValue])
+    except:
+      return VMError(message: fmt"Key {index.strValue} not found in {left}")
+
+  return VMError(message: fmt"Index operation is not supported on {left.objType}")
+
+method callFunction(vm: var VM, fn: Obj, numArgs: int): VMError {.base.} =
+  if numArgs != fn.compiledFunctionNumParams:
+    return VMError(message: fmt"Incorrect number of arguments, expected {fn.compiledFunctionNumParams}, got {numArgs}")
+
+  let frame: Frame = newFrame(fn, vm.stackPointer-numArgs)
+  vm.stackPointer = frame.basePointer + fn.compiledFunctionNumLocals
+  discard vm.pushFrame(frame)
+
+proc applyFunctionNoOp*(fn: Obj, arguments: seq[Obj], env: var Env): Obj =
+  nil
+
+method callBuiltin(vm: var VM, fn: Obj, numArgs: int): VMError {.base.} =
+  let arguments: seq[Obj] = vm.stack[vm.stackPointer-numArgs .. vm.stackPointer-1]
+  let res: Obj = fn.builtinFn(arguments, applyFunctionNoOp)
+  vm.stackPointer = vm.stackPointer - numArgs - 1
+
+  if res != nil:
+    return vm.push(res)
+  else:
+    return vm.push(OBJ_NIL)
+
+method execCalls(vm: var VM, numArgs: int): VMError {.base.} =
+  let fn: Obj = vm.stack[vm.stackPointer-numArgs-1]
+
+  case fn.objType:
+    of ObjType.OTCompiledFunction:
+      return vm.callFunction(fn, numArgs)
+    of ObjType.OTBuiltin:
+      return vm.callBuiltin(fn, numArgs)
+    else:
+      return VMError(message: fmt"Calling non function of type {fn.objType}")
 
 method runVM*(vm: var VM): VMError {.base.} =
   var
@@ -259,7 +288,7 @@ method runVM*(vm: var VM): VMError {.base.} =
         if vmError != nil:
           return vmError
       of OpPop:
-        discard vm.pop
+        discard vm.pop()
       of OpTrue:
         let vmError = vm.push(OBJ_TRUE)
         if vmError != nil:
@@ -381,16 +410,9 @@ method runVM*(vm: var VM): VMError {.base.} =
           instructions[ip+1 .. len(instructions)-1]
         )
 
-        let fn: Obj = vm.stack[vm.stackPointer-numArgs-1]
-        if fn.objType != ObjType.OTCompiledFunction:
-          return VMError(message: fmt"Calling non function of type {fn.objType}")
-
-        if numArgs != fn.compiledFunctionNumParams:
-          return VMError(message: fmt"Incorrect number of arguments, expected {fn.compiledFunctionNumParams}, got {numArgs}")
-
-        let frame: Frame = newFrame(fn, vm.stackPointer-numArgs)
-        discard vm.pushFrame(frame)
-        vm.stackPointer = frame.basePointer + fn.compiledFunctionNumLocals
+        let vmError = vm.execCalls(numArgs)
+        if vmError != nil:
+          return vmError
       of OpReturnValue:
         let returnValue = vm.pop
 
@@ -407,7 +429,16 @@ method runVM*(vm: var VM): VMError {.base.} =
         let vmError: VMError = vm.push(OBJ_NIL)
         if vmError != nil:
           return vmError
+      of OpGetBuiltin:
+        let builtinIndex = readUint8(
+          instructions[ip+1 .. len(instructions)-1]
+        )
+        vm.currentFrame().ip += 1
 
+        let builtin: Obj = globalsByIndex[builtinIndex][1]
+        let vmError: VMError = vm.push(builtin)
+        if vmError != nil:
+          return vmError
       else:
         discard
 

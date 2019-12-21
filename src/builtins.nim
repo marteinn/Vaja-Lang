@@ -68,19 +68,20 @@ proc builtinExit(arguments: seq[Obj], applyFn: ApplyFunction): Obj =
   quit()
 
 var
-  globals*: Table[string, Obj] = {
-    "type": newBuiltin(builtinFn=builtinType),
-    "print": newBuiltin(builtinFn=builtinPrint),
-    "identity": newBuiltin(builtinFn=builtinIdentity),
-    "always": newBuiltin(builtinFn=builtinAlways),
-    "exit": newBuiltin(builtinFn=builtinExit),
-    "Array": arrayModule,
-    "String": stringModule,
-    "HashMap": hashMapModule,
-    "Http": httpModule,
-    "IO": ioModule,
-    "Regex": regexModule,
-    "JSON": jsonModule,
-    "Base64": base64Module,
-    "UnitTest": unitTestModule,
-  }.toTable
+  globalsByIndex*: seq[(string, Obj)] = @[
+    ("type", newBuiltin(builtinFn=builtinType)),
+    ("print", newBuiltin(builtinFn=builtinPrint)),
+    ("identity", newBuiltin(builtinFn=builtinIdentity)),
+    ("always", newBuiltin(builtinFn=builtinAlways)),
+    ("exit", newBuiltin(builtinFn=builtinExit)),
+    ("Array", arrayModule),
+    ("String", stringModule),
+    ("HashMap", hashMapModule),
+    ("Http", httpModule),
+    ("IO", ioModule),
+    ("Regex", regexModule),
+    ("JSON", jsonModule),
+    ("Base64", base64Module),
+    ("UnitTest", unitTestModule),
+  ]
+  globals*: OrderedTable[string, Obj] = globalsByIndex.toOrderedTable

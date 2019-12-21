@@ -402,6 +402,12 @@ proc evalIndexOp(left: Obj, index: Obj): Obj =
     except:
       return newError(errorMsg="Key " & $index.intValue & " not found")
 
+  if left.objType == ObjType.OTBuiltinModule:
+    try:
+      return left.moduleFns[index.strValue]
+    except:
+      return newError(errorMsg="Key " & index.strValue & " not found")
+
   if left.objType == ObjType.OTModule:
     return getVar(left.moduleEnv, index.strValue)
 

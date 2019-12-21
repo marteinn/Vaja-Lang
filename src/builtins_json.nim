@@ -5,6 +5,7 @@ from obj import
   ObjType,
   ApplyFunction,
   newBuiltin,
+  newBuiltinModule,
   newHashMap,
   newStr,
   newError,
@@ -87,4 +88,4 @@ let functions*: OrderedTable[string, Obj] = {
   "fromJSON": newBuiltin(builtinFn=jsonFromJSON),
 }.toOrderedTable
 
-let jsonModule*: Obj = newHashMap(hashMapElements=functions)
+let jsonModule*: Obj = newBuiltinModule(moduleFns=functions)

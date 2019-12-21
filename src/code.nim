@@ -33,6 +33,7 @@ const
   OpReturnValue*: OPCode = 25
   OpGetLocal*: OpCode = 26
   OpSetLocal*: OpCode = 27
+  OpGetBuiltin*: OpCode = 28
 
 type
   Definition* = ref object
@@ -67,6 +68,7 @@ let definitions: Table[Opcode, Definition] = {
   OpReturnValue: Definition(name: "OpReturnValue", operandWidths: @[]),
   OpGetLocal: Definition(name: "OpGetLocal", operandWidths: @[1]),
   OpSetLocal: Definition(name: "OpSetLocal", operandWidths: @[1]),
+  OpGetBuiltin: Definition(name: "OpGetBuiltin", operandWidths: @[1]),
 }.toTable
 
 proc lookup*(op: byte): Definition =

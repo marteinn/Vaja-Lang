@@ -8,6 +8,7 @@ from obj import
   NativeValue,
   ApplyFunction,
   newBuiltin,
+  newBuiltinModule,
   newHashMap,
   newStr,
   newError,
@@ -276,4 +277,4 @@ let functions*: OrderedTable[string, Obj] = {
   "call": newBuiltin(builtinFn=httpCall),
 }.toOrderedTable
 
-let httpModule*: Obj = newHashMap(hashMapElements=functions)
+let httpModule*: Obj = newBuiltinModule(moduleFns=functions)

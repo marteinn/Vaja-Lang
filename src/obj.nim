@@ -20,6 +20,7 @@ type
     OTReturn
     OTNil
     OTArray
+    OTBuiltinModule
     OTBuiltin
     OTHashMap
     OTNativeObject
@@ -51,6 +52,8 @@ type
       of OTReturn: returnValue*: Obj
       of OTNil: discard
       of OTArray: arrayElements*: seq[Obj]
+      of OTBuiltinModule:
+        moduleFns*: OrderedTable[string, Obj]
       of OTBuiltin: builtinFn*:
         proc(arguments: seq[Obj], applyFn: ApplyFunction): Obj
       of OTHashMap: hashMapElements*: OrderedTable[string, Obj]
@@ -176,6 +179,14 @@ proc inspect*(obj: Obj): string =
     of OTModule: "<module>"
     of OTRegex: "<regex>"
     of OTQuote: "<quote " & obj.quoteNode.toCode() & ">"
+    of OTBuiltinModule:
+      var elementsCode: string = ""
+      for key, val in obj.moduleFns:
+        if elementsCode != "":
+          elementsCode = elementsCode & ", "
+        elementsCode = elementsCode & key & ": " & val.inspect()
+
+      "<builtinModule " & elementsCode & ">"
 
 proc `$`*(obj: Obj): string =
   return inspect(obj)
@@ -251,6 +262,9 @@ proc newModule*(moduleName: string, moduleEnv: Env): Obj =
   return Obj(
     objType: ObjType.OTModule, moduleName: moduleName, moduleEnv: moduleEnv
   )
+
+proc newBuiltinModule*(moduleFns: OrderedTable[string, Obj]): Obj =
+  return Obj(objType: ObjType.OTBuiltinModule, moduleFns: moduleFns)
 
 proc newRegex*(regexValue: Regex): Obj =
   return Obj(

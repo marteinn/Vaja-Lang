@@ -4,7 +4,7 @@ from obj import
   ObjType,
   ApplyFunction,
   newBuiltin,
-  newHashMap,
+  newBuiltinModule,
   newError,
   newInteger,
   newArray,
@@ -40,4 +40,4 @@ let functions*: OrderedTable[string, Obj] = {
   "writeFile": newBuiltin(builtinFn=ioWriteFile),
 }.toOrderedTable
 
-let ioModule*: Obj = newHashMap(hashMapElements=functions)
+let ioModule*: Obj = newBuiltinModule(moduleFns=functions)

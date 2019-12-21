@@ -5,7 +5,7 @@ from obj import
   ObjType,
   ApplyFunction,
   newBuiltin,
-  newHashMap,
+  newBuiltinModule,
   newError,
   newArray,
   newStr,
@@ -35,4 +35,4 @@ let functions*: OrderedTable[string, Obj] = {
   "decode": newBuiltin(builtinFn=base64Decode),
 }.toOrderedTable
 
-let base64Module*: Obj = newHashMap(hashMapElements=functions)
+let base64Module*: Obj = newBuiltinModule(moduleFns=functions)
