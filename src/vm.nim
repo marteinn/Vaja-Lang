@@ -16,6 +16,7 @@ from obj import
   newArray,
   newHashMap,
   newCompiledFunction,
+  newClosure,
   `$`
 from code import
   Instructions,
@@ -49,7 +50,8 @@ from code import
   OpReturnValue,
   OpSetLocal,
   OpGetLocal,
-  OpGetBuiltin
+  OpGetBuiltin,
+  OpClosure
 from builtins import globals, globalsByIndex
 
 var
@@ -76,7 +78,8 @@ type
 proc newVM*(bytecode: Bytecode): VM =
   let
     mainFn: Obj = newCompiledFunction(bytecode.instructions, 0, 0)
-    mainFrame: Frame = newFrame(mainFn, 0)
+    mainClosure: Obj = newClosure(mainFn)
+    mainFrame: Frame = newFrame(mainClosure, 0)
   var
     frames = newSeq[Frame](stackSize)
 
@@ -116,6 +119,14 @@ method pushFrame(vm: var VM, frame: Frame): Frame {.base.} =
   vm.frames[vm.framesIndex] = frame
   vm.framesIndex = vm.framesIndex + 1
   return frame
+
+method pushClosure(vm: var VM, constIndex: int): VMError =
+  let compiledFn: Obj = vm.constants[constIndex]
+  if compiledFn.objType != ObjType.OTCompiledFunction:
+    return VMError(message: fmt"{compiledFn.objType} is not a function")
+
+  let closure = newClosure(compiledFn)
+  discard vm.push(closure)
 
 method popFrame(vm: var VM): Frame {.base.} =
   vm.framesIndex = vm.framesIndex - 1
@@ -237,6 +248,15 @@ method callBuiltin(vm: var VM, fn: Obj, numArgs: int): VMError {.base.} =
   else:
     return vm.push(OBJ_NIL)
 
+method callClosure(vm: var VM, closure: Obj, numArgs: int): VMError {.base.} =
+  if numArgs != closure.closureFn.compiledFunctionNumParams:
+    return VMError(message: fmt"Incorrect number of arguments, expected {closure.closureFn.compiledFunctionNumParams}, got {numArgs}")
+
+  let frame: Frame = newFrame(closure, vm.stackPointer-numArgs)
+
+  vm.stackPointer = frame.basePointer + closure.closureFn.compiledFunctionNumLocals
+  discard vm.pushFrame(frame)
+
 method execCalls(vm: var VM, numArgs: int): VMError {.base.} =
   let fn: Obj = vm.stack[vm.stackPointer-numArgs-1]
 
@@ -245,6 +265,8 @@ method execCalls(vm: var VM, numArgs: int): VMError {.base.} =
       return vm.callFunction(fn, numArgs)
     of ObjType.OTBuiltin:
       return vm.callBuiltin(fn, numArgs)
+    of ObjType.OTClosure:
+      return vm.callClosure(fn, numArgs)
     else:
       return VMError(message: fmt"Calling non function of type {fn.objType}")
 
@@ -437,6 +459,16 @@ method runVM*(vm: var VM): VMError {.base.} =
 
         let builtin: Obj = globalsByIndex[builtinIndex][1]
         let vmError: VMError = vm.push(builtin)
+        if vmError != nil:
+          return vmError
+      of OpClosure:
+        let closureIndex = readUint16(
+          instructions[ip+1 .. len(instructions)-1]
+        )
+        let _ = code.readUint8(instructions[ip+3 .. len(instructions)-1])
+        vm.currentFrame().ip += 3
+
+        let vmError: VMError = vm.pushClosure(closureIndex)
         if vmError != nil:
           return vmError
       else:

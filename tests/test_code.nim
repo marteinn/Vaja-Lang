@@ -8,7 +8,8 @@ from code import
   lookup,
   readOperands,
   OpAdd,
-  OpGetLocal
+  OpGetLocal,
+  OpClosure
 
 suite "code tests":
   test "test make":
@@ -17,7 +18,8 @@ suite "code tests":
     ] = @[
       (OpConstant, @[65534], @[byte(OpConstant), 255, 254]),
       (OpAdd, @[], @[byte(OpAdd)]),
-      (OpGetLocal, @[255], @[byte(OpGetLocal), 255])
+      (OpGetLocal, @[255], @[byte(OpGetLocal), 255]),
+      (OpClosure, @[65534, 255], @[byte(OpClosure), 255, 254, 255]),
     ]
 
     for x in tests:
@@ -30,12 +32,14 @@ suite "code tests":
       make(OpConstant, @[1]),
       make(OpConstant, @[2]),
       make(OpConstant, @[65535]),
+      make(OpClosure, @[65534, 255]),
     ]
 
     let expected = """0000 OpAdd
 0001 OpConstant 1
 0004 OpConstant 2
 0007 OpConstant 65535
+0010 OpClosure 65534 255
 """
     var concatted: Instructions = @[]
     for instruction in instructions:

@@ -34,6 +34,7 @@ const
   OpGetLocal*: OpCode = 26
   OpSetLocal*: OpCode = 27
   OpGetBuiltin*: OpCode = 28
+  OpClosure*: OpCode = 29
 
 type
   Definition* = ref object
@@ -69,6 +70,7 @@ let definitions: Table[Opcode, Definition] = {
   OpGetLocal: Definition(name: "OpGetLocal", operandWidths: @[1]),
   OpSetLocal: Definition(name: "OpSetLocal", operandWidths: @[1]),
   OpGetBuiltin: Definition(name: "OpGetBuiltin", operandWidths: @[1]),
+  OpClosure: Definition(name: "OpClosure", operandWidths: @[2, 1]),
 }.toTable
 
 proc lookup*(op: byte): Definition =
@@ -151,6 +153,8 @@ proc toString*(instructions: Instructions): string =
         result &= fmt"{i:04} {definition.name}"
       of 1:
         result &= fmt"{i:04} {definition.name} {readResult.operands[0]}"
+      of 2:
+        result &= fmt"{i:04} {definition.name} {readResult.operands[0]} {readResult.operands[1]}"
       else:
         result &= fmt"Error: Unhandled operatorCount for {definition.name}"
 

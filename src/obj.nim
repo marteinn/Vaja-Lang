@@ -28,6 +28,7 @@ type
     OTRegex
     OTQuote
     OTMacro
+    OTClosure
   Obj* = ref object
     case objType*: ObjType
       of OTInteger: intValue*: int
@@ -65,6 +66,9 @@ type
         regexValue*: Regex
       of OTQuote:
         quoteNode*: Node
+      of OTClosure:
+        closureFn*: Obj
+        closureFree*: seq[Obj]
   ApplyFunction* =
     proc (fn: Obj, arguments: seq[Obj], env: var Env): Obj
   Env* = ref object
@@ -187,6 +191,8 @@ proc inspect*(obj: Obj): string =
         elementsCode = elementsCode & key & ": " & val.inspect()
 
       "<builtinModule " & elementsCode & ">"
+    of OTClosure:
+      "<closure>"
 
 proc `$`*(obj: Obj): string =
   return inspect(obj)
@@ -222,6 +228,12 @@ proc newCompiledFunction*(
     compiledFunctionInstructions: instructions,
     compiledFunctionNumLocals: numLocals,
     compiledFunctionNumParams: numParams,
+  )
+
+proc newClosure*(compiledFn: Obj): Obj =
+  return Obj(
+    objType: ObjType.OTClosure,
+    closureFn: compiledFn,
   )
 
 proc newMacro*(macroBody: Node, macroEnv: Env, macroParams: seq[Node]): Obj =

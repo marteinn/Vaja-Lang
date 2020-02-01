@@ -32,7 +32,8 @@ from code import
   OpCall,
   OpGetLocal,
   OpSetLocal,
-  OpGetBuiltin
+  OpGetBuiltin,
+  OpClosure
 from lexer import newLexer, Lexer, nextToken, readCharacter
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
@@ -145,7 +146,7 @@ fn () val end
         @[
           make(OpConstant, @[0]),
           make(OpSetGlobal, @[0]),
-          make(OpConstant, @[1]),
+          make(OpClosure, @[1, 0]),
           make(OpPop),
         ],
       ),
@@ -167,7 +168,7 @@ end
           ])
         ],
         @[
-          make(OpConstant, @[1]),
+          make(OpClosure, @[1, 0]),
           make(OpPop),
         ],
       ),
@@ -195,7 +196,7 @@ end
           ])
         ],
         @[
-          make(OpConstant, @[2]),
+          make(OpClosure, @[2, 0]),
           make(OpPop),
         ],
       ),
@@ -250,7 +251,7 @@ end
           ])
         ],
         @[
-          make(OpConstant, @[1]),
+          make(OpClosure, @[1, 0]),
           make(OpCall, @[0]),
           make(OpPop),
         ],
@@ -268,7 +269,7 @@ a()""",
           ])
         ],
         @[
-          make(OpConstant, @[1]),
+          make(OpClosure, @[1, 0]),
           make(OpSetGlobal, @[0]),
           make(OpGetGlobal, @[0]),
           make(OpCall, @[0]),
@@ -288,7 +289,7 @@ a(55)""",
           TestValue(valueType: TVTInt, intValue: 55),
         ],
         @[
-          make(OpConstant, @[0]),
+          make(OpClosure, @[0, 0]),
           make(OpSetGlobal, @[0]),
           make(OpGetGlobal, @[0]),
           make(OpConstant, @[1]),
@@ -315,7 +316,7 @@ a(55, 66)""",
           TestValue(valueType: TVTInt, intValue: 66),
         ],
         @[
-          make(OpConstant, @[0]),
+          make(OpClosure, @[0, 0]),
           make(OpSetGlobal, @[0]),
           make(OpGetGlobal, @[0]),
           make(OpConstant, @[1]),
@@ -344,7 +345,7 @@ a(55, 66)""",
           ])
         ],
         @[
-          make(OpConstant, @[2]),
+          make(OpClosure, @[2, 0]),
           make(OpPop),
         ],
       ),
@@ -363,7 +364,7 @@ a(55, 66)""",
           ])
         ],
         @[
-          make(OpConstant, @[2]),
+          make(OpClosure, @[2, 0]),
           make(OpPop),
         ],
       ),
@@ -377,7 +378,7 @@ a(55, 66)""",
           ])
         ],
         @[
-          make(OpConstant, @[0]),
+          make(OpClosure, @[0, 0]),
           make(OpPop),
         ],
       ),
@@ -399,7 +400,7 @@ end""",
           ])
         ],
         @[
-          make(OpConstant, @[2]),
+          make(OpClosure, @[2, 0]),
           make(OpPop),
         ],
       ),

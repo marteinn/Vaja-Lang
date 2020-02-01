@@ -31,7 +31,8 @@ from code import
   OpReturn,
   OpReturnValue,
   OpCall,
-  OpGetBuiltin
+  OpGetBuiltin,
+  OpClosure
 from obj import Obj, newInteger, newStr, newCompiledFunction
 from ast import Node, NodeType
 from symbol_table import
@@ -232,7 +233,7 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
           numParams=len(node.functionParams),
         )
 
-      discard compiler.emit(OpConstant, @[compiler.addConstant(compiledFn)])
+      discard compiler.emit(OpClosure, @[compiler.addConstant(compiledFn), 0])
     of NodeType.NTCallExpression:
       let err = compiler.compile(node.callFunction)
       if err != nil:
