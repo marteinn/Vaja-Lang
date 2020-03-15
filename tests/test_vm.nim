@@ -348,3 +348,16 @@ closure(3)(4)""", TestValue(valueType: TVTInt, intValue: 10)),
 
     ]
     runTests(tests)
+
+  test "recursive function":
+    let tests: seq[(string, TestValue)] = @[
+      ("""let countDown = fn(x)
+  if (x == 0)
+    return 0
+  else
+    countDown(x - 1)
+  end
+end
+countDown(1)""", TestValue(valueType: TVTInt, intValue: 0)),
+    ]
+    runTests(tests)

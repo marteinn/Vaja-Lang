@@ -363,10 +363,10 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
           return valErr
       discard compiler.emit(OpHashMap, @[len(node.hashMapElements)*2])
     of NodeType.NTAssignStatement:
+      let symbol: Symbol = compiler.symbolTable.define(node.assignName.identValue)
       let err = compiler.compile(node.assignValue)
       if err != nil:
         return err
-      let symbol: Symbol = compiler.symbolTable.define(node.assignName.identValue)
       if symbol.scope == GLOBAL_SCOPE:
         discard compiler.emit(OpSetGlobal, @[symbol.index])
       else:
