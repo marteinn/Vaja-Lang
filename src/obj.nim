@@ -230,10 +230,11 @@ proc newCompiledFunction*(
     compiledFunctionNumParams: numParams,
   )
 
-proc newClosure*(compiledFn: Obj): Obj =
+proc newClosure*(compiledFn: Obj, free: seq[Obj]): Obj =
   return Obj(
     objType: ObjType.OTClosure,
     closureFn: compiledFn,
+    closureFree: free,
   )
 
 proc newMacro*(macroBody: Node, macroEnv: Env, macroParams: seq[Node]): Obj =

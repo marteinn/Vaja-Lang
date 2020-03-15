@@ -327,3 +327,24 @@ b()""", TestValue(valueType: TVTNil)),
     ]
 
     runTests(tests)
+
+  test "closures":
+    let tests: seq[(string, TestValue)] = @[
+      ("""let newClosure = fn(a)
+  fn() a end
+end
+let closure = newClosure(99)
+closure()""", TestValue(valueType: TVTInt, intValue: 99)),
+    ("""let newClosure = fn(a, b)
+  let c = a + b
+  fn(d)
+    fn(e)
+      c + d + e
+    end
+  end
+end
+let closure = newClosure(1, 2)
+closure(3)(4)""", TestValue(valueType: TVTInt, intValue: 10)),
+
+    ]
+    runTests(tests)

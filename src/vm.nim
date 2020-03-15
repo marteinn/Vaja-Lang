@@ -51,7 +51,8 @@ from code import
   OpSetLocal,
   OpGetLocal,
   OpGetBuiltin,
-  OpClosure
+  OpClosure,
+  OpGetFree
 from builtins import globals, globalsByIndex
 
 var
@@ -78,7 +79,7 @@ type
 proc newVM*(bytecode: Bytecode): VM =
   let
     mainFn: Obj = newCompiledFunction(bytecode.instructions, 0, 0)
-    mainClosure: Obj = newClosure(mainFn)
+    mainClosure: Obj = newClosure(mainFn, @[])
     mainFrame: Frame = newFrame(mainClosure, 0)
   var
     frames = newSeq[Frame](stackSize)
@@ -120,12 +121,20 @@ method pushFrame(vm: var VM, frame: Frame): Frame {.base.} =
   vm.framesIndex = vm.framesIndex + 1
   return frame
 
-method pushClosure(vm: var VM, constIndex: int): VMError =
+method pushClosure(vm: var VM, constIndex: int, numFree: int): VMError =
   let compiledFn: Obj = vm.constants[constIndex]
   if compiledFn.objType != ObjType.OTCompiledFunction:
     return VMError(message: fmt"{compiledFn.objType} is not a function")
 
-  let closure = newClosure(compiledFn)
+  var
+    free: seq[Obj] = newSeq[Obj](numFree)
+
+  for i in 0 .. numFree-1:
+    free[i] = vm.stack[vm.stackPointer-numFree+i]
+
+  vm.stackPointer = vm.stackPointer - numFree
+
+  let closure = newClosure(compiledFn, free)
   discard vm.push(closure)
 
 method popFrame(vm: var VM): Frame {.base.} =
@@ -465,10 +474,21 @@ method runVM*(vm: var VM): VMError {.base.} =
         let closureIndex = readUint16(
           instructions[ip+1 .. len(instructions)-1]
         )
-        let _ = code.readUint8(instructions[ip+3 .. len(instructions)-1])
+        let numFree = code.readUint8(instructions[ip+3 .. len(instructions)-1])
         vm.currentFrame().ip += 3
 
-        let vmError: VMError = vm.pushClosure(closureIndex)
+        let vmError: VMError = vm.pushClosure(closureIndex, numFree)
+        if vmError != nil:
+          return vmError
+      of OpGetFree:
+        let freeIndex = readUint8(
+          instructions[ip+1 .. len(instructions)-1]
+        )
+        vm.currentFrame().ip += 1
+
+        let
+          currentClosure = vm.currentFrame().closure
+        let vmError: VMError = vm.push(currentClosure.closureFree[freeIndex])
         if vmError != nil:
           return vmError
       else:
