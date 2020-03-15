@@ -32,7 +32,8 @@ from code import
   OpReturnValue,
   OpCall,
   OpGetBuiltin,
-  OpClosure
+  OpClosure,
+  OpGetFree
 from obj import Obj, newInteger, newStr, newCompiledFunction
 from ast import Node, NodeType
 from symbol_table import
@@ -46,6 +47,7 @@ from symbol_table import
   GLOBAL_SCOPE,
   LOCAL_SCOPE,
   BUILTIN_SCOPE,
+  FREE_SCOPE,
   `$`
 from builtins import globals
 
@@ -182,6 +184,8 @@ method loadSymbol(compiler: var Compiler, symbol: Symbol) {.base.} =
       discard compiler.emit(OpGetLocal, @[symbol.index])
     of BUILTIN_SCOPE:
       discard compiler.emit(OpGetBuiltin, @[symbol.index])
+    of FREE_SCOPE:
+      discard compiler.emit(OpGetFree, @[symbol.index])
 
 method replaceLastPopWithReturnValue(compiler: var Compiler) {.base.} =
   let currentScope = compiler.scopes[compiler.scopeIndex]
@@ -225,15 +229,23 @@ method compile*(compiler: var Compiler, node: Node): CompilerError {.base.} =
         discard compiler.emit(OpReturn)
 
       let
+        freeSymbols = compiler.symbolTable.freeSymbols
         numLocals = compiler.symbolTable.numDefinitions
         instructions = compiler.leaveScope()
+
+      for symbol in freeSymbols:
+        compiler.loadSymbol(symbol)
+
+      let
         compiledFn: Obj = newCompiledFunction(
           instructions=instructions,
           numLocals=numLocals,
           numParams=len(node.functionParams),
         )
 
-      discard compiler.emit(OpClosure, @[compiler.addConstant(compiledFn), 0])
+      discard compiler.emit(
+        OpClosure, @[compiler.addConstant(compiledFn), len(freeSymbols)]
+      )
     of NodeType.NTCallExpression:
       let err = compiler.compile(node.callFunction)
       if err != nil:

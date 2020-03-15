@@ -11,6 +11,7 @@ from symbol_table import
   resolve,
   GLOBAL_SCOPE,
   LOCAL_SCOPE,
+  FREE_SCOPE,
   BUILTIN_SCOPE,
   `$`,
   `==`
@@ -131,3 +132,86 @@ suite "symbol table tests":
     for symbol in expected:
       let resolvedSymbol: (Symbol, bool) = global.resolve(symbol.name)
       check(resolvedSymbol[0] == symbol)
+
+  test "resolve free":
+    var
+      global = newSymbolTable()
+
+    discard global.define("a")
+    discard global.define("b")
+
+    var
+      firstLocal: SymbolTable = newEnclosedSymbolTable(global)
+    discard firstLocal.define("c")
+    discard firstLocal.define("d")
+
+    var
+      secondLocal: SymbolTable = newEnclosedSymbolTable(firstLocal)
+    discard secondLocal.define("e")
+    discard secondLocal.define("f")
+
+    let
+      firstExpected: seq[Symbol] = @[
+        Symbol(name: "a", scope: GLOBAL_SCOPE, index: 0),
+        Symbol(name: "b", scope: GLOBAL_SCOPE, index: 1),
+        Symbol(name: "c", scope: LOCAL_SCOPE, index: 0),
+        Symbol(name: "d", scope: LOCAL_SCOPE, index: 1),
+      ]
+
+    for symbol in firstExpected:
+      let resolvedSymbol: (Symbol, bool) = firstLocal.resolve(symbol.name)
+      check(resolvedSymbol[0] == symbol)
+
+    let
+      secondExpected: seq[Symbol] = @[
+        Symbol(name: "a", scope: GLOBAL_SCOPE, index: 0),
+        Symbol(name: "b", scope: GLOBAL_SCOPE, index: 1),
+        Symbol(name: "c", scope: FREE_SCOPE, index: 0),
+        Symbol(name: "d", scope: FREE_SCOPE, index: 1),
+        Symbol(name: "e", scope: LOCAL_SCOPE, index: 0),
+        Symbol(name: "f", scope: LOCAL_SCOPE, index: 1),
+      ]
+      secondFreeExpected: seq[Symbol] = @[
+        Symbol(name: "c", scope: LOCAL_SCOPE, index: 0),
+        Symbol(name: "d", scope: LOCAL_SCOPE, index: 1),
+      ]
+
+    for symbol in secondExpected:
+      let resolvedSymbol: (Symbol, bool) = secondLocal.resolve(symbol.name)
+      check(resolvedSymbol[0] == symbol)
+
+    for index, symbol in secondFreeExpected:
+      let resolvedSymbol: Symbol = secondLocal.freeSymbols[index]
+      check(resolvedSymbol == symbol)
+
+  test "unrecoverable free":
+    var
+      global = newSymbolTable()
+    discard global.define("a")
+
+    var
+      firstLocal: SymbolTable = newEnclosedSymbolTable(global)
+    discard firstLocal.define("c")
+
+    var
+      secondLocal: SymbolTable = newEnclosedSymbolTable(firstLocal)
+    discard secondLocal.define("e")
+    discard secondLocal.define("f")
+
+    let
+      expected: seq[Symbol] = @[
+        Symbol(name: "a", scope: GLOBAL_SCOPE, index: 0),
+        Symbol(name: "c", scope: FREE_SCOPE, index: 0),
+        Symbol(name: "e", scope: LOCAL_SCOPE, index: 0),
+        Symbol(name: "f", scope: LOCAL_SCOPE, index: 1),
+      ]
+
+    for symbol in expected:
+      let resolvedSymbol: (Symbol, bool) = secondLocal.resolve(symbol.name)
+      check(resolvedSymbol[0] == symbol)
+
+    let unreachableSymbols: seq[string] = @["b", "d"]
+    for name in unreachableSymbols:
+      let
+        (_, ok) = secondLocal.resolve(name)
+      check(ok == false)

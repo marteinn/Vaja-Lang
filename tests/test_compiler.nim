@@ -33,7 +33,8 @@ from code import
   OpGetLocal,
   OpSetLocal,
   OpGetBuiltin,
-  OpClosure
+  OpClosure,
+  OpGetFree
 from lexer import newLexer, Lexer, nextToken, readCharacter
 from parser import Parser, newParser, parseProgram
 from ast import Node, NodeType, toCode
@@ -815,6 +816,35 @@ end""",
           make(OpMinus, @[]),
           make(OpPop, @[]),
       ])
+    ]
+
+    runTests(tests)
+
+  test "closures":
+    let tests: seq[CompilerTestCase] = @[
+      (
+        """fn(a) fn(b) a + b end end""",
+        @[
+          TestValue(
+            valueType: TVTInstructions,
+            instructions: @[
+              make(OpGetFree, @[0]),
+              make(OpGetLocal, @[0]),
+              make(OpAdd),
+              make(OpReturnValue),
+          ]),
+          TestValue(
+            valueType: TVTInstructions,
+            instructions: @[
+              make(OpGetLocal, @[0]),
+              make(OpClosure, @[0]),
+              make(OpReturnValue),
+          ])
+        ],
+        @[
+          make(OpClosure, @[1, 0]),
+          make(OpPop),
+      ]),
     ]
 
     runTests(tests)

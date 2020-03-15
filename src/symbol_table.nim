@@ -8,6 +8,7 @@ const
   GLOBAL_SCOPE*: SymbolScope = "GLOBAL"
   LOCAL_SCOPE*: SymbolScope = "LOCAL"
   BUILTIN_SCOPE*: SymbolScope = "BUILTIN"
+  FREE_SCOPE*: SymbolScope = "FREE"
 
 type
   Symbol* = ref object
@@ -18,10 +19,13 @@ type
     outer*: SymbolTable
     store*: Table[string, Symbol]
     numDefinitions*: int
+    freeSymbols*: seq[Symbol]
 
 proc newSymbolTable*(): SymbolTable =
-  let store: Table[string, Symbol] = initTable[string, Symbol]()
-  return SymbolTable(store: store, numDefinitions: 0)
+  let
+    store: Table[string, Symbol] = initTable[string, Symbol]()
+    freeSymbols: seq[Symbol] = @[]
+  return SymbolTable(store: store, numDefinitions: 0, freeSymbols: freeSymbols)
 
 proc newEnclosedSymbolTable*(outerSymbolTable: SymbolTable): SymbolTable =
   let
@@ -70,12 +74,36 @@ method defineBuiltin*(symbolTable: var SymbolTable, index: int, name: string): S
   symbolTable.store[name] = symbol
   return symbol
 
+method defineFree*(
+  symbolTable: var SymbolTable, originalSymbol: Symbol
+): Symbol {.base.} =
+  symbolTable.freeSymbols.add(originalSymbol)
+
+  let symbol: Symbol = Symbol(
+    name: originalSymbol.name,
+    index: len(symbolTable.freeSymbols) - 1,
+    scope: FREE_SCOPE,
+  )
+
+  symbolTable.store[originalSymbol.name] = symbol
+  return symbol
+
 method resolve*(symbolTable: var SymbolTable, name: string): (Symbol, bool) {.base.} =
   let inStore: bool = name in symbolTable.store
   if inStore:
     return (symbolTable.store[name], true)
 
   if symbolTable.outer != nil:
-    return symbolTable.outer.resolve(name)
+    let
+      (obj, ok) = symbolTable.outer.resolve(name)
+
+    if not ok:
+      return (obj, ok)
+
+    if obj.scope in [GLOBAL_SCOPE, BUILTIN_SCOPE]:
+      return (obj, ok)
+
+    let freeSymbol = symbolTable.defineFree(obj)
+    return (freeSymbol, true)
 
   return (nil, false)
